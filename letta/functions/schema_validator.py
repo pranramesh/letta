@@ -17,7 +17,9 @@ class SchemaHealth(Enum):
     INVALID = "INVALID"  # Broken for both
 
 
-def validate_complete_json_schema(schema: Dict[str, Any]) -> Tuple[SchemaHealth, List[str]]:
+def validate_complete_json_schema(
+    schema: Dict[str, Any],
+) -> Tuple[SchemaHealth, List[str]]:
     """
     Validate schema for OpenAI tool strict mode compliance.
 
@@ -173,7 +175,15 @@ def validate_complete_json_schema(schema: Dict[str, Any]) -> Tuple[SchemaHealth,
             # They represent union types (e.g., string | null)
             for t in node_type:
                 # TODO: @jnjpng handle enum types?
-                if t not in ["string", "number", "integer", "boolean", "null", "array", "object"]:
+                if t not in [
+                    "string",
+                    "number",
+                    "integer",
+                    "boolean",
+                    "null",
+                    "array",
+                    "object",
+                ]:
                     mark_invalid(f"{path}: Invalid type '{t}' in type array")
 
         # UNION TYPES

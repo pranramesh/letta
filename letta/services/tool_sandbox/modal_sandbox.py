@@ -31,7 +31,14 @@ class AsyncToolSandboxModal(AsyncToolSandboxBase):
         sandbox_config: SandboxConfig | None = None,
         sandbox_env_vars: dict[str, Any] | None = None,
     ):
-        super().__init__(tool_name, args, user, tool_object, sandbox_config=sandbox_config, sandbox_env_vars=sandbox_env_vars)
+        super().__init__(
+            tool_name,
+            args,
+            user,
+            tool_object,
+            sandbox_config=sandbox_config,
+            sandbox_env_vars=sandbox_env_vars,
+        )
 
         if not tool_settings.modal_token_id or not tool_settings.modal_token_secret:
             raise ValueError("MODAL_TOKEN_ID and MODAL_TOKEN_SECRET must be set.")
@@ -58,7 +65,13 @@ class AsyncToolSandboxModal(AsyncToolSandboxBase):
 
         # Decorator for the tool, note information on running untrusted code: https://modal.com/docs/guide/restricted-access
         # The `@app.function` decorator must apply to functions in global scope, unless `serialized=True` is set.
-        @app.function(image=image, timeout=modal_config.timeout, restrict_modal_access=True, max_inputs=1, serialized=True)
+        @app.function(
+            image=image,
+            timeout=modal_config.timeout,
+            restrict_modal_access=True,
+            max_inputs=1,
+            serialized=True,
+        )
         def execute_tool_with_script(execution_script: str, environment_vars: dict[str, str]):
             """Execute the generated tool script in Modal sandbox."""
             import os
@@ -96,7 +109,11 @@ class AsyncToolSandboxModal(AsyncToolSandboxBase):
         try:
             log_event(
                 "modal_execution_started",
-                {"tool": self.tool_name, "app_name": self._app_name, "env_vars": list(envs)},
+                {
+                    "tool": self.tool_name,
+                    "app_name": self._app_name,
+                    "env_vars": list(envs),
+                },
             )
 
             # Create Modal app with the tool function registered
@@ -114,7 +131,9 @@ class AsyncToolSandboxModal(AsyncToolSandboxBase):
                 logger.debug(f"Tool {self.tool_name} raised a {result['error']['name']}: {result['error']['value']}")
                 logger.debug(f"Traceback from Modal sandbox: \n{result['error']['traceback']}")
                 func_return = get_friendly_error_msg(
-                    function_name=self.tool_name, exception_name=result["error"]["name"], exception_message=result["error"]["value"]
+                    function_name=self.tool_name,
+                    exception_name=result["error"]["name"],
+                    exception_message=result["error"]["value"],
                 )
                 log_event(
                     "modal_execution_failed",
@@ -342,9 +361,12 @@ class TypescriptToolSandboxModal(AsyncToolSandboxModal):
 
         # Register the NodeShimServer class with Modal
         # This creates a serverless function that can handle concurrent requests
-        app.cls(image=image, restrict_modal_access=True, include_source=False, timeout=modal_config.timeout if modal_config else 60)(
-            modal.concurrent(max_inputs=100, target_inputs=50)(NodeShimServer)
-        )
+        app.cls(
+            image=image,
+            restrict_modal_access=True,
+            include_source=False,
+            timeout=modal_config.timeout if modal_config else 60,
+        )(modal.concurrent(max_inputs=100, target_inputs=50)(NodeShimServer))
 
         # Deploy the app to Modal
         with modal.enable_output():

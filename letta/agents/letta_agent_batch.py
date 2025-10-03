@@ -4,7 +4,11 @@ from dataclasses import dataclass
 from typing import Any, AsyncGenerator, Dict, List, Optional, Sequence, Tuple, Union
 
 from aiomultiprocess import Pool
-from anthropic.types.beta.messages import BetaMessageBatchCanceledResult, BetaMessageBatchErroredResult, BetaMessageBatchSucceededResult
+from anthropic.types.beta.messages import (
+    BetaMessageBatchCanceledResult,
+    BetaMessageBatchErroredResult,
+    BetaMessageBatchSucceededResult,
+)
 
 from letta.agents.base_agent import BaseAgent
 from letta.agents.helpers import _prepare_in_context_messages_async
@@ -18,10 +22,22 @@ from letta.local_llm.constants import INNER_THOUGHTS_KWARG
 from letta.log import get_logger
 from letta.otel.tracing import log_event, trace_method
 from letta.schemas.agent import AgentState
-from letta.schemas.enums import AgentStepStatus, JobStatus, MessageStreamStatus, ProviderType, SandboxType, ToolType
+from letta.schemas.enums import (
+    AgentStepStatus,
+    JobStatus,
+    MessageStreamStatus,
+    ProviderType,
+    SandboxType,
+    ToolType,
+)
 from letta.schemas.job import JobUpdate
 from letta.schemas.letta_message import LegacyLettaMessage, LettaMessage
-from letta.schemas.letta_message_content import OmittedReasoningContent, ReasoningContent, RedactedReasoningContent, TextContent
+from letta.schemas.letta_message_content import (
+    OmittedReasoningContent,
+    ReasoningContent,
+    RedactedReasoningContent,
+    TextContent,
+)
 from letta.schemas.letta_request import LettaBatchRequest
 from letta.schemas.letta_response import LettaBatchResponse, LettaResponse
 from letta.schemas.llm_batch_job import AgentStepState, LLMBatchItem
@@ -30,7 +46,10 @@ from letta.schemas.openai.chat_completion_response import ToolCall as OpenAITool
 from letta.schemas.sandbox_config import SandboxConfig
 from letta.schemas.tool_execution_result import ToolExecutionResult
 from letta.schemas.user import User
-from letta.server.rest_api.utils import create_heartbeat_system_message, create_letta_messages_from_llm_response
+from letta.server.rest_api.utils import (
+    create_heartbeat_system_message,
+    create_letta_messages_from_llm_response,
+)
 from letta.services.agent_manager import AgentManager
 from letta.services.block_manager import BlockManager
 from letta.services.job_manager import JobManager
@@ -67,7 +86,9 @@ class _ResumeContext:
     request_status_updates: List[RequestStatusUpdateInfo]
 
 
-async def execute_tool_wrapper(params: ToolExecutionParams) -> tuple[str, ToolExecutionResult]:
+async def execute_tool_wrapper(
+    params: ToolExecutionParams,
+) -> tuple[str, ToolExecutionResult]:
     """
     Executes the tool in an out‑of‑process worker and returns:
         (agent_id, (tool_result:str, success_flag:bool))
@@ -147,7 +168,9 @@ class LettaAgentBatch(BaseAgent):
         agent_mapping = {
             agent_state.id: agent_state
             for agent_state in await self.agent_manager.get_agents_by_ids_async(
-                agent_ids=[request.agent_id for request in batch_requests], include_relationships=["tools", "memory"], actor=self.actor
+                agent_ids=[request.agent_id for request in batch_requests],
+                include_relationships=["tools", "memory"],
+                actor=self.actor,
             )
         }
 
@@ -159,7 +182,8 @@ class LettaAgentBatch(BaseAgent):
 
             if agent_id not in agent_step_state_mapping:
                 agent_step_state_mapping[agent_id] = AgentStepState(
-                    step_number=0, tool_rules_solver=ToolRulesSolver(tool_rules=agent_state.tool_rules)
+                    step_number=0,
+                    tool_rules_solver=ToolRulesSolver(tool_rules=agent_state.tool_rules),
                 )
 
             llm_batch_item = LLMBatchItem(
@@ -250,7 +274,9 @@ class LettaAgentBatch(BaseAgent):
         next_reqs, next_step_state = await self._prepare_next_iteration_async(exec_results, ctx, msg_map)
         if len(next_reqs) == 0:
             await self.job_manager.update_job_by_id_async(
-                job_id=letta_batch_id, job_update=JobUpdate(status=JobStatus.completed), actor=self.actor
+                job_id=letta_batch_id,
+                job_update=JobUpdate(status=JobStatus.completed),
+                actor=self.actor,
             )
             return LettaBatchResponse(
                 letta_batch_id=llm_batch_job.letta_batch_job_id,
@@ -303,13 +329,18 @@ class LettaAgentBatch(BaseAgent):
 
         # Fetch agent states in a single call
         agent_states = await self.agent_manager.get_agents_by_ids_async(
-            agent_ids=agent_ids, include_relationships=["tools", "memory"], actor=self.actor
+            agent_ids=agent_ids,
+            include_relationships=["tools", "memory"],
+            actor=self.actor,
         )
         agent_state_map = {agent.id: agent for agent in agent_states}
 
         # Process each agent's results
         tool_call_results = self._process_agent_results(
-            agent_ids=agent_ids, batch_item_map=batch_item_map, provider_results=provider_results, llm_batch_id=llm_batch_id
+            agent_ids=agent_ids,
+            batch_item_map=batch_item_map,
+            provider_results=provider_results,
+            llm_batch_id=llm_batch_id,
         )
 
         return _ResumeContext(
@@ -376,7 +407,9 @@ class LettaAgentBatch(BaseAgent):
 
         tool_call = (
             llm_client.convert_response_to_chat_completion(
-                response_data=result.message.model_dump(), input_messages=[], llm_config=item.llm_config
+                response_data=result.message.model_dump(),
+                input_messages=[],
+                llm_config=item.llm_config,
             )
             .choices[0]
             .message.tool_calls[0]
@@ -479,7 +512,12 @@ class LettaAgentBatch(BaseAgent):
 
     async def _mark_steps_complete_async(self, llm_batch_id: str, agent_ids: List[str]) -> None:
         updates = [
-            StepStatusUpdateInfo(llm_batch_id=llm_batch_id, agent_id=aid, step_status=AgentStepStatus.completed) for aid in agent_ids
+            StepStatusUpdateInfo(
+                llm_batch_id=llm_batch_id,
+                agent_id=aid,
+                step_status=AgentStepStatus.completed,
+            )
+            for aid in agent_ids
         ]
         await self.batch_manager.bulk_update_llm_batch_items_step_status_by_agent_async(updates)
 
@@ -535,7 +573,16 @@ class LettaAgentBatch(BaseAgent):
         tool_exec_result: str,
         tool_exec_result_obj: "ToolExecutionResult",
         success_flag: bool,
-        reasoning_content: Optional[List[Union[TextContent, ReasoningContent, RedactedReasoningContent, OmittedReasoningContent]]] = None,
+        reasoning_content: Optional[
+            List[
+                Union[
+                    TextContent,
+                    ReasoningContent,
+                    RedactedReasoningContent,
+                    OmittedReasoningContent,
+                ]
+            ]
+        ] = None,
     ) -> List[Message]:
         tool_call_id = f"call_{uuid.uuid4().hex[:8]}"
 
@@ -623,7 +670,10 @@ class LettaAgentBatch(BaseAgent):
 
     # Not used in batch.
     async def step(
-        self, input_messages: List[MessageCreate], max_steps: int = DEFAULT_MAX_STEPS, run_id: str | None = None
+        self,
+        input_messages: List[MessageCreate],
+        max_steps: int = DEFAULT_MAX_STEPS,
+        run_id: str | None = None,
     ) -> LettaResponse:
         raise NotImplementedError
 

@@ -15,14 +15,23 @@ class PassageBase(OrmMetadataBase):
     is_deleted: bool = Field(False, description="Whether this passage is deleted or not.")
 
     # associated user/agent
-    organization_id: Optional[str] = Field(None, description="The unique identifier of the user associated with the passage.")
-    archive_id: Optional[str] = Field(None, description="The unique identifier of the archive containing this passage.")
+    organization_id: Optional[str] = Field(
+        None,
+        description="The unique identifier of the user associated with the passage.",
+    )
+    archive_id: Optional[str] = Field(
+        None,
+        description="The unique identifier of the archive containing this passage.",
+    )
 
     # origin data source
     source_id: Optional[str] = Field(None, description="The data source of the passage.")
 
     # file association
-    file_id: Optional[str] = Field(None, description="The unique identifier of the file associated with the passage.")
+    file_id: Optional[str] = Field(
+        None,
+        description="The unique identifier of the file associated with the passage.",
+    )
     file_name: Optional[str] = Field(None, description="The name of the file (only for source passages).")
     metadata: Optional[Dict] = Field({}, validation_alias="metadata_", description="The metadata of the passage.")
     tags: Optional[List[str]] = Field(None, description="Tags associated with this passage.")
@@ -62,7 +71,11 @@ class Passage(PassageBase):
 
         if embedding and len(embedding) != MAX_EMBEDDING_DIM:
             np_embedding = np.array(embedding)
-            padded_embedding = np.pad(np_embedding, (0, MAX_EMBEDDING_DIM - np_embedding.shape[0]), mode="constant")
+            padded_embedding = np.pad(
+                np_embedding,
+                (0, MAX_EMBEDDING_DIM - np_embedding.shape[0]),
+                mode="constant",
+            )
             return padded_embedding.tolist()
         return embedding
 

@@ -182,7 +182,9 @@ class PromptGenerator:
             pass
 
         memory_with_sources = in_context_memory.compile(
-            tool_usage_rules=tool_constraint_block, sources=sources, max_files_open=max_files_open
+            tool_usage_rules=tool_constraint_block,
+            sources=sources,
+            max_files_open=max_files_open,
         )
 
         return PromptGenerator.get_system_message_from_compiled_memory(

@@ -275,7 +275,9 @@ async def agent_with_files(server: SyncServer, default_user, test_block, weather
     )
 
     await server.agent_manager.insert_files_into_context_window(
-        agent_state=agent_state, file_metadata_with_content=[test_file], actor=default_user
+        agent_state=agent_state,
+        file_metadata_with_content=[test_file],
+        actor=default_user,
     )
 
     return (agent_state.id, test_source.id, test_file.id)
@@ -358,7 +360,13 @@ async def create_test_source(server: SyncServer, name: str, user: User):
     return await server.source_manager.create_source(source_data, user)
 
 
-async def create_test_file(server: SyncServer, filename: str, source_id: str, user: User, content: Optional[str] = None):
+async def create_test_file(
+    server: SyncServer,
+    filename: str,
+    source_id: str,
+    user: User,
+    content: Optional[str] = None,
+):
     """Helper function to create a test file using server."""
     from letta.schemas.file import FileMetadata
 
@@ -405,7 +413,9 @@ async def create_test_agent_with_files(server: SyncServer, name: str, user: User
     for source_id, file_id in file_relationships:
         file_metadata = await server.file_manager.get_file_by_id(file_id, user)
         await server.agent_manager.insert_files_into_context_window(
-            agent_state=agent_state, file_metadata_with_content=[file_metadata], actor=user
+            agent_state=agent_state,
+            file_metadata_with_content=[file_metadata],
+            actor=user,
         )
 
     return agent_state
@@ -769,7 +779,12 @@ class TestFileExport:
         file1 = await create_test_file(server, "file1.txt", source.id, default_user)
         file2 = await create_test_file(server, "file2.txt", source.id, default_user)
 
-        agent = await create_test_agent_with_files(server, "multi-file-agent", default_user, [(source.id, file1.id), (source.id, file2.id)])
+        agent = await create_test_agent_with_files(
+            server,
+            "multi-file-agent",
+            default_user,
+            [(source.id, file1.id), (source.id, file2.id)],
+        )
 
         exported = await agent_serialization_manager.export([agent.id], actor=default_user)
 
@@ -798,7 +813,10 @@ class TestFileExport:
         file2 = await create_test_file(server, "file2.txt", source2.id, default_user)
 
         agent = await create_test_agent_with_files(
-            server, "multi-source-agent", default_user, [(source1.id, file1.id), (source2.id, file2.id)]
+            server,
+            "multi-source-agent",
+            default_user,
+            [(source1.id, file1.id), (source2.id, file2.id)],
         )
 
         exported = await agent_serialization_manager.export([agent.id], actor=default_user)
@@ -925,7 +943,14 @@ class TestAgentFileExport:
         assert len(exported_agent.messages) > 0
         assert len(exported_agent.in_context_message_ids) > 0
 
-    async def test_export_multiple_agents(self, server, agent_serialization_manager, test_agent, default_user, weather_tool):
+    async def test_export_multiple_agents(
+        self,
+        server,
+        agent_serialization_manager,
+        test_agent,
+        default_user,
+        weather_tool,
+    ):
         """Test exporting multiple agents."""
         create_agent_request = CreateAgent(
             name="second_test_agent",
@@ -1122,7 +1147,13 @@ class TestAgentFileImport:
                 assert db_id != test_agent.id  # New agent should have different ID
 
     async def test_basic_import_with_embedding_override(
-        self, server, agent_serialization_manager, test_agent, default_user, other_user, embedding_handle_override
+        self,
+        server,
+        agent_serialization_manager,
+        test_agent,
+        default_user,
+        other_user,
+        embedding_handle_override,
     ):
         """Test basic agent import functionality with embedding override."""
         agent_file = await agent_serialization_manager.export([test_agent.id], default_user)
@@ -1222,7 +1253,14 @@ class TestAgentFileImport:
         with pytest.raises(AgentFileImportError):
             await agent_serialization_manager.import_file(invalid_agent_file, other_user)
 
-    async def test_import_sleeptime_enabled_agent(self, server, agent_serialization_manager, default_user, other_user, weather_tool):
+    async def test_import_sleeptime_enabled_agent(
+        self,
+        server,
+        agent_serialization_manager,
+        default_user,
+        other_user,
+        weather_tool,
+    ):
         """Test basic agent import functionality."""
         create_agent_request = CreateAgent(
             name="sleeptime-enabled-test-agent",
@@ -1258,7 +1296,14 @@ class TestAgentFileImport:
 
         await server.agent_manager.delete_agent_async(agent_id=sleeptime_enabled_agent.id, actor=default_user)
 
-    async def test_import_with_environment_variables(self, server, agent_serialization_manager, default_user, other_user, weather_tool):
+    async def test_import_with_environment_variables(
+        self,
+        server,
+        agent_serialization_manager,
+        default_user,
+        other_user,
+        weather_tool,
+    ):
         """Test that environment variables can be provided during import."""
         # create agent with environment variables
         create_agent_request = CreateAgent(
@@ -1306,7 +1351,9 @@ class TestAgentFileImport:
         # get the imported agent and verify environment variables were set correctly
         imported_agent_id = result.imported_agent_ids[0]
         imported_agent = await server.agent_manager.get_agent_by_id_async(
-            agent_id=imported_agent_id, actor=other_user, include_relationships=["tool_exec_environment_variables"]
+            agent_id=imported_agent_id,
+            actor=other_user,
+            include_relationships=["tool_exec_environment_variables"],
         )
 
         # verify the imported agent has the new environment variable values
@@ -1383,7 +1430,12 @@ class TestAgentFileImportWithProcessing:
         file1 = await create_test_file(server, "file1.txt", source.id, default_user)
         file2 = await create_test_file(server, "file2.txt", source.id, default_user)
 
-        agent = await create_test_agent_with_files(server, "multi-agent", default_user, [(source.id, file1.id), (source.id, file2.id)])
+        agent = await create_test_agent_with_files(
+            server,
+            "multi-agent",
+            default_user,
+            [(source.id, file1.id), (source.id, file2.id)],
+        )
 
         exported = await agent_serialization_manager.export([agent.id], default_user)
 
@@ -1462,7 +1514,14 @@ class TestAgentFileEdgeCases:
 
         assert len(imported_agent.message_ids) == 0
 
-    async def test_large_agent_file(self, server, agent_serialization_manager, default_user, other_user, weather_tool):
+    async def test_large_agent_file(
+        self,
+        server,
+        agent_serialization_manager,
+        default_user,
+        other_user,
+        weather_tool,
+    ):
         """Test handling of larger agent files with many messages."""
         # Create agent
         create_agent_request = CreateAgent(
@@ -1562,7 +1621,10 @@ class TestAgentFileValidation:
                     id="tool-0",
                     name="test_tool",
                     source_code="test",
-                    json_schema={"name": "test_tool", "parameters": {"type": "object", "properties": {}}},
+                    json_schema={
+                        "name": "test_tool",
+                        "parameters": {"type": "object", "properties": {}},
+                    },
                 )
             ],
             mcp_servers=[],
@@ -1655,7 +1717,10 @@ class TestMCPServerSerialization:
 
         mcp_tool = await server.tool_manager.create_mcp_tool_async(tool_create_stdio, mcp_server.server_name, mcp_server.id, default_user)
         mcp_tool_http = await server.tool_manager.create_mcp_tool_async(
-            tool_create_http, mcp_server_http.server_name, mcp_server_http.id, default_user
+            tool_create_http,
+            mcp_server_http.server_name,
+            mcp_server_http.id,
+            default_user,
         )
 
         # Create agent with the tool
@@ -1715,7 +1780,13 @@ class TestMCPServerSerialization:
         # Verify tag format
         assert any(tag.startswith("mcp:") for tag in mcp_tool.tags)
 
-    async def test_mcp_server_import(self, agent_serialization_manager, agent_with_mcp_tools, default_user, other_user):
+    async def test_mcp_server_import(
+        self,
+        agent_serialization_manager,
+        agent_with_mcp_tools,
+        default_user,
+        other_user,
+    ):
         """Test importing agents with MCP servers."""
         # Export from default user
         agent_file = await agent_serialization_manager.export([agent_with_mcp_tools.id], default_user)
@@ -1726,7 +1797,10 @@ class TestMCPServerSerialization:
         assert result.success
 
         # Verify MCP server was imported
-        mcp_server_id = next((db_id for file_id, db_id in result.id_mappings.items() if file_id.startswith("mcp_server-")), None)
+        mcp_server_id = next(
+            (db_id for file_id, db_id in result.id_mappings.items() if file_id.startswith("mcp_server-")),
+            None,
+        )
         assert mcp_server_id is not None
 
     async def test_multiple_mcp_servers_export(self, server, agent_serialization_manager, default_user):
@@ -1763,7 +1837,11 @@ class TestMCPServerSerialization:
         tool1 = await server.tool_manager.create_mcp_tool_async(
             ToolCreate.from_mcp(
                 "mcp1",
-                MCPTool(name="tool1", description="Tool 1", inputSchema={"type": "object", "properties": {}}),
+                MCPTool(
+                    name="tool1",
+                    description="Tool 1",
+                    inputSchema={"type": "object", "properties": {}},
+                ),
             ),
             "mcp1",
             mcp_server1.id,
@@ -1772,7 +1850,11 @@ class TestMCPServerSerialization:
         tool2 = await server.tool_manager.create_mcp_tool_async(
             ToolCreate.from_mcp(
                 "mcp2",
-                MCPTool(name="tool2", description="Tool 2", inputSchema={"type": "object", "properties": {}}),
+                MCPTool(
+                    name="tool2",
+                    description="Tool 2",
+                    inputSchema={"type": "object", "properties": {}},
+                ),
             ),
             "mcp2",
             mcp_server2.id,
@@ -1824,7 +1906,14 @@ class TestMCPServerSerialization:
             "args": ["arg1", "arg2"],
         }
 
-    async def test_mcp_server_deduplication(self, server, agent_serialization_manager, default_user, test_mcp_server, mcp_tool):
+    async def test_mcp_server_deduplication(
+        self,
+        server,
+        agent_serialization_manager,
+        default_user,
+        test_mcp_server,
+        mcp_tool,
+    ):
         """Test that shared MCP servers are deduplicated during export."""
         # Create two agents using the same MCP tool
         from letta.schemas.agent import CreateAgent

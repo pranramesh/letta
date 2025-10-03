@@ -85,7 +85,10 @@ class GoogleAIProvider(Provider):
     def get_model_context_window(self, model_name: str) -> int | None:
         import warnings
 
-        warnings.warn("This is deprecated, use get_model_context_window_async when possible.", DeprecationWarning)
+        warnings.warn(
+            "This is deprecated, use get_model_context_window_async when possible.",
+            DeprecationWarning,
+        )
         from letta.llm_api.google_ai_client import google_ai_get_model_context_window
 
         if model_name in LLM_MAX_TOKENS:
@@ -94,7 +97,9 @@ class GoogleAIProvider(Provider):
             return google_ai_get_model_context_window(self.base_url, self.api_key, model_name)
 
     async def get_model_context_window_async(self, model_name: str) -> int | None:
-        from letta.llm_api.google_ai_client import google_ai_get_model_context_window_async
+        from letta.llm_api.google_ai_client import (
+            google_ai_get_model_context_window_async,
+        )
 
         if model_name in LLM_MAX_TOKENS:
             return LLM_MAX_TOKENS[model_name]

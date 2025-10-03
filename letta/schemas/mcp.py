@@ -27,8 +27,14 @@ class MCPServer(BaseMCPServer):
     server_name: str = Field(..., description="The name of the server")
 
     # sse / streamable http config
-    server_url: Optional[str] = Field(None, description="The URL of the server (MCP SSE/Streamable HTTP client will connect to this URL)")
-    token: Optional[str] = Field(None, description="The access token or API key for the MCP server (used for authentication)")
+    server_url: Optional[str] = Field(
+        None,
+        description="The URL of the server (MCP SSE/Streamable HTTP client will connect to this URL)",
+    )
+    token: Optional[str] = Field(
+        None,
+        description="The access token or API key for the MCP server (used for authentication)",
+    )
     custom_headers: Optional[Dict[str, str]] = Field(None, description="Custom authentication headers as key-value pairs")
 
     token_enc: Optional[str] = Field(None, description="Encrypted token")
@@ -36,15 +42,22 @@ class MCPServer(BaseMCPServer):
 
     # stdio config
     stdio_config: Optional[StdioServerConfig] = Field(
-        None, description="The configuration for the server (MCP 'local' client will run this command)"
+        None,
+        description="The configuration for the server (MCP 'local' client will run this command)",
     )
 
-    organization_id: Optional[str] = Field(None, description="The unique identifier of the organization associated with the tool.")
+    organization_id: Optional[str] = Field(
+        None,
+        description="The unique identifier of the organization associated with the tool.",
+    )
 
     # metadata fields
     created_by_id: Optional[str] = Field(None, description="The id of the user that made this Tool.")
     last_updated_by_id: Optional[str] = Field(None, description="The id of the user that made this Tool.")
-    metadata_: Optional[Dict[str, Any]] = Field(default_factory=dict, description="A dictionary of additional metadata for the tool.")
+    metadata_: Optional[Dict[str, Any]] = Field(
+        default_factory=dict,
+        description="A dictionary of additional metadata for the tool.",
+    )
 
     def get_token_secret(self) -> Secret:
         """Get the token as a Secret object, preferring encrypted over plaintext."""
@@ -113,8 +126,8 @@ class MCPServer(BaseMCPServer):
             config = SSEServerConfig(
                 server_name=self.server_name,
                 server_url=self.server_url,
-                auth_header=MCP_AUTH_HEADER_AUTHORIZATION if token_plaintext and not headers_plaintext else None,
-                auth_token=f"{MCP_AUTH_TOKEN_BEARER_PREFIX} {token_plaintext}" if token_plaintext and not headers_plaintext else None,
+                auth_header=(MCP_AUTH_HEADER_AUTHORIZATION if token_plaintext and not headers_plaintext else None),
+                auth_token=(f"{MCP_AUTH_TOKEN_BEARER_PREFIX} {token_plaintext}" if token_plaintext and not headers_plaintext else None),
                 custom_headers=headers_plaintext,
             )
             if resolve_variables:
@@ -133,8 +146,8 @@ class MCPServer(BaseMCPServer):
             config = StreamableHTTPServerConfig(
                 server_name=self.server_name,
                 server_url=self.server_url,
-                auth_header=MCP_AUTH_HEADER_AUTHORIZATION if token_plaintext and not headers_plaintext else None,
-                auth_token=f"{MCP_AUTH_TOKEN_BEARER_PREFIX} {token_plaintext}" if token_plaintext and not headers_plaintext else None,
+                auth_header=(MCP_AUTH_HEADER_AUTHORIZATION if token_plaintext and not headers_plaintext else None),
+                auth_token=(f"{MCP_AUTH_TOKEN_BEARER_PREFIX} {token_plaintext}" if token_plaintext and not headers_plaintext else None),
                 custom_headers=headers_plaintext,
             )
             if resolve_variables:
@@ -147,8 +160,14 @@ class MCPServer(BaseMCPServer):
 class UpdateSSEMCPServer(LettaBase):
     """Update an SSE MCP server"""
 
-    server_url: Optional[str] = Field(None, description="The URL of the server (MCP SSE client will connect to this URL)")
-    token: Optional[str] = Field(None, description="The access token or API key for the MCP server (used for SSE authentication)")
+    server_url: Optional[str] = Field(
+        None,
+        description="The URL of the server (MCP SSE client will connect to this URL)",
+    )
+    token: Optional[str] = Field(
+        None,
+        description="The access token or API key for the MCP server (used for SSE authentication)",
+    )
     custom_headers: Optional[Dict[str, str]] = Field(None, description="Custom authentication headers as key-value pairs")
 
 
@@ -156,15 +175,22 @@ class UpdateStdioMCPServer(LettaBase):
     """Update a Stdio MCP server"""
 
     stdio_config: Optional[StdioServerConfig] = Field(
-        None, description="The configuration for the server (MCP 'local' client will run this command)"
+        None,
+        description="The configuration for the server (MCP 'local' client will run this command)",
     )
 
 
 class UpdateStreamableHTTPMCPServer(LettaBase):
     """Update a Streamable HTTP MCP server"""
 
-    server_url: Optional[str] = Field(None, description="The URL path for the streamable HTTP server (e.g., 'example/mcp')")
-    auth_header: Optional[str] = Field(None, description="The name of the authentication header (e.g., 'Authorization')")
+    server_url: Optional[str] = Field(
+        None,
+        description="The URL path for the streamable HTTP server (e.g., 'example/mcp')",
+    )
+    auth_header: Optional[str] = Field(
+        None,
+        description="The name of the authentication header (e.g., 'Authorization')",
+    )
     auth_token: Optional[str] = Field(None, description="The authentication token or API key value")
     custom_headers: Optional[Dict[str, str]] = Field(None, description="Custom authentication headers as key-value pairs")
 

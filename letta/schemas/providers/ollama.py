@@ -3,7 +3,12 @@ from typing import Literal
 import aiohttp
 from pydantic import Field
 
-from letta.constants import DEFAULT_CONTEXT_WINDOW, DEFAULT_EMBEDDING_CHUNK_SIZE, DEFAULT_EMBEDDING_DIM, OLLAMA_API_PREFIX
+from letta.constants import (
+    DEFAULT_CONTEXT_WINDOW,
+    DEFAULT_EMBEDDING_CHUNK_SIZE,
+    DEFAULT_EMBEDDING_DIM,
+    OLLAMA_API_PREFIX,
+)
 from letta.log import get_logger
 from letta.schemas.embedding_config import EmbeddingConfig
 from letta.schemas.enums import ProviderCategory, ProviderType
@@ -24,7 +29,8 @@ class OllamaProvider(OpenAIProvider):
     base_url: str = Field(..., description="Base URL for the Ollama API.")
     api_key: str | None = Field(None, description="API key for the Ollama API (default: `None`).")
     default_prompt_formatter: str = Field(
-        ..., description="Default prompt formatter (aka model wrapper) to use on a /completions style API."
+        ...,
+        description="Default prompt formatter (aka model wrapper) to use on a /completions style API.",
     )
 
     async def list_llm_models_async(self) -> list[LLMConfig]:

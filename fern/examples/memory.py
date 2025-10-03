@@ -40,5 +40,8 @@ block = client.blocks.modify(block.id, limit=10000)
 
 # update the block (via label)
 block = client.agents.core_memory.modify_block(
-    agent_id=shared_block_agent.id, block_label="organization", value="Organization: Letta", limit=10000
+    agent_id=shared_block_agent.id,
+    block_label="organization",
+    value="Organization: Letta",
+    limit=10000,
 )

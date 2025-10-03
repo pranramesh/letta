@@ -17,10 +17,17 @@ from letta.schemas.sandbox_config import SandboxConfig
 from letta.schemas.tool import Tool
 from letta.schemas.tool_execution_result import ToolExecutionResult
 from letta.services.tool_sandbox.base import AsyncToolSandboxBase
-from letta.services.tool_sandbox.modal_constants import DEFAULT_MAX_CONCURRENT_INPUTS, DEFAULT_PYTHON_VERSION
+from letta.services.tool_sandbox.modal_constants import (
+    DEFAULT_MAX_CONCURRENT_INPUTS,
+    DEFAULT_PYTHON_VERSION,
+)
 from letta.services.tool_sandbox.modal_deployment_manager import ModalDeploymentManager
 from letta.services.tool_sandbox.modal_version_manager import ModalVersionManager
-from letta.services.tool_sandbox.safe_pickle import SafePickleError, safe_pickle_dumps, sanitize_for_pickle
+from letta.services.tool_sandbox.safe_pickle import (
+    SafePickleError,
+    safe_pickle_dumps,
+    sanitize_for_pickle,
+)
 from letta.settings import tool_settings
 from letta.types import JsonDict
 from letta.utils import get_friendly_error_msg
@@ -57,7 +64,14 @@ class AsyncToolSandboxModalV2(AsyncToolSandboxBase):
             use_locking: Whether to use locking for deployment coordination (default: True)
             use_version_tracking: Whether to track and reuse deployments (default: True)
         """
-        super().__init__(tool_name, args, user, tool_object, sandbox_config=sandbox_config, sandbox_env_vars=sandbox_env_vars)
+        super().__init__(
+            tool_name,
+            args,
+            user,
+            tool_object,
+            sandbox_config=sandbox_config,
+            sandbox_env_vars=sandbox_env_vars,
+        )
 
         if not tool_settings.modal_token_id or not tool_settings.modal_token_secret:
             raise ValueError("MODAL_TOKEN_ID and MODAL_TOKEN_SECRET must be set.")
@@ -168,7 +182,10 @@ class AsyncToolSandboxModalV2(AsyncToolSandboxBase):
             try:
                 await modal.App.lookup.aio(app_full_name)
                 logger.info(f"Modal app {app_full_name} already exists, skipping deployment")
-                log_event("modal_v2_deploy_already_exists", {"app_name": app_full_name, "version": version})
+                log_event(
+                    "modal_v2_deploy_already_exists",
+                    {"app_name": app_full_name, "version": version},
+                )
                 # Return the created app with the function attached
                 return app
             except:
@@ -177,9 +194,15 @@ class AsyncToolSandboxModalV2(AsyncToolSandboxBase):
 
             with modal.enable_output():
                 await app.deploy.aio()
-            log_event("modal_v2_deploy_succeeded", {"app_name": app_full_name, "version": version})
+            log_event(
+                "modal_v2_deploy_succeeded",
+                {"app_name": app_full_name, "version": version},
+            )
         except Exception as e:
-            log_event("modal_v2_deploy_failed", {"app_name": app_full_name, "version": version, "error": str(e)})
+            log_event(
+                "modal_v2_deploy_failed",
+                {"app_name": app_full_name, "version": version, "error": str(e)},
+            )
             raise
 
         return app
@@ -203,7 +226,9 @@ class AsyncToolSandboxModalV2(AsyncToolSandboxBase):
         # Prepare schema code if needed
         args_schema_code = None
         if self.tool.args_json_schema:
-            from letta.services.helpers.tool_execution_helper import add_imports_and_pydantic_schemas_for_args
+            from letta.services.helpers.tool_execution_helper import (
+                add_imports_and_pydantic_schemas_for_args,
+            )
 
             args_schema_code = add_imports_and_pydantic_schemas_for_args(self.tool.args_json_schema)
 
@@ -238,7 +263,7 @@ class AsyncToolSandboxModalV2(AsyncToolSandboxBase):
                     "version": self._version_hash,
                     "env_vars": list(envs),
                     "args_size": len(args_pickled),
-                    "agent_state_size": len(agent_state_pickled) if agent_state_pickled else 0,
+                    "agent_state_size": (len(agent_state_pickled) if agent_state_pickled else 0),
                     "inject_agent_state": self.inject_agent_state,
                 },
             )
@@ -283,7 +308,15 @@ class AsyncToolSandboxModalV2(AsyncToolSandboxBase):
                     last_error = e
                     # Check if it's a transient error worth retrying
                     error_str = str(e).lower()
-                    if any(x in error_str for x in ["segmentation fault", "sigsegv", "connection", "timeout"]):
+                    if any(
+                        x in error_str
+                        for x in [
+                            "segmentation fault",
+                            "sigsegv",
+                            "connection",
+                            "timeout",
+                        ]
+                    ):
                         logger.warning(f"Transient error on attempt {attempt + 1}/{max_retries} for tool {self.tool_name}: {e}")
                         if attempt < max_retries - 1:
                             await asyncio.sleep(retry_delay)
@@ -363,7 +396,10 @@ class AsyncToolSandboxModalV2(AsyncToolSandboxBase):
                 "traceback": traceback.format_exc(),
             }
 
-            logger.error(f"Modal V2 execution for tool {self.tool_name} encountered an error: {e}", extra=error_context)
+            logger.error(
+                f"Modal V2 execution for tool {self.tool_name} encountered an error: {e}",
+                extra=error_context,
+            )
 
             # Determine if this is a deployment error or execution error
             if "deploy" in str(e).lower() or "modal" in str(e).lower():

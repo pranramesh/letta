@@ -26,29 +26,46 @@ class ToolRulesSolver(BaseModel):
 
     # Categorized fields
     init_tool_rules: list[InitToolRule] = Field(
-        default_factory=list, description="Initial tool rules to be used at the start of tool execution.", exclude=True
+        default_factory=list,
+        description="Initial tool rules to be used at the start of tool execution.",
+        exclude=True,
     )
     continue_tool_rules: list[ContinueToolRule] = Field(
-        default_factory=list, description="Continue tool rules to be used to continue tool execution.", exclude=True
+        default_factory=list,
+        description="Continue tool rules to be used to continue tool execution.",
+        exclude=True,
     )
     # TODO: This should be renamed?
     # TODO: These are tools that control the set of allowed functions in the next turn
     child_based_tool_rules: list[ChildToolRule | ConditionalToolRule | MaxCountPerStepToolRule] = Field(
-        default_factory=list, description="Standard tool rules for controlling execution sequence and allowed transitions.", exclude=True
+        default_factory=list,
+        description="Standard tool rules for controlling execution sequence and allowed transitions.",
+        exclude=True,
     )
     parent_tool_rules: list[ParentToolRule] = Field(
-        default_factory=list, description="Filter tool rules to be used to filter out tools from the available set.", exclude=True
+        default_factory=list,
+        description="Filter tool rules to be used to filter out tools from the available set.",
+        exclude=True,
     )
     terminal_tool_rules: list[TerminalToolRule] = Field(
-        default_factory=list, description="Terminal tool rules that end the agent loop if called.", exclude=True
+        default_factory=list,
+        description="Terminal tool rules that end the agent loop if called.",
+        exclude=True,
     )
     required_before_exit_tool_rules: list[RequiredBeforeExitToolRule] = Field(
-        default_factory=list, description="Tool rules that must be called before the agent can exit.", exclude=True
+        default_factory=list,
+        description="Tool rules that must be called before the agent can exit.",
+        exclude=True,
     )
     requires_approval_tool_rules: list[RequiresApprovalToolRule] = Field(
-        default_factory=list, description="Tool rules that trigger an approval request for human-in-the-loop.", exclude=True
+        default_factory=list,
+        description="Tool rules that trigger an approval request for human-in-the-loop.",
+        exclude=True,
     )
-    tool_call_history: list[str] = Field(default_factory=list, description="History of tool calls, updated with each tool call.")
+    tool_call_history: list[str] = Field(
+        default_factory=list,
+        description="History of tool calls, updated with each tool call.",
+    )
 
     def __init__(self, tool_rules: list[ToolRule] | None = None, **kwargs):
         super().__init__(tool_rules=tool_rules, **kwargs)
@@ -84,7 +101,10 @@ class ToolRulesSolver(BaseModel):
         self.tool_call_history.clear()
 
     def get_allowed_tool_names(
-        self, available_tools: set[ToolName], error_on_empty: bool = True, last_function_response: str | None = None
+        self,
+        available_tools: set[ToolName],
+        error_on_empty: bool = True,
+        last_function_response: str | None = None,
     ) -> list[ToolName]:
         """Get a list of tool names allowed based on the last tool called.
 

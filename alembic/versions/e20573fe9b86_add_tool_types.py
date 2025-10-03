@@ -65,7 +65,12 @@ def upgrade() -> None:
 
     # Step 3: Alter the column to be non-nullable
     op.alter_column("tools", "tool_type", nullable=False)
-    op.alter_column("tools", "json_schema", existing_type=postgresql.JSON(astext_type=sa.Text()), nullable=True)
+    op.alter_column(
+        "tools",
+        "json_schema",
+        existing_type=postgresql.JSON(astext_type=sa.Text()),
+        nullable=True,
+    )
 
 
 def downgrade() -> None:
@@ -74,6 +79,11 @@ def downgrade() -> None:
         return
 
     # Revert the changes made during the upgrade
-    op.alter_column("tools", "json_schema", existing_type=postgresql.JSON(astext_type=sa.Text()), nullable=False)
+    op.alter_column(
+        "tools",
+        "json_schema",
+        existing_type=postgresql.JSON(astext_type=sa.Text()),
+        nullable=False,
+    )
     op.drop_column("tools", "tool_type")
     # ### end Alembic commands ###

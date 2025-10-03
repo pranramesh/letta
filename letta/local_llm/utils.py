@@ -28,7 +28,10 @@ def post_json_auth_request(uri, json_payload, auth_type, auth_key):
     elif auth_type == "bearer_token":
         if auth_key is None:
             raise ValueError(f"auth_type is {auth_type}, but auth_key is null")
-        headers = {"Content-Type": "application/json", "Authorization": f"Bearer {auth_key}"}
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {auth_key}",
+        }
         response = requests.post(uri, json=json_payload, headers=headers)
 
     # Used by OpenAI Azure

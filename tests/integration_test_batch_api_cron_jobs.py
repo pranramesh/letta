@@ -126,7 +126,10 @@ def create_failed_response(custom_id: str) -> BetaMessageBatchIndividualResponse
         custom_id=custom_id,
         result=BetaMessageBatchErroredResult(
             type="errored",
-            error=BetaErrorResponse(type="error", error=BetaRateLimitError(type="rate_limit_error", message="Rate limit hit.")),
+            error=BetaErrorResponse(
+                type="error",
+                error=BetaRateLimitError(type="rate_limit_error", message="Rate limit hit."),
+            ),
         ),
     )
 
@@ -134,7 +137,12 @@ def create_failed_response(custom_id: str) -> BetaMessageBatchIndividualResponse
 # --- Test Setup Helpers --- #
 
 
-def create_test_agent(name, actor, test_id: Optional[str] = None, model="anthropic/claude-3-5-sonnet-20241022"):
+def create_test_agent(
+    name,
+    actor,
+    test_id: Optional[str] = None,
+    model="anthropic/claude-3-5-sonnet-20241022",
+):
     """Create a test agent with standardized configuration."""
     dummy_llm_config = LLMConfig(
         model="claude-3-7-sonnet-latest",
@@ -199,7 +207,8 @@ async def create_test_batch_item(server, batch_id, agent_id, default_user):
     )
 
     common_step_state = AgentStepState(
-        step_number=1, tool_rules_solver=ToolRulesSolver(tool_rules=[InitToolRule(tool_name="send_message")])
+        step_number=1,
+        tool_rules_solver=ToolRulesSolver(tool_rules=[InitToolRule(tool_name="send_message")]),
     )
 
     return await server.batch_manager.create_llm_batch_item_async(

@@ -24,7 +24,12 @@ def upgrade():
         return
 
     # add index for blocks_agents table
-    op.create_index("ix_blocks_agents_block_label_agent_id", "blocks_agents", ["block_label", "agent_id"], unique=False)
+    op.create_index(
+        "ix_blocks_agents_block_label_agent_id",
+        "blocks_agents",
+        ["block_label", "agent_id"],
+        unique=False,
+    )
 
     # add index for just block_label
     op.create_index("ix_blocks_block_label", "blocks_agents", ["block_label"], unique=False)

@@ -26,9 +26,20 @@ from letta.schemas.openai.chat_completion_response import ChatCompletionResponse
 from letta.schemas.provider_trace import ProviderTraceCreate
 from letta.services.telemetry_manager import TelemetryManager
 from letta.settings import ModelSettings
-from letta.streaming_interface import AgentChunkStreamingInterface, AgentRefreshStreamingInterface
+from letta.streaming_interface import (
+    AgentChunkStreamingInterface,
+    AgentRefreshStreamingInterface,
+)
 
-LLM_API_PROVIDER_OPTIONS = ["openai", "azure", "anthropic", "google_ai", "local", "groq", "deepseek"]
+LLM_API_PROVIDER_OPTIONS = [
+    "openai",
+    "azure",
+    "anthropic",
+    "google_ai",
+    "local",
+    "groq",
+    "deepseek",
+]
 
 
 def retry_with_exponential_backoff(
@@ -87,7 +98,10 @@ def retry_with_exponential_backoff(
                                 "error": str(http_err),
                             },
                         )
-                        raise RateLimitExceededError("Maximum number of retries exceeded", max_retries=max_retries)
+                        raise RateLimitExceededError(
+                            "Maximum number of retries exceeded",
+                            max_retries=max_retries,
+                        )
 
                     # Increment the delay
                     delay *= exponential_base * (1 + jitter * random.random())
@@ -102,13 +116,20 @@ def retry_with_exponential_backoff(
                     # For other HTTP errors, re-raise the exception
                     log_event(
                         "llm_non_retryable_error",
-                        {"status_code": http_err.response.status_code, "error_type": type(http_err).__name__, "error": str(http_err)},
+                        {
+                            "status_code": http_err.response.status_code,
+                            "error_type": type(http_err).__name__,
+                            "error": str(http_err),
+                        },
                     )
                     raise
 
             # Raise exceptions for any errors not specified
             except Exception as e:
-                log_event("llm_unexpected_error", {"error_type": type(e).__name__, "error": str(e)})
+                log_event(
+                    "llm_unexpected_error",
+                    {"error_type": type(e).__name__, "error": str(e)},
+                )
                 raise e
 
     return wrapper
@@ -167,7 +188,10 @@ def create(
     if llm_config.model_endpoint_type == "openai":
         if model_settings.openai_api_key is None and llm_config.model_endpoint == "https://api.openai.com/v1":
             # only is a problem if we are *not* using an openai proxy
-            raise LettaConfigurationError(message="OpenAI key is missing from letta config file", missing_fields=["openai_api_key"])
+            raise LettaConfigurationError(
+                message="OpenAI key is missing from letta config file",
+                missing_fields=["openai_api_key"],
+            )
         elif llm_config.provider_category == ProviderCategory.byok:
             from letta.services.provider_manager import ProviderManager
             from letta.services.user_manager import UserManager

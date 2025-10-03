@@ -5,7 +5,11 @@ from pydantic import BaseModel
 
 from letta.orm.errors import NoResultFound
 from letta.schemas.archive import Archive as PydanticArchive
-from letta.server.rest_api.dependencies import HeaderParams, get_headers, get_letta_server
+from letta.server.rest_api.dependencies import (
+    HeaderParams,
+    get_headers,
+    get_letta_server,
+)
 from letta.server.server import SyncServer
 
 router = APIRouter(prefix="/archives", tags=["archives"])
@@ -63,7 +67,8 @@ async def list_archives(
     ),
     limit: Optional[int] = Query(50, description="Maximum number of archives to return"),
     order: Literal["asc", "desc"] = Query(
-        "desc", description="Sort order for archives by creation time. 'asc' for oldest first, 'desc' for newest first"
+        "desc",
+        description="Sort order for archives by creation time. 'asc' for oldest first, 'desc' for newest first",
     ),
     name: Optional[str] = Query(None, description="Filter by archive name (exact match)"),
     agent_id: Optional[str] = Query(None, description="Only archives attached to this agent ID"),

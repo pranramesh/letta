@@ -69,9 +69,7 @@ except Exception as e:
 with open("example-on-disk.txt", "rb") as f:
     # Upload the file to the folder
     file = client.folders.files.upload(
-        folder_id=folder_id,
-        file=f,
-        duplicate_handling="skip"
+        folder_id=folder_id, file=f, duplicate_handling="skip"
     )
 
 # 2. From a string by encoding it into a base64 string
@@ -91,9 +89,7 @@ file_object.name = "example.txt"
 
 # Upload the file to the folder
 file = client.folders.files.upload(
-    folder_id=folder_id,
-    file=file_object,
-    duplicate_handling="skip"
+    folder_id=folder_id, file=file_object, duplicate_handling="skip"
 )
 
 #
@@ -112,9 +108,7 @@ if not os.path.exists("memgpt.pdf"):
 # Upload the PDF to the folder
 with open("memgpt.pdf", "rb") as f:
     file = client.folders.files.upload(
-        folder_id=folder_id,
-        file=f,
-        duplicate_handling="skip"
+        folder_id=folder_id, file=f, duplicate_handling="skip"
     )
 
 #
@@ -126,25 +120,19 @@ agent = client.agents.create(
     model="openai/gpt-4o-mini",
     name="Example Agent",
     description="This agent looks at files and answers questions about them.",
-    memory_blocks = [
-        {
-            "label": "human",
-            "value": "The human wants to know about the files."
-        },
+    memory_blocks=[
+        {"label": "human", "value": "The human wants to know about the files."},
         {
             "label": "persona",
-            "value": "My name is Clippy, I answer questions about files."
-        }
-    ]
+            "value": "My name is Clippy, I answer questions about files.",
+        },
+    ],
 )
 
 # Attach the data folder to the agent.
 # Once the folder is attached, the agent will be able to see all
 # files in the folder.
-client.agents.folders.attach(
-    agent_id=agent.id,
-    folder_id=folder_id
-)
+client.agents.folders.attach(agent_id=agent.id, folder_id=folder_id)
 
 ########################################################
 # This code makes a simple chatbot interface to the agent
@@ -164,7 +152,7 @@ try:
             print("\n👋 Goodbye!")
             break
 
-        if user_input.lower() in ['quit', 'exit', 'q']:
+        if user_input.lower() in ["quit", "exit", "q"]:
             print("👋 Goodbye!")
             break
 
@@ -174,12 +162,7 @@ try:
         # Stream the agent's response
         stream = client.agents.messages.create_stream(
             agent_id=agent.id,
-            messages=[
-                {
-                    "role": "user",
-                    "content": user_input
-                }
-            ],
+            messages=[{"role": "user", "content": user_input}],
         )
 
         for chunk in stream:

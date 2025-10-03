@@ -4,7 +4,11 @@ from typing import Optional
 from pydantic import ConfigDict, Field, model_validator
 from typing_extensions import Self
 
-from letta.constants import CORE_MEMORY_BLOCK_CHAR_LIMIT, DEFAULT_HUMAN_BLOCK_DESCRIPTION, DEFAULT_PERSONA_BLOCK_DESCRIPTION
+from letta.constants import (
+    CORE_MEMORY_BLOCK_CHAR_LIMIT,
+    DEFAULT_HUMAN_BLOCK_DESCRIPTION,
+    DEFAULT_PERSONA_BLOCK_DESCRIPTION,
+)
 from letta.schemas.letta_base import LettaBase
 
 # block of the LLM context
@@ -22,7 +26,10 @@ class BaseBlock(LettaBase, validate_assignment=True):
     project_id: Optional[str] = Field(None, description="The associated project id.")
     # template data (optional)
     template_name: Optional[str] = Field(None, description="Name of the block if it is a template.", alias="name")
-    is_template: bool = Field(False, description="Whether the block is a template (e.g. saved human/persona options).")
+    is_template: bool = Field(
+        False,
+        description="Whether the block is a template (e.g. saved human/persona options).",
+    )
     template_id: Optional[str] = Field(None, description="The id of the template.", alias="name")
     base_template_id: Optional[str] = Field(None, description="The base template id of the block.")
     deployment_id: Optional[str] = Field(None, description="The id of the deployment.")
@@ -30,7 +37,10 @@ class BaseBlock(LettaBase, validate_assignment=True):
     preserve_on_migration: Optional[bool] = Field(False, description="Preserve the block on template migration.")
 
     # context window label
-    label: Optional[str] = Field(None, description="Label of the block (e.g. 'human', 'persona') in the context window.")
+    label: Optional[str] = Field(
+        None,
+        description="Label of the block (e.g. 'human', 'persona') in the context window.",
+    )
 
     # permissions of the agent
     read_only: bool = Field(False, description="Whether the agent has read-only access to the block.")

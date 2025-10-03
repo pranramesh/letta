@@ -4,7 +4,12 @@ import pytest
 from pydantic import ValidationError
 
 from letta.constants import DEFAULT_MESSAGE_TOOL, DEFAULT_MESSAGE_TOOL_KWARG
-from letta.schemas.letta_request import CreateBatch, LettaBatchRequest, LettaRequest, LettaStreamingRequest
+from letta.schemas.letta_request import (
+    CreateBatch,
+    LettaBatchRequest,
+    LettaRequest,
+    LettaStreamingRequest,
+)
 from letta.schemas.message import MessageCreate
 
 
@@ -179,5 +184,9 @@ class TestLettaRequestIntegration:
         assert request.max_steps == 10
 
         # Should work with all other fields
-        request = LettaRequest(messages=messages, use_assistant_message=False, assistant_message_tool_name="custom_tool")
+        request = LettaRequest(
+            messages=messages,
+            use_assistant_message=False,
+            assistant_message_tool_name="custom_tool",
+        )
         assert request.max_steps == 10  # Still uses default

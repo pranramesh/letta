@@ -50,6 +50,10 @@ class Tool(SqlalchemyBase, OrganizationMixin):
     )
     npm_requirements: Mapped[list | None] = mapped_column(JSON, doc="Optional list of npm packages required by this tool.")
     default_requires_approval: Mapped[bool] = mapped_column(nullable=True, doc="Whether or not to require approval.")
-    metadata_: Mapped[Optional[dict]] = mapped_column(JSON, default=lambda: {}, doc="A dictionary of additional metadata for the tool.")
+    metadata_: Mapped[Optional[dict]] = mapped_column(
+        JSON,
+        default=lambda: {},
+        doc="A dictionary of additional metadata for the tool.",
+    )
     # relationships
     organization: Mapped["Organization"] = relationship("Organization", back_populates="tools", lazy="selectin")

@@ -7,7 +7,11 @@ if TYPE_CHECKING:
     from letta.schemas.file import FileMetadata
 
 
-async def open_files(agent_state: "AgentState", file_requests: List[FileOpenRequest], close_all_others: bool = False) -> str:
+async def open_files(
+    agent_state: "AgentState",
+    file_requests: List[FileOpenRequest],
+    close_all_others: bool = False,
+) -> str:
     """Open one or more files and load their contents into files section in core memory. Maximum of 5 files can be opened simultaneously.
 
     Use this when you want to:

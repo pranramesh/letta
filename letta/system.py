@@ -84,7 +84,12 @@ def get_initial_boot_messages(version, timezone, tool_call_id):
     return messages
 
 
-def get_heartbeat(timezone, reason: str = "Automated timer", include_location: bool = False, location_name: str = "San Francisco, CA, USA"):
+def get_heartbeat(
+    timezone,
+    reason: str = "Automated timer",
+    include_location: bool = False,
+    location_name: str = "San Francisco, CA, USA",
+):
     # Package the message with time and location
     formatted_time = get_local_time(timezone=timezone)
     packaged_message = {
@@ -99,7 +104,12 @@ def get_heartbeat(timezone, reason: str = "Automated timer", include_location: b
     return json_dumps(packaged_message)
 
 
-def get_login_event(timezone, last_login="Never (first login)", include_location=False, location_name="San Francisco, CA, USA"):
+def get_login_event(
+    timezone,
+    last_login="Never (first login)",
+    include_location=False,
+    location_name="San Francisco, CA, USA",
+):
     # Package the message with time and location
     formatted_time = get_local_time(timezone=timezone)
     packaged_message = {

@@ -22,23 +22,17 @@ for tool in mcp_tools:
 
 # Create a Tool (with a tool id) using the server and tool names.
 mcp_tool = client.tools.add_mcp_tool(
-    mcp_server_name=mcp_server_name,
-    mcp_tool_name=mcp_tool_name
+    mcp_server_name=mcp_server_name, mcp_tool_name=mcp_tool_name
 )
 
 # Create an agent with the tool, using tool.id -- note that
 # this is the ONLY tool in the agent, you typically want to
 # also include the default tools.
 agent = client.agents.create(
-    memory_blocks=[
-        {
-            "value": "Name: Caren",
-            "label": "human"
-        }
-    ],
+    memory_blocks=[{"value": "Name: Caren", "label": "human"}],
     model="openai/gpt-4o-mini",
     embedding="openai/text-embedding-3-small",
-    tool_ids=[mcp_tool.id]
+    tool_ids=[mcp_tool.id],
 )
 print(f"Created agent id {agent.id}")
 
@@ -46,10 +40,7 @@ print(f"Created agent id {agent.id}")
 response = client.agents.messages.create(
     agent_id=agent.id,
     messages=[
-        {
-            "role": "user",
-            "content": "Hello can you echo back this input?"
-        },
+        {"role": "user", "content": "Hello can you echo back this input?"},
     ],
 )
 for message in response.messages:

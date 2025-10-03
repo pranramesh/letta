@@ -49,9 +49,28 @@ def upgrade() -> None:
     """
     )
     op.alter_column("block", "organization_id", nullable=False)
-    op.add_column("block", sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True))
-    op.add_column("block", sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True))
-    op.add_column("block", sa.Column("is_deleted", sa.Boolean(), server_default=sa.text("FALSE"), nullable=False))
+    op.add_column(
+        "block",
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
+    )
+    op.add_column(
+        "block",
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
+    )
+    op.add_column(
+        "block",
+        sa.Column("is_deleted", sa.Boolean(), server_default=sa.text("FALSE"), nullable=False),
+    )
     op.add_column("block", sa.Column("_created_by_id", sa.String(), nullable=True))
     op.add_column("block", sa.Column("_last_updated_by_id", sa.String(), nullable=True))
     op.alter_column("block", "limit", existing_type=sa.BIGINT(), type_=sa.Integer(), nullable=False)

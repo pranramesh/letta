@@ -8,7 +8,11 @@ from openai import OpenAI
 from letta.constants import LETTA_MODEL_ENDPOINT
 from letta.errors import ErrorCode, LLMAuthenticationError, LLMError
 from letta.helpers.datetime_helpers import timestamp_to_datetime
-from letta.llm_api.helpers import add_inner_thoughts_to_functions, convert_to_structured_output, make_post_request
+from letta.llm_api.helpers import (
+    add_inner_thoughts_to_functions,
+    convert_to_structured_output,
+    make_post_request,
+)
 from letta.llm_api.openai_client import (
     accepts_developer_role,
     requires_auto_tool_choice,
@@ -16,12 +20,19 @@ from letta.llm_api.openai_client import (
     supports_structured_output,
     supports_temperature_param,
 )
-from letta.local_llm.constants import INNER_THOUGHTS_KWARG, INNER_THOUGHTS_KWARG_DESCRIPTION, INNER_THOUGHTS_KWARG_DESCRIPTION_GO_FIRST
+from letta.local_llm.constants import (
+    INNER_THOUGHTS_KWARG,
+    INNER_THOUGHTS_KWARG_DESCRIPTION,
+    INNER_THOUGHTS_KWARG_DESCRIPTION_GO_FIRST,
+)
 from letta.local_llm.utils import num_tokens_from_functions, num_tokens_from_messages
 from letta.log import get_logger
 from letta.otel.tracing import log_event
 from letta.schemas.llm_config import LLMConfig
-from letta.schemas.message import Message as PydanticMessage, MessageRole as _MessageRole
+from letta.schemas.message import (
+    Message as PydanticMessage,
+    MessageRole as _MessageRole,
+)
 from letta.schemas.openai.chat_completion_request import (
     ChatCompletionRequest,
     FunctionCall as ToolFunctionChoiceFunctionCall,
@@ -40,7 +51,10 @@ from letta.schemas.openai.chat_completion_response import (
     UsageStatistics,
 )
 from letta.schemas.openai.embedding_response import EmbeddingResponse
-from letta.streaming_interface import AgentChunkStreamingInterface, AgentRefreshStreamingInterface
+from letta.streaming_interface import (
+    AgentChunkStreamingInterface,
+    AgentRefreshStreamingInterface,
+)
 from letta.utils import get_tool_call_id, smart_urljoin
 
 logger = get_logger(__name__)
@@ -54,7 +68,10 @@ def openai_check_valid_api_key(base_url: str, api_key: Union[str, None]) -> None
             openai_get_model_list(url=base_url, api_key=api_key)
         except requests.HTTPError as e:
             if e.response.status_code == 401:
-                raise LLMAuthenticationError(message=f"Failed to authenticate with OpenAI: {e}", code=ErrorCode.UNAUTHENTICATED)
+                raise LLMAuthenticationError(
+                    message=f"Failed to authenticate with OpenAI: {e}",
+                    code=ErrorCode.UNAUTHENTICATED,
+                )
             raise e
         except Exception as e:
             raise LLMError(message=f"{e}", code=ErrorCode.INTERNAL_SERVER_ERROR)
@@ -62,7 +79,12 @@ def openai_check_valid_api_key(base_url: str, api_key: Union[str, None]) -> None
         raise ValueError("No API key provided")
 
 
-def openai_get_model_list(url: str, api_key: Optional[str] = None, fix_url: bool = False, extra_params: Optional[dict] = None) -> dict:
+def openai_get_model_list(
+    url: str,
+    api_key: Optional[str] = None,
+    fix_url: bool = False,
+    extra_params: Optional[dict] = None,
+) -> dict:
     """https://platform.openai.com/docs/api-reference/models/list"""
 
     # In some cases we may want to double-check the URL and do basic correction, eg:
@@ -71,7 +93,10 @@ def openai_get_model_list(url: str, api_key: Optional[str] = None, fix_url: bool
 
     import warnings
 
-    warnings.warn("The synchronous version of openai_get_model_list function is deprecated. Use the async one instead.", DeprecationWarning)
+    warnings.warn(
+        "The synchronous version of openai_get_model_list function is deprecated. Use the async one instead.",
+        DeprecationWarning,
+    )
 
     if fix_url:
         if not url.endswith("/v1"):
@@ -159,7 +184,10 @@ async def openai_get_model_list_async(
         try:
             error_response = http_err.response.json()
         except:
-            error_response = {"status_code": http_err.response.status_code, "text": http_err.response.text}
+            error_response = {
+                "status_code": http_err.response.status_code,
+                "text": http_err.response.text,
+            }
         logger.debug(f"Got HTTPError, exception={http_err}, response={error_response}")
         raise http_err
     except httpx.RequestError as req_err:
@@ -219,7 +247,10 @@ def build_openai_chat_completions_request(
         if function_call is None:
             tool_choice = None
         elif function_call not in ["none", "auto", "required"]:
-            tool_choice = ToolFunctionChoice(type="function", function=ToolFunctionChoiceFunctionCall(name=function_call))
+            tool_choice = ToolFunctionChoice(
+                type="function",
+                function=ToolFunctionChoiceFunctionCall(name=function_call),
+            )
         else:
             if requires_auto_tool_choice(llm_config):
                 tool_choice = "auto"
@@ -228,11 +259,11 @@ def build_openai_chat_completions_request(
         data = ChatCompletionRequest(
             model=model,
             messages=openai_message_list,
-            tools=[Tool(type="function", function=f) for f in functions] if functions else None,
+            tools=([Tool(type="function", function=f) for f in functions] if functions else None),
             tool_choice=tool_choice,
             user=str(user_id),
             max_completion_tokens=llm_config.max_tokens,
-            temperature=llm_config.temperature if supports_temperature_param(model) else 1.0,
+            temperature=(llm_config.temperature if supports_temperature_param(model) else 1.0),
             reasoning_effort=llm_config.reasoning_effort,
         )
     else:
@@ -243,7 +274,7 @@ def build_openai_chat_completions_request(
             function_call=function_call,
             user=str(user_id),
             max_completion_tokens=llm_config.max_tokens,
-            temperature=llm_config.temperature if supports_temperature_param(model) else 1.0,
+            temperature=(llm_config.temperature if supports_temperature_param(model) else 1.0),
             reasoning_effort=llm_config.reasoning_effort,
         )
         # https://platform.openai.com/docs/guides/text-generation/json-mode
@@ -380,7 +411,7 @@ def openai_chat_completions_process_stream(
                 if isinstance(stream_interface, AgentChunkStreamingInterface):
                     message_type = stream_interface.process_chunk(
                         chat_completion_chunk,
-                        message_id=chat_completion_response.id if create_message_id else chat_completion_chunk.id,
+                        message_id=(chat_completion_response.id if create_message_id else chat_completion_chunk.id),
                         message_date=(
                             timestamp_to_datetime(chat_completion_response.created)
                             if create_message_datetime
@@ -448,7 +479,10 @@ def openai_chat_completions_process_stream(
                     # If this is the first tool call showing up in a chunk, initialize the list with it
                     if accum_message.tool_calls is None:
                         accum_message.tool_calls = [
-                            ToolCall(id=TEMP_STREAM_TOOL_CALL_ID, function=FunctionCall(name="", arguments=""))
+                            ToolCall(
+                                id=TEMP_STREAM_TOOL_CALL_ID,
+                                function=FunctionCall(name="", arguments=""),
+                            )
                             for _ in range(len(tool_calls_delta))
                         ]
 
@@ -517,7 +551,7 @@ def openai_chat_completions_process_stream(
     assert all([c.finish_reason != TEMP_STREAM_FINISH_REASON for c in chat_completion_response.choices])
     assert all(
         [
-            all([tc.id != TEMP_STREAM_TOOL_CALL_ID for tc in c.message.tool_calls]) if c.message.tool_calls else True
+            (all([tc.id != TEMP_STREAM_TOOL_CALL_ID for tc in c.message.tool_calls]) if c.message.tool_calls else True)
             for c in chat_completion_response.choices
         ]
     )

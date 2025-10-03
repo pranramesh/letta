@@ -4,7 +4,10 @@ from datetime import datetime, timezone
 from typing import Generator
 
 import pytest
-from anthropic.types.beta.messages import BetaMessageBatch, BetaMessageBatchRequestCounts
+from anthropic.types.beta.messages import (
+    BetaMessageBatch,
+    BetaMessageBatchRequestCounts,
+)
 
 from letta.server.db import db_registry
 from letta.services.organization_manager import OrganizationManager

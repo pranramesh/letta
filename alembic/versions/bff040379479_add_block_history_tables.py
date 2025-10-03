@@ -39,8 +39,18 @@ def upgrade() -> None:
         sa.Column("sequence_number", sa.Integer(), nullable=False),
         sa.Column("organization_id", sa.String(), nullable=False),
         sa.Column("id", sa.String(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
         sa.Column("is_deleted", sa.Boolean(), server_default=sa.text("FALSE"), nullable=False),
         sa.Column("_created_by_id", sa.String(), nullable=True),
         sa.Column("_last_updated_by_id", sa.String(), nullable=True),
@@ -51,11 +61,28 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index("ix_block_history_block_id_sequence", "block_history", ["block_id", "sequence_number"], unique=True)
+    op.create_index(
+        "ix_block_history_block_id_sequence",
+        "block_history",
+        ["block_id", "sequence_number"],
+        unique=True,
+    )
     op.add_column("block", sa.Column("current_history_entry_id", sa.String(), nullable=True))
     op.add_column("block", sa.Column("version", sa.Integer(), server_default="1", nullable=False))
-    op.create_index(op.f("ix_block_current_history_entry_id"), "block", ["current_history_entry_id"], unique=False)
-    op.create_foreign_key("fk_block_current_history_entry", "block", "block_history", ["current_history_entry_id"], ["id"], use_alter=True)
+    op.create_index(
+        op.f("ix_block_current_history_entry_id"),
+        "block",
+        ["current_history_entry_id"],
+        unique=False,
+    )
+    op.create_foreign_key(
+        "fk_block_current_history_entry",
+        "block",
+        "block_history",
+        ["current_history_entry_id"],
+        ["id"],
+        use_alter=True,
+    )
     # ### end Alembic commands ###
 
 

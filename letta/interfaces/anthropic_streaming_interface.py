@@ -36,7 +36,11 @@ from letta.schemas.letta_message import (
     ToolCallDelta,
     ToolCallMessage,
 )
-from letta.schemas.letta_message_content import ReasoningContent, RedactedReasoningContent, TextContent
+from letta.schemas.letta_message_content import (
+    ReasoningContent,
+    RedactedReasoningContent,
+    TextContent,
+)
 from letta.schemas.letta_stop_reason import LettaStopReason, StopReasonType
 from letta.schemas.message import Message
 from letta.schemas.openai.chat_completion_response import FunctionCall, ToolCall
@@ -119,7 +123,10 @@ class AnthropicStreamingInterface:
             arguments = str(json.dumps(tool_input["function"]["arguments"], indent=2))
         else:
             arguments = str(json.dumps(tool_input, indent=2))
-        return ToolCall(id=self.tool_call_id, function=FunctionCall(arguments=arguments, name=self.tool_call_name))
+        return ToolCall(
+            id=self.tool_call_id,
+            function=FunctionCall(arguments=arguments, name=self.tool_call_name),
+        )
 
     def _check_inner_thoughts_complete(self, combined_args: str) -> bool:
         """
@@ -138,16 +145,25 @@ class AnthropicStreamingInterface:
             logger.error("Error checking inner thoughts: %s", e)
             raise
 
-    def get_reasoning_content(self) -> list[TextContent | ReasoningContent | RedactedReasoningContent]:
+    def get_reasoning_content(
+        self,
+    ) -> list[TextContent | ReasoningContent | RedactedReasoningContent]:
         def _process_group(
             group: list[ReasoningMessage | HiddenReasoningMessage], group_type: str
         ) -> TextContent | ReasoningContent | RedactedReasoningContent:
             if group_type == "reasoning":
                 reasoning_text = "".join(chunk.reasoning for chunk in group).strip()
                 is_native = any(chunk.source == "reasoner_model" for chunk in group)
-                signature = next((chunk.signature for chunk in group if chunk.signature is not None), None)
+                signature = next(
+                    (chunk.signature for chunk in group if chunk.signature is not None),
+                    None,
+                )
                 if is_native:
-                    return ReasoningContent(is_native=is_native, reasoning=reasoning_text, signature=signature)
+                    return ReasoningContent(
+                        is_native=is_native,
+                        reasoning=reasoning_text,
+                        signature=signature,
+                    )
                 else:
                     return TextContent(text=reasoning_text)
             elif group_type == "redacted":
@@ -215,7 +231,11 @@ class AnthropicStreamingInterface:
                     except asyncio.CancelledError as e:
                         import traceback
 
-                        logger.info("Cancelled stream attempt but overriding %s: %s", e, traceback.format_exc())
+                        logger.info(
+                            "Cancelled stream attempt but overriding %s: %s",
+                            e,
+                            traceback.format_exc(),
+                        )
                         async for message in self._process_event(event, ttft_span, prev_message_type, message_index):
                             new_message_type = message.message_type
                             if new_message_type != prev_message_type:
@@ -234,7 +254,11 @@ class AnthropicStreamingInterface:
             if ttft_span:
                 ttft_span.add_event(
                     name="stop_reason",
-                    attributes={"stop_reason": StopReasonType.error.value, "error": str(e), "stacktrace": traceback.format_exc()},
+                    attributes={
+                        "stop_reason": StopReasonType.error.value,
+                        "error": str(e),
+                        "stacktrace": traceback.format_exc(),
+                    },
                 )
             yield LettaStopReason(stop_reason=StopReasonType.error)
             raise e
@@ -381,7 +405,10 @@ class AnthropicStreamingInterface:
                         # Strip out inner thoughts from arguments
                         tool_call_args = self.accumulated_tool_call_args
                         if current_inner_thoughts:
-                            tool_call_args = tool_call_args.replace(f'"{INNER_THOUGHTS_KWARG}": "{current_inner_thoughts}"', "")
+                            tool_call_args = tool_call_args.replace(
+                                f'"{INNER_THOUGHTS_KWARG}": "{current_inner_thoughts}"',
+                                "",
+                            )
 
                         approval_msg = ApprovalRequestMessage(
                             id=self.letta_message_id,
@@ -444,13 +471,21 @@ class AnthropicStreamingInterface:
                     if self.tool_call_name in self.requires_approval_tools:
                         tool_call_msg = ApprovalRequestMessage(
                             id=self.letta_message_id,
-                            tool_call=ToolCallDelta(name=self.tool_call_name, tool_call_id=self.tool_call_id, arguments=delta.partial_json),
+                            tool_call=ToolCallDelta(
+                                name=self.tool_call_name,
+                                tool_call_id=self.tool_call_id,
+                                arguments=delta.partial_json,
+                            ),
                             date=datetime.now(timezone.utc).isoformat(),
                         )
                     else:
                         tool_call_msg = ToolCallMessage(
                             id=self.letta_message_id,
-                            tool_call=ToolCallDelta(name=self.tool_call_name, tool_call_id=self.tool_call_id, arguments=delta.partial_json),
+                            tool_call=ToolCallDelta(
+                                name=self.tool_call_name,
+                                tool_call_id=self.tool_call_id,
+                                arguments=delta.partial_json,
+                            ),
                             date=datetime.now(timezone.utc).isoformat(),
                         )
                     if self.inner_thoughts_complete:

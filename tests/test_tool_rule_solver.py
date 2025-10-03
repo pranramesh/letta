@@ -34,7 +34,10 @@ def test_get_allowed_tool_names_with_init_rules():
 
     allowed_tools = solver.get_allowed_tool_names(set())
 
-    assert allowed_tools == [START_TOOL, PREP_TOOL], "Should allow only InitToolRule tools at the start"
+    assert allowed_tools == [
+        START_TOOL,
+        PREP_TOOL,
+    ], "Should allow only InitToolRule tools at the start"
 
 
 def test_get_allowed_tool_names_with_subsequent_rule():
@@ -98,7 +101,11 @@ def test_update_tool_usage_and_get_allowed_tool_names_combined():
 def test_conditional_tool_rule():
     init_rule = InitToolRule(tool_name=START_TOOL)
     terminal_rule = TerminalToolRule(tool_name=END_TOOL)
-    rule = ConditionalToolRule(tool_name=START_TOOL, default_child=None, child_output_mapping={True: END_TOOL, False: START_TOOL})
+    rule = ConditionalToolRule(
+        tool_name=START_TOOL,
+        default_child=None,
+        child_output_mapping={True: END_TOOL, False: START_TOOL},
+    )
     solver = ToolRulesSolver(tool_rules=[init_rule, rule, terminal_rule])
 
     assert solver.get_allowed_tool_names({START_TOOL}) == [START_TOOL], "Initial allowed tool should be 'start_tool'"
@@ -226,7 +233,10 @@ def test_tool_rule_equality_and_hashing():
 
     # test ConditionalToolRule equality
     cond_rule1 = ConditionalToolRule(
-        tool_name="conditional", child_output_mapping={"yes": "tool1", "no": "tool2"}, default_child="tool3", require_output_mapping=True
+        tool_name="conditional",
+        child_output_mapping={"yes": "tool1", "no": "tool2"},
+        default_child="tool3",
+        require_output_mapping=True,
     )
     cond_rule2 = ConditionalToolRule(
         tool_name="conditional",
@@ -352,14 +362,40 @@ def test_continue_tool_rule_equality_and_hashing():
         (lambda **kw: InitToolRule(**kw), dict(tool_name="t"), dict(tool_name="t")),
         (lambda **kw: TerminalToolRule(**kw), dict(tool_name="t"), dict(tool_name="t")),
         (lambda **kw: ContinueToolRule(**kw), dict(tool_name="t"), dict(tool_name="t")),
-        (lambda **kw: RequiredBeforeExitToolRule(**kw), dict(tool_name="t"), dict(tool_name="t")),
-        (lambda **kw: MaxCountPerStepToolRule(**kw), dict(tool_name="t", max_count_limit=2), dict(tool_name="t", max_count_limit=2)),
-        (lambda **kw: ChildToolRule(**kw), dict(tool_name="t", children=["a", "b"]), dict(tool_name="t", children=["a", "b"])),
-        (lambda **kw: ParentToolRule(**kw), dict(tool_name="t", children=["a", "b"]), dict(tool_name="t", children=["a", "b"])),
+        (
+            lambda **kw: RequiredBeforeExitToolRule(**kw),
+            dict(tool_name="t"),
+            dict(tool_name="t"),
+        ),
+        (
+            lambda **kw: MaxCountPerStepToolRule(**kw),
+            dict(tool_name="t", max_count_limit=2),
+            dict(tool_name="t", max_count_limit=2),
+        ),
+        (
+            lambda **kw: ChildToolRule(**kw),
+            dict(tool_name="t", children=["a", "b"]),
+            dict(tool_name="t", children=["a", "b"]),
+        ),
+        (
+            lambda **kw: ParentToolRule(**kw),
+            dict(tool_name="t", children=["a", "b"]),
+            dict(tool_name="t", children=["a", "b"]),
+        ),
         (
             lambda **kw: ConditionalToolRule(**kw),
-            dict(tool_name="t", child_output_mapping={"x": "a"}, default_child=None, require_output_mapping=False),
-            dict(tool_name="t", child_output_mapping={"x": "a"}, default_child=None, require_output_mapping=False),
+            dict(
+                tool_name="t",
+                child_output_mapping={"x": "a"},
+                default_child=None,
+                require_output_mapping=False,
+            ),
+            dict(
+                tool_name="t",
+                child_output_mapping={"x": "a"},
+                default_child=None,
+                require_output_mapping=False,
+            ),
         ),
     ],
 )
@@ -374,8 +410,14 @@ def test_prompt_template_ignored(rule_factory, kwargs_a, kwargs_b):
     "a,b",
     [
         (InitToolRule(tool_name="same"), TerminalToolRule(tool_name="same")),
-        (ContinueToolRule(tool_name="same"), RequiredBeforeExitToolRule(tool_name="same")),
-        (ChildToolRule(tool_name="same", children=["x"]), ParentToolRule(tool_name="same", children=["x"])),
+        (
+            ContinueToolRule(tool_name="same"),
+            RequiredBeforeExitToolRule(tool_name="same"),
+        ),
+        (
+            ChildToolRule(tool_name="same", children=["x"]),
+            ParentToolRule(tool_name="same", children=["x"]),
+        ),
     ],
 )
 def test_cross_type_hash_distinguishes_types(a, b):
@@ -393,7 +435,12 @@ def test_cross_type_hash_distinguishes_types(a, b):
         MaxCountPerStepToolRule(tool_name="x", max_count_limit=1),
         ChildToolRule(tool_name="x", children=["a"]),
         ParentToolRule(tool_name="x", children=["a"]),
-        ConditionalToolRule(tool_name="x", child_output_mapping={"k": "a"}, default_child=None, require_output_mapping=False),
+        ConditionalToolRule(
+            tool_name="x",
+            child_output_mapping={"k": "a"},
+            default_child=None,
+            require_output_mapping=False,
+        ),
     ],
 )
 def test_equality_with_non_rule_objects(rule):
@@ -403,10 +450,16 @@ def test_equality_with_non_rule_objects(rule):
 
 def test_conditional_tool_rule_mapping_order_and_hash():
     r1 = ConditionalToolRule(
-        tool_name="cond", child_output_mapping={"yes": "tool1", "no": "tool2"}, default_child="tool3", require_output_mapping=True
+        tool_name="cond",
+        child_output_mapping={"yes": "tool1", "no": "tool2"},
+        default_child="tool3",
+        require_output_mapping=True,
     )
     r2 = ConditionalToolRule(
-        tool_name="cond", child_output_mapping={"no": "tool2", "yes": "tool1"}, default_child="tool3", require_output_mapping=True
+        tool_name="cond",
+        child_output_mapping={"no": "tool2", "yes": "tool1"},
+        default_child="tool3",
+        require_output_mapping=True,
     )
     assert r1 == r2
     assert hash(r1) == hash(r2)
@@ -415,9 +468,24 @@ def test_conditional_tool_rule_mapping_order_and_hash():
 def test_conditional_tool_rule_mapping_numeric_and_bool_keys_equivalence_current_behavior():
     # NOTE: Python dict equality treats True == 1 and 1 == 1.0 as equal keys.
     # This test documents current behavior of __eq__ on mapping equality.
-    r_bool = ConditionalToolRule(tool_name="cond", child_output_mapping={True: "A"}, default_child=None, require_output_mapping=False)
-    r_int = ConditionalToolRule(tool_name="cond", child_output_mapping={1: "A"}, default_child=None, require_output_mapping=False)
-    r_float = ConditionalToolRule(tool_name="cond", child_output_mapping={1.0: "A"}, default_child=None, require_output_mapping=False)
+    r_bool = ConditionalToolRule(
+        tool_name="cond",
+        child_output_mapping={True: "A"},
+        default_child=None,
+        require_output_mapping=False,
+    )
+    r_int = ConditionalToolRule(
+        tool_name="cond",
+        child_output_mapping={1: "A"},
+        default_child=None,
+        require_output_mapping=False,
+    )
+    r_float = ConditionalToolRule(
+        tool_name="cond",
+        child_output_mapping={1.0: "A"},
+        default_child=None,
+        require_output_mapping=False,
+    )
     # Document current semantics: these are equal under Python's dict equality.
     assert r_bool == r_int
     assert r_int == r_float
@@ -425,8 +493,18 @@ def test_conditional_tool_rule_mapping_numeric_and_bool_keys_equivalence_current
 
 
 def test_conditional_tool_rule_mapping_string_vs_numeric_not_equal():
-    r_num = ConditionalToolRule(tool_name="cond", child_output_mapping={1: "A"}, default_child=None, require_output_mapping=False)
-    r_str = ConditionalToolRule(tool_name="cond", child_output_mapping={"1": "A"}, default_child=None, require_output_mapping=False)
+    r_num = ConditionalToolRule(
+        tool_name="cond",
+        child_output_mapping={1: "A"},
+        default_child=None,
+        require_output_mapping=False,
+    )
+    r_str = ConditionalToolRule(
+        tool_name="cond",
+        child_output_mapping={"1": "A"},
+        default_child=None,
+        require_output_mapping=False,
+    )
     assert r_num != r_str
     assert hash(r_num) != hash(r_str)
 
@@ -459,7 +537,15 @@ def test_conditional_order_invariance_multiple_permutations():
         {"z": "c", "y": "b", "x": "a"},
         {"y": "b", "x": "a", "z": "c"},
     ]
-    rules = [ConditionalToolRule(tool_name="t", child_output_mapping=m, default_child=None, require_output_mapping=False) for m in maps]
+    rules = [
+        ConditionalToolRule(
+            tool_name="t",
+            child_output_mapping=m,
+            default_child=None,
+            require_output_mapping=False,
+        )
+        for m in maps
+    ]
     for r in rules[1:]:
         assert rules[0] == r
         assert hash(rules[0]) == hash(r)
@@ -511,7 +597,10 @@ def test_required_before_exit_tool_rule_multiple_required_tools():
         "Should return False when no required tools have been called"
     )
     uncalled_tools = solver.get_uncalled_required_tools({REQUIRED_TOOL_1, REQUIRED_TOOL_2})
-    assert set(uncalled_tools) == {REQUIRED_TOOL_1, REQUIRED_TOOL_2}, "Should return both uncalled required tools"
+    assert set(uncalled_tools) == {
+        REQUIRED_TOOL_1,
+        REQUIRED_TOOL_2,
+    }, "Should return both uncalled required tools"
 
     # Call first required tool
     solver.register_tool_call(REQUIRED_TOOL_1)

@@ -11,7 +11,10 @@ class EnvironmentVariableBase(OrmMetadataBase):
     key: str = Field(..., description="The name of the environment variable.")
     value: str = Field(..., description="The value of the environment variable.")
     description: Optional[str] = Field(None, description="An optional description of the environment variable.")
-    organization_id: Optional[str] = Field(None, description="The ID of the organization this environment variable belongs to.")
+    organization_id: Optional[str] = Field(
+        None,
+        description="The ID of the organization this environment variable belongs to.",
+    )
 
 
 class EnvironmentVariableCreateBase(LettaBase):
@@ -29,7 +32,10 @@ class EnvironmentVariableUpdateBase(LettaBase):
 # Environment Variable
 class SandboxEnvironmentVariableBase(EnvironmentVariableBase):
     __id_prefix__ = "sandbox-env"
-    sandbox_config_id: str = Field(..., description="The ID of the sandbox config this environment variable belongs to.")
+    sandbox_config_id: str = Field(
+        ...,
+        description="The ID of the sandbox config this environment variable belongs to.",
+    )
 
 
 class SandboxEnvironmentVariable(SandboxEnvironmentVariableBase):

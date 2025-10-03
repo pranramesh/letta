@@ -32,7 +32,10 @@ def extract_metadata_from_files(file_list):
 
 
 def get_filenames_in_dir(
-    input_dir: str, recursive: bool = True, required_exts: Optional[List[str]] = None, exclude: Optional[List[str]] = None
+    input_dir: str,
+    recursive: bool = True,
+    required_exts: Optional[List[str]] = None,
+    exclude: Optional[List[str]] = None,
 ):
     """
     Recursively reads files from the directory, applying required_exts and exclude filters.

@@ -45,7 +45,10 @@ class LLMConfig(BaseModel):
         True,
         description="Puts 'inner_thoughts' as a kwarg in the function call if this is set to True. This helps with function calling performance and also the generation of inner thoughts.",
     )
-    handle: Optional[str] = Field(None, description="The handle for this config, in the format provider/model-name.")
+    handle: Optional[str] = Field(
+        None,
+        description="The handle for this config, in the format provider/model-name.",
+    )
     temperature: float = Field(
         0.7,
         description="The temperature to use when generating text with the model. A higher temperature will result in more random text.",
@@ -55,7 +58,8 @@ class LLMConfig(BaseModel):
         description="The maximum number of tokens to generate. If not set, the model will use its default value.",
     )
     enable_reasoner: bool = Field(
-        True, description="Whether or not the model should use extended thinking if it is a 'reasoning' style model"
+        True,
+        description="Whether or not the model should use extended thinking if it is a 'reasoning' style model",
     )
     reasoning_effort: Optional[Literal["minimal", "low", "medium", "high"]] = Field(
         None,

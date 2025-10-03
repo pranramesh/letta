@@ -3,7 +3,10 @@ from typing import List, Optional
 
 from letta.log import get_logger
 from letta.schemas.file import FileMetadata
-from letta.services.file_processor.file_types import ChunkingStrategy, file_type_registry
+from letta.services.file_processor.file_types import (
+    ChunkingStrategy,
+    file_type_registry,
+)
 
 logger = get_logger(__name__)
 
@@ -176,11 +179,17 @@ class LineChunker:
                 # Display 1-indexed ranges for users
                 start_display = start + 1
                 end_display = end
-                content_lines.insert(0, f"[Viewing {chunk_type} {start_display} to {end_display} (out of {total_chunks} {chunk_type})]")
+                content_lines.insert(
+                    0,
+                    f"[Viewing {chunk_type} {start_display} to {end_display} (out of {total_chunks} {chunk_type})]",
+                )
             elif start is not None:
                 # Only start specified - viewing from start to end
                 start_display = start + 1
-                content_lines.insert(0, f"[Viewing {chunk_type} {start_display} to end (out of {total_chunks} {chunk_type})]")
+                content_lines.insert(
+                    0,
+                    f"[Viewing {chunk_type} {start_display} to end (out of {total_chunks} {chunk_type})]",
+                )
             else:
                 content_lines.insert(0, f"[Viewing file start (out of {total_chunks} {chunk_type})]")
 

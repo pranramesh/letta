@@ -1,7 +1,16 @@
 from conftest import create_test_module
 
 AGENTS_CREATE_PARAMS = [
-    ("caren_agent", {"name": "caren", "model": "openai/gpt-4o-mini", "embedding": "openai/text-embedding-3-small"}, {}, None),
+    (
+        "caren_agent",
+        {
+            "name": "caren",
+            "model": "openai/gpt-4o-mini",
+            "embedding": "openai/text-embedding-3-small",
+        },
+        {},
+        None,
+    ),
 ]
 
 AGENTS_MODIFY_PARAMS = [

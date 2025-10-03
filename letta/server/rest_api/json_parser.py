@@ -31,7 +31,10 @@ class PydanticJSONParser(JSONParser):
         if not input_str:
             return {}
         try:
-            return from_json(input_str, allow_partial="trailing-strings" if not self.strict else False)
+            return from_json(
+                input_str,
+                allow_partial="trailing-strings" if not self.strict else False,
+            )
         except Exception as e:
             logger.warning(f"PydanticJSONParser failed: {e} | input_str={input_str!r}, falling back to OptimisticJSONParser")
             try:

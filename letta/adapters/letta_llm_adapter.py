@@ -3,9 +3,16 @@ from typing import AsyncGenerator
 
 from letta.llm_api.llm_client_base import LLMClientBase
 from letta.schemas.letta_message import LettaMessage
-from letta.schemas.letta_message_content import ReasoningContent, RedactedReasoningContent, TextContent
+from letta.schemas.letta_message_content import (
+    ReasoningContent,
+    RedactedReasoningContent,
+    TextContent,
+)
 from letta.schemas.llm_config import LLMConfig
-from letta.schemas.openai.chat_completion_response import ChatCompletionResponse, ToolCall
+from letta.schemas.openai.chat_completion_response import (
+    ChatCompletionResponse,
+    ToolCall,
+)
 from letta.schemas.usage import LettaUsageStatistics
 from letta.schemas.user import User
 from letta.services.telemetry_manager import TelemetryManager

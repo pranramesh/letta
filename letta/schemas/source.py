@@ -39,7 +39,11 @@ class Source(BaseSource):
     id: str = BaseSource.generate_id_field()
     embedding_config: EmbeddingConfig = Field(..., description="The embedding configuration used by the source.")
     organization_id: Optional[str] = Field(None, description="The ID of the organization that created the source.")
-    metadata: Optional[dict] = Field(None, validation_alias="metadata_", description="Metadata associated with the source.")
+    metadata: Optional[dict] = Field(
+        None,
+        validation_alias="metadata_",
+        description="Metadata associated with the source.",
+    )
 
     # metadata fields
     vector_db_provider: VectorDBProvider = Field(

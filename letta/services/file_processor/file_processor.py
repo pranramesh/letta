@@ -49,7 +49,10 @@ class FileProcessor:
         filename = file_metadata.file_name
 
         # Create file-type-specific chunker
-        text_chunker = LlamaIndexChunker(file_type=file_metadata.file_type, chunk_size=self.embedder.embedding_config.embedding_chunk_size)
+        text_chunker = LlamaIndexChunker(
+            file_type=file_metadata.file_type,
+            chunk_size=self.embedder.embedding_config.embedding_chunk_size,
+        )
 
         # First attempt with file-specific chunker
         try:
@@ -170,19 +173,34 @@ class FileProcessor:
             if len(content) > self.max_file_size:
                 log_event(
                     "file_processor.size_limit_exceeded",
-                    {"filename": filename, "file_size": len(content), "max_file_size": self.max_file_size},
+                    {
+                        "filename": filename,
+                        "file_size": len(content),
+                        "max_file_size": self.max_file_size,
+                    },
                 )
                 raise ValueError(f"PDF size exceeds maximum allowed size of {self.max_file_size} bytes")
 
             logger.info(f"Starting OCR extraction for {filename}")
-            log_event("file_processor.ocr_started", {"filename": filename, "file_size": len(content), "mime_type": file_metadata.file_type})
+            log_event(
+                "file_processor.ocr_started",
+                {
+                    "filename": filename,
+                    "file_size": len(content),
+                    "mime_type": file_metadata.file_type,
+                },
+            )
             ocr_response = await self.file_parser.extract_text(content, mime_type=file_metadata.file_type)
 
             # update file with raw text
             raw_markdown_text = "".join([page.markdown for page in ocr_response.pages])
             log_event(
                 "file_processor.ocr_completed",
-                {"filename": filename, "pages_extracted": len(ocr_response.pages), "text_length": len(raw_markdown_text)},
+                {
+                    "filename": filename,
+                    "pages_extracted": len(ocr_response.pages),
+                    "text_length": len(raw_markdown_text),
+                },
             )
 
             file_metadata = await self.file_manager.upsert_file_content(file_id=file_metadata.id, text=raw_markdown_text, actor=self.actor)
@@ -268,7 +286,7 @@ class FileProcessor:
                 file_id=file_metadata.id,
                 actor=self.actor,
                 processing_status=FileProcessingStatus.ERROR,
-                error_message=str(e) if str(e) else f"File processing failed: {type(e).__name__}",
+                error_message=(str(e) if str(e) else f"File processing failed: {type(e).__name__}"),
             )
 
             return []
@@ -306,35 +324,52 @@ class FileProcessor:
 
             # Update file status to embedding (valid transition from PARSING)
             file_metadata = await self.file_manager.update_file_status(
-                file_id=file_metadata.id, actor=self.actor, processing_status=FileProcessingStatus.EMBEDDING
+                file_id=file_metadata.id,
+                actor=self.actor,
+                processing_status=FileProcessingStatus.EMBEDDING,
             )
 
             logger.info(f"Chunking imported file content for {filename}")
-            log_event("file_processor.import_chunking_started", {"filename": filename, "content_length": len(content)})
+            log_event(
+                "file_processor.import_chunking_started",
+                {"filename": filename, "content_length": len(content)},
+            )
 
             # Chunk and embed using existing logic
             all_passages = await self._chunk_and_embed_with_fallback(
-                file_metadata=file_metadata, ocr_response=ocr_response, source_id=source_id
+                file_metadata=file_metadata,
+                ocr_response=ocr_response,
+                source_id=source_id,
             )
 
             # Create passages in database (unless using Pinecone)
             if self.vector_db_type == VectorDBProvider.NATIVE:
                 all_passages = await self.passage_manager.create_many_source_passages_async(
-                    passages=all_passages, file_metadata=file_metadata, actor=self.actor
+                    passages=all_passages,
+                    file_metadata=file_metadata,
+                    actor=self.actor,
                 )
-                log_event("file_processor.import_passages_created", {"filename": filename, "total_passages": len(all_passages)})
+                log_event(
+                    "file_processor.import_passages_created",
+                    {"filename": filename, "total_passages": len(all_passages)},
+                )
 
             # Update file status to completed (valid transition from EMBEDDING)
             # pinecone completes slowly, so gets updated later
             if self.vector_db_type != VectorDBProvider.PINECONE:
                 await self.file_manager.update_file_status(
-                    file_id=file_metadata.id, actor=self.actor, processing_status=FileProcessingStatus.COMPLETED
+                    file_id=file_metadata.id,
+                    actor=self.actor,
+                    processing_status=FileProcessingStatus.COMPLETED,
                 )
             else:
                 # For Pinecone, update chunk counts but keep status at EMBEDDING
                 # The status will be updated to COMPLETED later when chunks are confirmed embedded
                 await self.file_manager.update_file_status(
-                    file_id=file_metadata.id, actor=self.actor, total_chunks=len(all_passages), chunks_embedded=0
+                    file_id=file_metadata.id,
+                    actor=self.actor,
+                    total_chunks=len(all_passages),
+                    chunks_embedded=0,
                 )
 
             logger.info(f"Successfully processed imported file {filename}: {len(all_passages)} passages")
@@ -366,7 +401,7 @@ class FileProcessor:
                 file_id=file_metadata.id,
                 actor=self.actor,
                 processing_status=FileProcessingStatus.ERROR,
-                error_message=str(e) if str(e) else f"Import file processing failed: {type(e).__name__}",
+                error_message=(str(e) if str(e) else f"Import file processing failed: {type(e).__name__}"),
             )
 
             return []

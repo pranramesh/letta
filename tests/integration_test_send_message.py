@@ -168,7 +168,13 @@ USER_MESSAGE_BASE64_IMAGE: List[MessageCreate] = [
 ]
 
 # configs for models that are to dumb to do much other than messaging
-limited_configs = ["ollama.json", "together-qwen-2.5-72b-instruct.json", "vllm.json", "lmstudio.json", "groq.json"]
+limited_configs = [
+    "ollama.json",
+    "together-qwen-2.5-72b-instruct.json",
+    "vllm.json",
+    "lmstudio.json",
+    "groq.json",
+]
 
 all_configs = [
     "openai-gpt-4o-mini.json",
@@ -600,13 +606,19 @@ def accumulate_chunks(chunks: List[Any], verify_token_streaming: bool = False) -
         prev_message_type = current_message_type
         chunk_count += 1
     messages.append(current_message)
-    if verify_token_streaming and current_message.message_type in ["reasoning_message", "assistant_message", "tool_call_message"]:
+    if verify_token_streaming and current_message.message_type in [
+        "reasoning_message",
+        "assistant_message",
+        "tool_call_message",
+    ]:
         assert chunk_count > 1, f"Expected more than one chunk for {current_message.message_type}"
 
     return [m for m in messages if m is not None]
 
 
-def cast_message_dict_to_messages(messages: List[Dict[str, Any]]) -> List[LettaMessageUnion]:
+def cast_message_dict_to_messages(
+    messages: List[Dict[str, Any]],
+) -> List[LettaMessageUnion]:
     def cast_message(message: Dict[str, Any]) -> LettaMessageUnion:
         if message["message_type"] == "reasoning_message":
             return ReasoningMessage(**message)
@@ -811,7 +823,10 @@ def test_tool_call(
     "llm_config",
     [
         (
-            pytest.param(config, marks=pytest.mark.xfail(reason="Qwen image processing unstable - needs investigation"))
+            pytest.param(
+                config,
+                marks=pytest.mark.xfail(reason="Qwen image processing unstable - needs investigation"),
+            )
             if config.model == "Qwen/Qwen2.5-72B-Instruct-Turbo"
             else config
         )
@@ -856,7 +871,10 @@ def test_url_image_input(
     "llm_config",
     [
         (
-            pytest.param(config, marks=pytest.mark.xfail(reason="Qwen image processing unstable - needs investigation"))
+            pytest.param(
+                config,
+                marks=pytest.mark.xfail(reason="Qwen image processing unstable - needs investigation"),
+            )
             if config.model == "Qwen/Qwen2.5-72B-Instruct-Turbo"
             else config
         )
@@ -1532,7 +1550,11 @@ class CallbackServer:
                 try:
                     callback_data = json.loads(post_data.decode("utf-8"))
                     self.callback_server.received_callbacks.append(
-                        {"data": callback_data, "headers": dict(self.headers), "timestamp": time.time()}
+                        {
+                            "data": callback_data,
+                            "headers": dict(self.headers),
+                            "timestamp": time.time(),
+                        }
                     )
                     # Respond with success
                     self.send_response(200)
@@ -1743,7 +1765,13 @@ def test_auto_summarize(disable_e2b_api_key: Any, client: Letta, llm_config: LLM
 # ============================
 
 
-def wait_for_run_status(client: Letta, run_id: str, target_status: str, timeout: float = 30.0, interval: float = 0.1) -> Run:
+def wait_for_run_status(
+    client: Letta,
+    run_id: str,
+    target_status: str,
+    timeout: float = 30.0,
+    interval: float = 0.1,
+) -> Run:
     """Wait for a run to reach a specific status"""
     start = time.time()
     while True:
@@ -2057,7 +2085,12 @@ def test_inner_thoughts_toggle_interleaved(
         pytest.skip(f"Skipping test for reasoning model {llm_config.model}")
 
     # Only run on OpenAI, Anthropic, and Google models
-    if llm_config.model_endpoint_type not in ["openai", "anthropic", "google_ai", "google_vertex"]:
+    if llm_config.model_endpoint_type not in [
+        "openai",
+        "anthropic",
+        "google_ai",
+        "google_vertex",
+    ]:
         pytest.skip(f"Skipping `test_inner_thoughts_toggle_interleaved` for model endpoint type {llm_config.model_endpoint_type}")
 
     assert not is_reasoning_completely_disabled(llm_config), "Reasoning should be enabled"

@@ -4,7 +4,10 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from letta.constants import CORE_MEMORY_LINE_NUMBER_WARNING, DEFAULT_EMBEDDING_CHUNK_SIZE
+from letta.constants import (
+    CORE_MEMORY_LINE_NUMBER_WARNING,
+    DEFAULT_EMBEDDING_CHUNK_SIZE,
+)
 from letta.schemas.block import CreateBlock
 from letta.schemas.embedding_config import EmbeddingConfig
 from letta.schemas.environment_variables import AgentEnvironmentVariable
@@ -19,7 +22,10 @@ from letta.schemas.response_format import ResponseFormatUnion
 from letta.schemas.source import Source
 from letta.schemas.tool import Tool
 from letta.schemas.tool_rule import ToolRule
-from letta.utils import calculate_file_defaults_based_on_context_window, create_random_username
+from letta.utils import (
+    calculate_file_defaults_based_on_context_window,
+    create_random_username,
+)
 
 
 # TODO: Remove this upon next OSS release, there's a duplicate AgentType in enums
@@ -63,7 +69,10 @@ class AgentState(OrmMetadataBase, validate_assignment=True):
     # tool rules
     tool_rules: Optional[List[ToolRule]] = Field(default=None, description="The list of tool rules.")
     # in-context memory
-    message_ids: Optional[List[str]] = Field(default=None, description="The ids of the messages in the agent's in-context memory.")
+    message_ids: Optional[List[str]] = Field(
+        default=None,
+        description="The ids of the messages in the agent's in-context memory.",
+    )
 
     # system prompt
     system: str = Field(..., description="The system prompt used by the agent.")
@@ -75,7 +84,8 @@ class AgentState(OrmMetadataBase, validate_assignment=True):
     llm_config: LLMConfig = Field(..., description="The LLM configuration used by the agent.")
     embedding_config: EmbeddingConfig = Field(..., description="The embedding configuration used by the agent.")
     response_format: Optional[ResponseFormatUnion] = Field(
-        None, description="The response format used by the agent when returning from `send_message`."
+        None,
+        description="The response format used by the agent when returning from `send_message`.",
     )
 
     # This is an object representing the in-process state of a running `Agent`
@@ -93,7 +103,8 @@ class AgentState(OrmMetadataBase, validate_assignment=True):
         deprecated=True,
     )
     secrets: List[AgentEnvironmentVariable] = Field(
-        default_factory=list, description="The environment variables for tool execution specific to this agent."
+        default_factory=list,
+        description="The environment variables for tool execution specific to this agent.",
     )
     project_id: Optional[str] = Field(None, description="The id of the project the agent belongs to.")
     template_id: Optional[str] = Field(None, description="The id of the template the agent belongs to.")
@@ -168,7 +179,10 @@ class AgentState(OrmMetadataBase, validate_assignment=True):
 
 class CreateAgent(BaseModel, validate_assignment=True):  #
     # all optional as server can generate defaults
-    name: str = Field(default_factory=lambda: create_random_username(), description="The name of the agent.")
+    name: str = Field(
+        default_factory=lambda: create_random_username(),
+        description="The name of the agent.",
+    )
 
     # memory creation
     memory_blocks: Optional[List[CreateBlock]] = Field(
@@ -183,23 +197,33 @@ class CreateAgent(BaseModel, validate_assignment=True):  #
     tool_rules: Optional[List[ToolRule]] = Field(None, description="The tool rules governing the agent.")
     tags: Optional[List[str]] = Field(None, description="The tags associated with the agent.")
     system: Optional[str] = Field(None, description="The system prompt used by the agent.")
-    agent_type: AgentType = Field(default_factory=lambda: AgentType.memgpt_v2_agent, description="The type of agent.")
+    agent_type: AgentType = Field(
+        default_factory=lambda: AgentType.memgpt_v2_agent,
+        description="The type of agent.",
+    )
     llm_config: Optional[LLMConfig] = Field(None, description="The LLM configuration used by the agent.")
     embedding_config: Optional[EmbeddingConfig] = Field(None, description="The embedding configuration used by the agent.")
     # Note: if this is None, then we'll populate with the standard "more human than human" initial message sequence
     # If the client wants to make this empty, then the client can set the arg to an empty list
     initial_message_sequence: Optional[List[MessageCreate]] = Field(
-        None, description="The initial set of messages to put in the agent's in-context memory."
+        None,
+        description="The initial set of messages to put in the agent's in-context memory.",
     )
-    include_base_tools: bool = Field(True, description="If true, attaches the Letta core tools (e.g. core_memory related functions).")
+    include_base_tools: bool = Field(
+        True,
+        description="If true, attaches the Letta core tools (e.g. core_memory related functions).",
+    )
     include_multi_agent_tools: bool = Field(
-        False, description="If true, attaches the Letta multi-agent tools (e.g. sending a message to another agent)."
+        False,
+        description="If true, attaches the Letta multi-agent tools (e.g. sending a message to another agent).",
     )
     include_base_tool_rules: Optional[bool] = Field(
-        None, description="If true, attaches the Letta base tool rules (e.g. deny all tools not explicitly allowed)."
+        None,
+        description="If true, attaches the Letta base tool rules (e.g. deny all tools not explicitly allowed).",
     )
     include_default_source: bool = Field(
-        False, description="If true, automatically creates and attaches a default data source for this agent."
+        False,
+        description="If true, automatically creates and attaches a default data source for this agent.",
     )
     description: Optional[str] = Field(None, description="The description of the agent.")
     metadata: Optional[Dict] = Field(None, description="The metadata of the agent.")
@@ -209,18 +233,26 @@ class CreateAgent(BaseModel, validate_assignment=True):  #
         "provider/model-name, as an alternative to specifying llm_config.",
     )
     embedding: Optional[str] = Field(
-        None, description="The embedding configuration handle used by the agent, specified in the format provider/model-name."
+        None,
+        description="The embedding configuration handle used by the agent, specified in the format provider/model-name.",
     )
     context_window_limit: Optional[int] = Field(None, description="The context window limit used by the agent.")
-    embedding_chunk_size: Optional[int] = Field(DEFAULT_EMBEDDING_CHUNK_SIZE, description="The embedding chunk size used by the agent.")
+    embedding_chunk_size: Optional[int] = Field(
+        DEFAULT_EMBEDDING_CHUNK_SIZE,
+        description="The embedding chunk size used by the agent.",
+    )
     max_tokens: Optional[int] = Field(
         None,
         description="The maximum number of tokens to generate, including reasoning step. If not set, the model will use its default value.",
     )
     max_reasoning_tokens: Optional[int] = Field(
-        None, description="The maximum number of tokens to generate for reasoning step. If not set, the model will use its default value."
+        None,
+        description="The maximum number of tokens to generate for reasoning step. If not set, the model will use its default value.",
     )
-    enable_reasoner: Optional[bool] = Field(True, description="Whether to enable internal extended thinking step for a reasoner model.")
+    enable_reasoner: Optional[bool] = Field(
+        True,
+        description="Whether to enable internal extended thinking step for a reasoner model.",
+    )
     reasoning: Optional[bool] = Field(None, description="Whether to enable reasoning for this agent.")
     from_template: Optional[str] = Field(None, description="The template id used to configure the agent")
     template: bool = Field(False, description="Whether the agent is a template")
@@ -230,7 +262,10 @@ class CreateAgent(BaseModel, validate_assignment=True):  #
         description="Deprecated: Project should now be passed via the X-Project header instead of in the request body. If using the sdk, this can be done via the new x_project field below.",
     )
     tool_exec_environment_variables: Optional[Dict[str, str]] = Field(None, description="Deprecated: use `secrets` field instead.")
-    secrets: Optional[Dict[str, str]] = Field(None, description="The environment variables for tool execution specific to this agent.")
+    secrets: Optional[Dict[str, str]] = Field(
+        None,
+        description="The environment variables for tool execution specific to this agent.",
+    )
     memory_variables: Optional[Dict[str, str]] = Field(None, description="The variables that should be set for the agent.")
     project_id: Optional[str] = Field(None, description="The id of the project the agent belongs to.")
     template_id: Optional[str] = Field(None, description="The id of the template the agent belongs to.")
@@ -240,7 +275,10 @@ class CreateAgent(BaseModel, validate_assignment=True):  #
         False,
         description="If set to True, the agent will not remember previous messages (though the agent will still retain state via core memory blocks and archival/recall memory). Not recommended unless you have an advanced use case.",
     )
-    enable_sleeptime: Optional[bool] = Field(None, description="If set to True, memory management will move to a background agent thread.")
+    enable_sleeptime: Optional[bool] = Field(
+        None,
+        description="If set to True, memory management will move to a background agent thread.",
+    )
     response_format: Optional[ResponseFormatUnion] = Field(None, description="The response format for the agent.")
     timezone: Optional[str] = Field(None, description="The timezone of the agent (IANA format).")
     max_files_open: Optional[int] = Field(
@@ -335,7 +373,10 @@ class UpdateAgent(BaseModel):
     description: Optional[str] = Field(None, description="The description of the agent.")
     metadata: Optional[Dict] = Field(None, description="The metadata of the agent.")
     tool_exec_environment_variables: Optional[Dict[str, str]] = Field(None, description="Deprecated: use `secrets` field instead")
-    secrets: Optional[Dict[str, str]] = Field(None, description="The environment variables for tool execution specific to this agent.")
+    secrets: Optional[Dict[str, str]] = Field(
+        None,
+        description="The environment variables for tool execution specific to this agent.",
+    )
     project_id: Optional[str] = Field(None, description="The id of the project the agent belongs to.")
     template_id: Optional[str] = Field(None, description="The id of the template the agent belongs to.")
     base_template_id: Optional[str] = Field(None, description="The base template id of the agent.")
@@ -350,10 +391,14 @@ class UpdateAgent(BaseModel):
         "provider/model-name, as an alternative to specifying llm_config.",
     )
     embedding: Optional[str] = Field(
-        None, description="The embedding configuration handle used by the agent, specified in the format provider/model-name."
+        None,
+        description="The embedding configuration handle used by the agent, specified in the format provider/model-name.",
     )
     reasoning: Optional[bool] = Field(None, description="Whether to enable reasoning for this agent.")
-    enable_sleeptime: Optional[bool] = Field(None, description="If set to True, memory management will move to a background agent thread.")
+    enable_sleeptime: Optional[bool] = Field(
+        None,
+        description="If set to True, memory management will move to a background agent thread.",
+    )
     response_format: Optional[ResponseFormatUnion] = Field(None, description="The response format for the agent.")
     last_run_completion: Optional[datetime] = Field(None, description="The timestamp when the agent last completed a run.")
     last_run_duration_ms: Optional[int] = Field(None, description="The duration in milliseconds of the agent's last run.")
@@ -376,10 +421,14 @@ class UpdateAgent(BaseModel):
 
 class AgentStepResponse(BaseModel):
     messages: List[Message] = Field(..., description="The messages generated during the agent's step.")
-    heartbeat_request: bool = Field(..., description="Whether the agent requested a heartbeat (i.e. follow-up execution).")
+    heartbeat_request: bool = Field(
+        ...,
+        description="Whether the agent requested a heartbeat (i.e. follow-up execution).",
+    )
     function_failed: bool = Field(..., description="Whether the agent step ended because a function call failed.")
     in_context_memory_warning: bool = Field(
-        ..., description="Whether the agent step ended because the in-context memory is near its limit."
+        ...,
+        description="Whether the agent step ended because the in-context memory is near its limit.",
     )
     usage: UsageStatistics = Field(..., description="Usage statistics of the LLM call during the agent's step.")
 

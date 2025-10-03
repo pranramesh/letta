@@ -128,7 +128,11 @@ class IdentityManager:
             )
 
             if existing_identity is None:
-                return await self._create_identity_async(db_session=session, identity=IdentityCreate(**identity.model_dump()), actor=actor)
+                return await self._create_identity_async(
+                    db_session=session,
+                    identity=IdentityCreate(**identity.model_dump()),
+                    actor=actor,
+                )
             else:
                 identity_update = IdentityUpdate(
                     name=identity.name,
@@ -138,13 +142,21 @@ class IdentityManager:
                     properties=identity.properties,
                 )
                 return await self._update_identity_async(
-                    db_session=session, existing_identity=existing_identity, identity=identity_update, actor=actor, replace=True
+                    db_session=session,
+                    existing_identity=existing_identity,
+                    identity=identity_update,
+                    actor=actor,
+                    replace=True,
                 )
 
     @enforce_types
     @trace_method
     async def update_identity_async(
-        self, identity_id: str, identity: IdentityUpdate, actor: PydanticUser, replace: bool = False
+        self,
+        identity_id: str,
+        identity: IdentityUpdate,
+        actor: PydanticUser,
+        replace: bool = False,
     ) -> PydanticIdentity:
         async with db_registry.async_session() as session:
             try:
@@ -155,7 +167,11 @@ class IdentityManager:
                 raise HTTPException(status_code=403, detail="Forbidden")
 
             return await self._update_identity_async(
-                db_session=session, existing_identity=existing_identity, identity=identity, actor=actor, replace=replace
+                db_session=session,
+                existing_identity=existing_identity,
+                identity=identity,
+                actor=actor,
+                replace=replace,
             )
 
     async def _update_identity_async(

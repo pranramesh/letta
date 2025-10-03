@@ -4,7 +4,19 @@ import traceback
 from datetime import datetime, timezone
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
-from fastapi import APIRouter, Body, Depends, File, Form, Header, HTTPException, Query, Request, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Body,
+    Depends,
+    File,
+    Form,
+    Header,
+    HTTPException,
+    Query,
+    Request,
+    UploadFile,
+    status,
+)
 from fastapi.responses import JSONResponse
 from marshmallow import ValidationError
 from orjson import orjson
@@ -14,7 +26,13 @@ from starlette.responses import Response, StreamingResponse
 
 from letta.agents.agent_loop import AgentLoop
 from letta.agents.letta_agent_v2 import LettaAgentV2
-from letta.constants import AGENT_ID_PATTERN, DEFAULT_MAX_STEPS, DEFAULT_MESSAGE_TOOL, DEFAULT_MESSAGE_TOOL_KWARG, REDIS_RUN_ID_PREFIX
+from letta.constants import (
+    AGENT_ID_PATTERN,
+    DEFAULT_MAX_STEPS,
+    DEFAULT_MESSAGE_TOOL,
+    DEFAULT_MESSAGE_TOOL_KWARG,
+    REDIS_RUN_ID_PREFIX,
+)
 from letta.data_sources.redis_client import NoopAsyncRedisClient, get_redis_client
 from letta.errors import (
     AgentExportIdMappingError,
@@ -35,8 +53,16 @@ from letta.schemas.enums import JobType
 from letta.schemas.file import AgentFileAttachment, PaginatedAgentFiles
 from letta.schemas.group import Group
 from letta.schemas.job import JobStatus, JobUpdate, LettaRequestConfig
-from letta.schemas.letta_message import LettaMessageUnion, LettaMessageUpdateUnion, MessageType
-from letta.schemas.letta_request import LettaAsyncRequest, LettaRequest, LettaStreamingRequest
+from letta.schemas.letta_message import (
+    LettaMessageUnion,
+    LettaMessageUpdateUnion,
+    MessageType,
+)
+from letta.schemas.letta_request import (
+    LettaAsyncRequest,
+    LettaRequest,
+    LettaStreamingRequest,
+)
 from letta.schemas.letta_response import LettaResponse
 from letta.schemas.letta_stop_reason import StopReasonType
 from letta.schemas.memory import (
@@ -46,18 +72,33 @@ from letta.schemas.memory import (
     CreateArchivalMemory,
     Memory,
 )
-from letta.schemas.message import MessageCreate, MessageSearchRequest, MessageSearchResult
+from letta.schemas.message import (
+    MessageCreate,
+    MessageSearchRequest,
+    MessageSearchResult,
+)
 from letta.schemas.passage import Passage
 from letta.schemas.run import Run
 from letta.schemas.source import Source
 from letta.schemas.tool import Tool
 from letta.schemas.user import User
 from letta.serialize_schemas.pydantic_agent_schema import AgentSchema
-from letta.server.rest_api.dependencies import HeaderParams, get_headers, get_letta_server
-from letta.server.rest_api.redis_stream_manager import create_background_stream_processor, redis_sse_stream_generator
+from letta.server.rest_api.dependencies import (
+    HeaderParams,
+    get_headers,
+    get_letta_server,
+)
+from letta.server.rest_api.redis_stream_manager import (
+    create_background_stream_processor,
+    redis_sse_stream_generator,
+)
 from letta.server.server import SyncServer
 from letta.settings import settings
-from letta.utils import safe_create_shielded_task, safe_create_task, truncate_file_visible_content
+from letta.utils import (
+    safe_create_shielded_task,
+    safe_create_task,
+    truncate_file_visible_content,
+)
 
 # These can be forward refs, but because Fastapi needs them at runtime the must be imported normally
 
@@ -81,7 +122,10 @@ async def list_agents(
     after: str | None = Query(None, description="Cursor for pagination"),
     limit: int | None = Query(50, description="Limit for pagination"),
     query_text: str | None = Query(None, description="Search agents by name"),
-    project_id: str | None = Query(None, description="Search agents by project ID - this will default to your default project on cloud"),
+    project_id: str | None = Query(
+        None,
+        description="Search agents by project ID - this will default to your default project on cloud",
+    ),
     template_id: str | None = Query(None, description="Search agents by template ID"),
     base_template_id: str | None = Query(None, description="Search agents by base template ID"),
     identity_id: str | None = Query(None, description="Search agents by identity ID"),
@@ -95,7 +139,8 @@ async def list_agents(
         ),
     ),
     order: Literal["asc", "desc"] = Query(
-        "desc", description="Sort order for agents by creation time. 'asc' for oldest first, 'desc' for newest first"
+        "desc",
+        description="Sort order for agents by creation time. 'asc' for oldest first, 'desc' for newest first",
     ),
     order_by: Literal["created_at", "last_run_completion"] = Query("created_at", description="Field to sort by"),
     ascending: bool = Query(
@@ -166,7 +211,11 @@ class IndentedORJSONResponse(Response):
         return orjson.dumps(content, option=orjson.OPT_INDENT_2)
 
 
-@router.get("/{agent_id}/export", response_class=IndentedORJSONResponse, operation_id="export_agent")
+@router.get(
+    "/{agent_id}/export",
+    response_class=IndentedORJSONResponse,
+    operation_id="export_agent",
+)
 async def export_agent(
     agent_id: str,
     max_steps: int = 100,
@@ -196,20 +245,30 @@ async def export_agent(
             agent = server.agent_manager.serialize(agent_id=agent_id, actor=actor, max_steps=max_steps)
             return agent.model_dump()
         except NoResultFound:
-            raise HTTPException(status_code=404, detail=f"Agent with id={agent_id} not found for user_id={actor.id}.")
+            raise HTTPException(
+                status_code=404,
+                detail=f"Agent with id={agent_id} not found for user_id={actor.id}.",
+            )
     else:
         # Use the new multi-entity export format
         try:
             agent_file_schema = await server.agent_serialization_manager.export(agent_ids=[agent_id], actor=actor)
             return agent_file_schema.model_dump()
         except AgentNotFoundForExportError:
-            raise HTTPException(status_code=404, detail=f"Agent with id={agent_id} not found for user_id={actor.id}.")
+            raise HTTPException(
+                status_code=404,
+                detail=f"Agent with id={agent_id} not found for user_id={actor.id}.",
+            )
         except AgentExportIdMappingError as e:
             raise HTTPException(
-                status_code=500, detail=f"Internal error during export: ID mapping failed for {e.entity_type} ID '{e.db_id}'"
+                status_code=500,
+                detail=f"Internal error during export: ID mapping failed for {e.entity_type} ID '{e.db_id}'",
             )
         except AgentExportProcessingError as e:
-            raise HTTPException(status_code=500, detail=f"Export processing failed: {str(e.original_error)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Export processing failed: {str(e.original_error)}",
+            )
 
 
 class ImportedAgentsResponse(BaseModel):
@@ -253,11 +312,17 @@ def import_agent_legacy(
         raise HTTPException(status_code=409, detail=f"Database integrity error: {e!s}")
 
     except OperationalError as e:
-        raise HTTPException(status_code=503, detail=f"Database connection error. Please try again later: {e!s}")
+        raise HTTPException(
+            status_code=503,
+            detail=f"Database connection error. Please try again later: {e!s}",
+        )
 
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"An unexpected error occurred while uploading the agent: {e!s}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"An unexpected error occurred while uploading the agent: {e!s}",
+        )
 
 
 async def _import_agent(
@@ -298,7 +363,8 @@ async def _import_agent(
 
         if not import_result.success:
             raise HTTPException(
-                status_code=500, detail=f"Import failed: {import_result.message}. Errors: {', '.join(import_result.errors)}"
+                status_code=500,
+                detail=f"Import failed: {import_result.message}. Errors: {', '.join(import_result.errors)}",
             )
 
         return import_result.imported_agent_ids
@@ -310,11 +376,17 @@ async def _import_agent(
         raise HTTPException(status_code=409, detail=f"Database integrity error: {e!s}")
 
     except OperationalError as e:
-        raise HTTPException(status_code=503, detail=f"Database connection error. Please try again later: {e!s}")
+        raise HTTPException(
+            status_code=503,
+            detail=f"Database connection error. Please try again later: {e!s}",
+        )
 
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"An unexpected error occurred while importing agents: {e!s}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"An unexpected error occurred while importing agents: {e!s}",
+        )
 
 
 @router.post("/import", response_model=ImportedAgentsResponse, operation_id="import_agent")
@@ -323,7 +395,10 @@ async def import_agent(
     server: "SyncServer" = Depends(get_letta_server),
     headers: HeaderParams = Depends(get_headers),
     x_override_embedding_model: str | None = Header(None, alias="x-override-embedding-model"),
-    append_copy_suffix: bool = Form(True, description='If set to True, appends "_copy" to the end of the agent name.'),
+    append_copy_suffix: bool = Form(
+        True,
+        description='If set to True, appends "_copy" to the end of the agent name.',
+    ),
     override_existing_tools: bool = Form(
         True,
         description="If set to True, existing tools can get their source code overwritten by the uploaded tool definitions. Note that Letta core tools can never be updated externally.",
@@ -338,7 +413,8 @@ async def import_agent(
         description="If set to True, strips all messages from the agent before importing.",
     ),
     env_vars_json: Optional[str] = Form(
-        None, description="Environment variables as a JSON string to pass to the agent for tool execution."
+        None,
+        description="Environment variables as a JSON string to pass to the agent for tool execution.",
     ),
 ):
     """
@@ -398,7 +474,11 @@ async def import_agent(
     return ImportedAgentsResponse(agent_ids=agent_ids)
 
 
-@router.get("/{agent_id}/context", response_model=ContextWindowOverview, operation_id="retrieve_agent_context_window")
+@router.get(
+    "/{agent_id}/context",
+    response_model=ContextWindowOverview,
+    operation_id="retrieve_agent_context_window",
+)
 async def retrieve_agent_context_window(
     agent_id: str,
     server: "SyncServer" = Depends(get_letta_server),
@@ -430,7 +510,9 @@ async def create_agent(
     server: "SyncServer" = Depends(get_letta_server),
     headers: HeaderParams = Depends(get_headers),
     x_project: str | None = Header(
-        None, alias="X-Project", description="The project slug to associate with the agent (cloud only)."
+        None,
+        alias="X-Project",
+        description="The project slug to associate with the agent (cloud only).",
     ),  # Only handled by next js middleware
 ):
     """
@@ -467,7 +549,11 @@ async def list_agent_tools(
     return await server.agent_manager.list_attached_tools_async(agent_id=agent_id, actor=actor)
 
 
-@router.patch("/{agent_id}/tools/attach/{tool_id}", response_model=AgentState, operation_id="attach_tool")
+@router.patch(
+    "/{agent_id}/tools/attach/{tool_id}",
+    response_model=AgentState,
+    operation_id="attach_tool",
+)
 async def attach_tool(
     agent_id: str,
     tool_id: str,
@@ -483,7 +569,11 @@ async def attach_tool(
     return await server.agent_manager.get_agent_by_id_async(agent_id=agent_id, actor=actor)
 
 
-@router.patch("/{agent_id}/tools/detach/{tool_id}", response_model=AgentState, operation_id="detach_tool")
+@router.patch(
+    "/{agent_id}/tools/detach/{tool_id}",
+    response_model=AgentState,
+    operation_id="detach_tool",
+)
 async def detach_tool(
     agent_id: str,
     tool_id: str,
@@ -499,7 +589,11 @@ async def detach_tool(
     return await server.agent_manager.get_agent_by_id_async(agent_id=agent_id, actor=actor)
 
 
-@router.patch("/{agent_id}/tools/approval/{tool_name}", response_model=AgentState, operation_id="modify_approval")
+@router.patch(
+    "/{agent_id}/tools/approval/{tool_name}",
+    response_model=AgentState,
+    operation_id="modify_approval",
+)
 async def modify_approval(
     agent_id: str,
     tool_name: str,
@@ -512,13 +606,20 @@ async def modify_approval(
     """
     actor = await server.user_manager.get_actor_or_default_async(actor_id=headers.actor_id)
     await server.agent_manager.modify_approvals_async(
-        agent_id=agent_id, tool_name=tool_name, requires_approval=requires_approval, actor=actor
+        agent_id=agent_id,
+        tool_name=tool_name,
+        requires_approval=requires_approval,
+        actor=actor,
     )
     # TODO: Unfortunately we need this to preserve our current API behavior
     return await server.agent_manager.get_agent_by_id_async(agent_id=agent_id, actor=actor)
 
 
-@router.patch("/{agent_id}/sources/attach/{source_id}", response_model=AgentState, operation_id="attach_source_to_agent")
+@router.patch(
+    "/{agent_id}/sources/attach/{source_id}",
+    response_model=AgentState,
+    operation_id="attach_source_to_agent",
+)
 async def attach_source(
     agent_id: str,
     source_id: str,
@@ -540,12 +641,19 @@ async def attach_source(
 
     if agent_state.enable_sleeptime:
         source = await server.source_manager.get_source_by_id(source_id=source_id)
-        safe_create_task(server.sleeptime_document_ingest_async(agent_state, source, actor), label="sleeptime_document_ingest_async")
+        safe_create_task(
+            server.sleeptime_document_ingest_async(agent_state, source, actor),
+            label="sleeptime_document_ingest_async",
+        )
 
     return agent_state
 
 
-@router.patch("/{agent_id}/folders/attach/{folder_id}", response_model=AgentState, operation_id="attach_folder_to_agent")
+@router.patch(
+    "/{agent_id}/folders/attach/{folder_id}",
+    response_model=AgentState,
+    operation_id="attach_folder_to_agent",
+)
 async def attach_folder_to_agent(
     agent_id: str,
     folder_id: str,
@@ -567,12 +675,19 @@ async def attach_folder_to_agent(
 
     if agent_state.enable_sleeptime:
         source = await server.source_manager.get_source_by_id(source_id=folder_id)
-        safe_create_task(server.sleeptime_document_ingest_async(agent_state, source, actor), label="sleeptime_document_ingest_async")
+        safe_create_task(
+            server.sleeptime_document_ingest_async(agent_state, source, actor),
+            label="sleeptime_document_ingest_async",
+        )
 
     return agent_state
 
 
-@router.patch("/{agent_id}/sources/detach/{source_id}", response_model=AgentState, operation_id="detach_source_from_agent")
+@router.patch(
+    "/{agent_id}/sources/detach/{source_id}",
+    response_model=AgentState,
+    operation_id="detach_source_from_agent",
+)
 async def detach_source(
     agent_id: str,
     source_id: str,
@@ -602,7 +717,11 @@ async def detach_source(
     return agent_state
 
 
-@router.patch("/{agent_id}/folders/detach/{folder_id}", response_model=AgentState, operation_id="detach_folder_from_agent")
+@router.patch(
+    "/{agent_id}/folders/detach/{folder_id}",
+    response_model=AgentState,
+    operation_id="detach_folder_from_agent",
+)
 async def detach_folder_from_agent(
     agent_id: str,
     folder_id: str,
@@ -632,7 +751,11 @@ async def detach_folder_from_agent(
     return agent_state
 
 
-@router.patch("/{agent_id}/files/close-all", response_model=List[str], operation_id="close_all_open_files")
+@router.patch(
+    "/{agent_id}/files/close-all",
+    response_model=List[str],
+    operation_id="close_all_open_files",
+)
 async def close_all_open_files(
     agent_id: str,
     server: "SyncServer" = Depends(get_letta_server),
@@ -649,7 +772,11 @@ async def close_all_open_files(
     return await server.file_agent_manager.close_all_other_files(agent_id=agent_id, keep_file_names=[], actor=actor)
 
 
-@router.patch("/{agent_id}/files/{file_id}/open", response_model=List[str], operation_id="open_file")
+@router.patch(
+    "/{agent_id}/files/{file_id}/open",
+    response_model=List[str],
+    operation_id="open_file",
+)
 async def open_file(
     agent_id: str,
     file_id: str,
@@ -724,9 +851,15 @@ async def close_file(
             actor=actor,
             is_open=False,
         )
-        return JSONResponse(status_code=status.HTTP_200_OK, content={"message": f"File id={file_id} successfully closed"})
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"message": f"File id={file_id} successfully closed"},
+        )
     except NoResultFound:
-        raise HTTPException(status_code=404, detail=f"File association for file_id={file_id} and agent_id={agent_id} not found")
+        raise HTTPException(
+            status_code=404,
+            detail=f"File association for file_id={file_id} and agent_id={agent_id} not found",
+        )
 
 
 @router.get("/{agent_id}", response_model=AgentState, operation_id="retrieve_agent")
@@ -748,7 +881,10 @@ async def retrieve_agent(
     """
     # Check if agent_id matches uuid4 format
     if not AGENT_ID_PATTERN.match(agent_id):
-        raise HTTPException(status_code=400, detail=f"agent_id {agent_id} is not in the valid format 'agent-<uuid4>'")
+        raise HTTPException(
+            status_code=400,
+            detail=f"agent_id {agent_id} is not in the valid format 'agent-<uuid4>'",
+        )
 
     actor = await server.user_manager.get_actor_or_default_async(actor_id=headers.actor_id)
 
@@ -770,12 +906,22 @@ async def delete_agent(
     actor = await server.user_manager.get_actor_or_default_async(actor_id=headers.actor_id)
     try:
         await server.agent_manager.delete_agent_async(agent_id=agent_id, actor=actor)
-        return JSONResponse(status_code=status.HTTP_200_OK, content={"message": f"Agent id={agent_id} successfully deleted"})
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"message": f"Agent id={agent_id} successfully deleted"},
+        )
     except NoResultFound:
-        raise HTTPException(status_code=404, detail=f"Agent agent_id={agent_id} not found for user_id={actor.id}.")
+        raise HTTPException(
+            status_code=404,
+            detail=f"Agent agent_id={agent_id} not found for user_id={actor.id}.",
+        )
 
 
-@router.get("/{agent_id}/sources", response_model=list[Source], operation_id="list_agent_sources")
+@router.get(
+    "/{agent_id}/sources",
+    response_model=list[Source],
+    operation_id="list_agent_sources",
+)
 async def list_agent_sources(
     agent_id: str,
     server: "SyncServer" = Depends(get_letta_server),
@@ -788,7 +934,11 @@ async def list_agent_sources(
     return await server.agent_manager.list_attached_sources_async(agent_id=agent_id, actor=actor)
 
 
-@router.get("/{agent_id}/folders", response_model=list[Source], operation_id="list_agent_folders")
+@router.get(
+    "/{agent_id}/folders",
+    response_model=list[Source],
+    operation_id="list_agent_folders",
+)
 async def list_agent_folders(
     agent_id: str,
     server: "SyncServer" = Depends(get_letta_server),
@@ -801,12 +951,19 @@ async def list_agent_folders(
     return await server.agent_manager.list_attached_sources_async(agent_id=agent_id, actor=actor)
 
 
-@router.get("/{agent_id}/files", response_model=PaginatedAgentFiles, operation_id="list_agent_files")
+@router.get(
+    "/{agent_id}/files",
+    response_model=PaginatedAgentFiles,
+    operation_id="list_agent_files",
+)
 async def list_agent_files(
     agent_id: str,
     cursor: Optional[str] = Query(None, description="Pagination cursor from previous response"),
     limit: int = Query(20, ge=1, le=100, description="Number of items to return (1-100)"),
-    is_open: Optional[bool] = Query(None, description="Filter by open status (true for open files, false for closed files)"),
+    is_open: Optional[bool] = Query(
+        None,
+        description="Filter by open status (true for open files, false for closed files)",
+    ),
     server: "SyncServer" = Depends(get_letta_server),
     headers: HeaderParams = Depends(get_headers),
 ):
@@ -845,7 +1002,11 @@ async def list_agent_files(
 
 
 # TODO: remove? can also get with agent blocks
-@router.get("/{agent_id}/core-memory", response_model=Memory, operation_id="retrieve_agent_memory")
+@router.get(
+    "/{agent_id}/core-memory",
+    response_model=Memory,
+    operation_id="retrieve_agent_memory",
+)
 async def retrieve_agent_memory(
     agent_id: str,
     server: "SyncServer" = Depends(get_letta_server),
@@ -860,7 +1021,11 @@ async def retrieve_agent_memory(
     return await server.get_agent_memory_async(agent_id=agent_id, actor=actor)
 
 
-@router.get("/{agent_id}/core-memory/blocks/{block_label}", response_model=Block, operation_id="retrieve_core_memory_block")
+@router.get(
+    "/{agent_id}/core-memory/blocks/{block_label}",
+    response_model=Block,
+    operation_id="retrieve_core_memory_block",
+)
 async def retrieve_block(
     agent_id: str,
     block_label: str,
@@ -878,7 +1043,11 @@ async def retrieve_block(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.get("/{agent_id}/core-memory/blocks", response_model=list[Block], operation_id="list_core_memory_blocks")
+@router.get(
+    "/{agent_id}/core-memory/blocks",
+    response_model=list[Block],
+    operation_id="list_core_memory_blocks",
+)
 async def list_blocks(
     agent_id: str,
     server: "SyncServer" = Depends(get_letta_server),
@@ -895,7 +1064,11 @@ async def list_blocks(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.patch("/{agent_id}/core-memory/blocks/{block_label}", response_model=Block, operation_id="modify_core_memory_block")
+@router.patch(
+    "/{agent_id}/core-memory/blocks/{block_label}",
+    response_model=Block,
+    operation_id="modify_core_memory_block",
+)
 async def modify_block(
     agent_id: str,
     block_label: str,
@@ -909,7 +1082,10 @@ async def modify_block(
     actor = await server.user_manager.get_actor_or_default_async(actor_id=headers.actor_id)
 
     block = await server.agent_manager.modify_block_by_label_async(
-        agent_id=agent_id, block_label=block_label, block_update=block_update, actor=actor
+        agent_id=agent_id,
+        block_label=block_label,
+        block_update=block_update,
+        actor=actor,
     )
 
     # This should also trigger a system prompt change in the agent
@@ -918,7 +1094,11 @@ async def modify_block(
     return block
 
 
-@router.patch("/{agent_id}/core-memory/blocks/attach/{block_id}", response_model=AgentState, operation_id="attach_core_memory_block")
+@router.patch(
+    "/{agent_id}/core-memory/blocks/attach/{block_id}",
+    response_model=AgentState,
+    operation_id="attach_core_memory_block",
+)
 async def attach_block(
     agent_id: str,
     block_id: str,
@@ -932,7 +1112,11 @@ async def attach_block(
     return await server.agent_manager.attach_block_async(agent_id=agent_id, block_id=block_id, actor=actor)
 
 
-@router.patch("/{agent_id}/core-memory/blocks/detach/{block_id}", response_model=AgentState, operation_id="detach_core_memory_block")
+@router.patch(
+    "/{agent_id}/core-memory/blocks/detach/{block_id}",
+    response_model=AgentState,
+    operation_id="detach_core_memory_block",
+)
 async def detach_block(
     agent_id: str,
     block_id: str,
@@ -946,7 +1130,11 @@ async def detach_block(
     return await server.agent_manager.detach_block_async(agent_id=agent_id, block_id=block_id, actor=actor)
 
 
-@router.get("/{agent_id}/archival-memory", response_model=list[Passage], operation_id="list_passages")
+@router.get(
+    "/{agent_id}/archival-memory",
+    response_model=list[Passage],
+    operation_id="list_passages",
+)
 async def list_passages(
     agent_id: str,
     server: "SyncServer" = Depends(get_letta_server),
@@ -955,7 +1143,8 @@ async def list_passages(
     limit: int | None = Query(None, description="How many results to include in the response."),
     search: str | None = Query(None, description="Search passages by text"),
     ascending: bool | None = Query(
-        True, description="Whether to sort passages oldest to newest (True, default) or newest to oldest (False)"
+        True,
+        description="Whether to sort passages oldest to newest (True, default) or newest to oldest (False)",
     ),
     headers: HeaderParams = Depends(get_headers),
 ):
@@ -975,7 +1164,11 @@ async def list_passages(
     )
 
 
-@router.post("/{agent_id}/archival-memory", response_model=list[Passage], operation_id="create_passage")
+@router.post(
+    "/{agent_id}/archival-memory",
+    response_model=list[Passage],
+    operation_id="create_passage",
+)
 async def create_passage(
     agent_id: str,
     request: CreateArchivalMemory = Body(...),
@@ -988,19 +1181,31 @@ async def create_passage(
     actor = await server.user_manager.get_actor_or_default_async(actor_id=headers.actor_id)
 
     return await server.insert_archival_memory_async(
-        agent_id=agent_id, memory_contents=request.text, actor=actor, tags=request.tags, created_at=request.created_at
+        agent_id=agent_id,
+        memory_contents=request.text,
+        actor=actor,
+        tags=request.tags,
+        created_at=request.created_at,
     )
 
 
-@router.get("/{agent_id}/archival-memory/search", response_model=ArchivalMemorySearchResponse, operation_id="search_archival_memory")
+@router.get(
+    "/{agent_id}/archival-memory/search",
+    response_model=ArchivalMemorySearchResponse,
+    operation_id="search_archival_memory",
+)
 async def search_archival_memory(
     agent_id: str,
     query: str = Query(..., description="String to search for using semantic similarity"),
     tags: Optional[List[str]] = Query(None, description="Optional list of tags to filter search results"),
     tag_match_mode: Literal["any", "all"] = Query(
-        "any", description="How to match tags - 'any' to match passages with any of the tags, 'all' to match only passages with all tags"
+        "any",
+        description="How to match tags - 'any' to match passages with any of the tags, 'all' to match only passages with all tags",
     ),
-    top_k: Optional[int] = Query(None, description="Maximum number of results to return. Uses system default if not specified"),
+    top_k: Optional[int] = Query(
+        None,
+        description="Maximum number of results to return. Uses system default if not specified",
+    ),
     start_datetime: Optional[datetime] = Query(None, description="Filter results to passages created after this datetime"),
     end_datetime: Optional[datetime] = Query(None, description="Filter results to passages created before this datetime"),
     server: "SyncServer" = Depends(get_letta_server),
@@ -1038,16 +1243,26 @@ async def search_archival_memory(
         return ArchivalMemorySearchResponse(results=search_results, count=len(formatted_results))
 
     except NoResultFound as e:
-        raise HTTPException(status_code=404, detail=f"Agent with id={agent_id} not found for user_id={actor.id}.")
+        raise HTTPException(
+            status_code=404,
+            detail=f"Agent with id={agent_id} not found for user_id={actor.id}.",
+        )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error during archival memory search: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Internal server error during archival memory search: {str(e)}",
+        )
 
 
 # TODO(ethan): query or path parameter for memory_id?
 # @router.delete("/{agent_id}/archival")
-@router.delete("/{agent_id}/archival-memory/{memory_id}", response_model=None, operation_id="delete_passage")
+@router.delete(
+    "/{agent_id}/archival-memory/{memory_id}",
+    response_model=None,
+    operation_id="delete_passage",
+)
 async def delete_passage(
     agent_id: str,
     memory_id: str,
@@ -1061,15 +1276,28 @@ async def delete_passage(
     actor = await server.user_manager.get_actor_or_default_async(actor_id=headers.actor_id)
 
     await server.delete_archival_memory_async(memory_id=memory_id, actor=actor)
-    return JSONResponse(status_code=status.HTTP_200_OK, content={"message": f"Memory id={memory_id} successfully deleted"})
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"message": f"Memory id={memory_id} successfully deleted"},
+    )
 
 
 AgentMessagesResponse = Annotated[
-    list[LettaMessageUnion], Field(json_schema_extra={"type": "array", "items": {"$ref": "#/components/schemas/LettaMessageUnion"}})
+    list[LettaMessageUnion],
+    Field(
+        json_schema_extra={
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/LettaMessageUnion"},
+        }
+    ),
 ]
 
 
-@router.get("/{agent_id}/messages", response_model=AgentMessagesResponse, operation_id="list_messages")
+@router.get(
+    "/{agent_id}/messages",
+    response_model=AgentMessagesResponse,
+    operation_id="list_messages",
+)
 async def list_messages(
     agent_id: str,
     server: "SyncServer" = Depends(get_letta_server),
@@ -1081,7 +1309,8 @@ async def list_messages(
     assistant_message_tool_name: str = Query(DEFAULT_MESSAGE_TOOL, description="The name of the designated message tool."),
     assistant_message_tool_kwarg: str = Query(DEFAULT_MESSAGE_TOOL_KWARG, description="The name of the message argument."),
     include_err: bool | None = Query(
-        None, description="Whether to include error messages and error statuses. For debugging purposes only."
+        None,
+        description="Whether to include error messages and error statuses. For debugging purposes only.",
     ),
     headers: HeaderParams = Depends(get_headers),
 ):
@@ -1106,7 +1335,11 @@ async def list_messages(
     )
 
 
-@router.patch("/{agent_id}/messages/{message_id}", response_model=LettaMessageUnion, operation_id="modify_message")
+@router.patch(
+    "/{agent_id}/messages/{message_id}",
+    response_model=LettaMessageUnion,
+    operation_id="modify_message",
+)
 def modify_message(
     agent_id: str,
     message_id: str,
@@ -1147,7 +1380,15 @@ async def send_message(
     actor = await server.user_manager.get_actor_or_default_async(actor_id=headers.actor_id)
     # TODO: This is redundant, remove soon
     agent = await server.agent_manager.get_agent_by_id_async(
-        agent_id, actor, include_relationships=["memory", "multi_agent_group", "sources", "tool_exec_environment_variables", "tools"]
+        agent_id,
+        actor,
+        include_relationships=[
+            "memory",
+            "multi_agent_group",
+            "sources",
+            "tool_exec_environment_variables",
+            "tools",
+        ],
     )
     agent_eligible = agent.multi_agent_group is None or agent.multi_agent_group.manager_type in ["sleeptime", "voice_sleeptime"]
     model_compatible = agent.llm_config.model_endpoint_type in [
@@ -1223,7 +1464,12 @@ async def send_message(
         job_update_metadata = {"error": str(e)}
         job_status = JobStatus.failed
         raise HTTPException(
-            status_code=409, detail={"code": "PENDING_APPROVAL", "message": str(e), "pending_request_id": e.pending_request_id}
+            status_code=409,
+            detail={
+                "code": "PENDING_APPROVAL",
+                "message": str(e),
+                "pending_request_id": e.pending_request_id,
+            },
         )
     except Exception as e:
         job_update_metadata = {"error": str(e)}
@@ -1280,7 +1526,15 @@ async def send_message_streaming(
     actor = await server.user_manager.get_actor_or_default_async(actor_id=headers.actor_id)
     # TODO: This is redundant, remove soon
     agent = await server.agent_manager.get_agent_by_id_async(
-        agent_id, actor, include_relationships=["memory", "multi_agent_group", "sources", "tool_exec_environment_variables", "tools"]
+        agent_id,
+        actor,
+        include_relationships=[
+            "memory",
+            "multi_agent_group",
+            "sources",
+            "tool_exec_environment_variables",
+            "tools",
+        ],
     )
     agent_eligible = agent.multi_agent_group is None or agent.multi_agent_group.manager_type in ["sleeptime", "voice_sleeptime"]
     model_compatible = agent.llm_config.model_endpoint_type in [
@@ -1296,7 +1550,12 @@ async def send_message_streaming(
         "groq",
         "deepseek",
     ]
-    model_compatible_token_streaming = agent.llm_config.model_endpoint_type in ["anthropic", "openai", "bedrock", "deepseek"]
+    model_compatible_token_streaming = agent.llm_config.model_endpoint_type in [
+        "anthropic",
+        "openai",
+        "bedrock",
+        "deepseek",
+    ]
 
     # Create a new job for execution tracking
     if settings.track_agent_run:
@@ -1330,7 +1589,12 @@ async def send_message_streaming(
 
             async def error_aware_stream():
                 """Stream that handles early LLM errors gracefully in streaming format."""
-                from letta.errors import LLMAuthenticationError, LLMError, LLMRateLimitError, LLMTimeoutError
+                from letta.errors import (
+                    LLMAuthenticationError,
+                    LLMError,
+                    LLMRateLimitError,
+                    LLMTimeoutError,
+                )
 
                 try:
                     stream = agent_loop.stream(
@@ -1347,7 +1611,11 @@ async def send_message_streaming(
 
                 except LLMTimeoutError as e:
                     error_data = {
-                        "error": {"type": "llm_timeout", "message": "The LLM request timed out. Please try again.", "detail": str(e)}
+                        "error": {
+                            "type": "llm_timeout",
+                            "message": "The LLM request timed out. Please try again.",
+                            "detail": str(e),
+                        }
                     }
                     yield (f"data: {json.dumps(error_data)}\n\n", 504)
                 except LLMRateLimitError as e:
@@ -1369,15 +1637,30 @@ async def send_message_streaming(
                     }
                     yield (f"data: {json.dumps(error_data)}\n\n", 401)
                 except LLMError as e:
-                    error_data = {"error": {"type": "llm_error", "message": "An error occurred with the LLM request.", "detail": str(e)}}
+                    error_data = {
+                        "error": {
+                            "type": "llm_error",
+                            "message": "An error occurred with the LLM request.",
+                            "detail": str(e),
+                        }
+                    }
                     yield (f"data: {json.dumps(error_data)}\n\n", 502)
                 except Exception as e:
-                    error_data = {"error": {"type": "internal_error", "message": "An internal server error occurred.", "detail": str(e)}}
+                    error_data = {
+                        "error": {
+                            "type": "internal_error",
+                            "message": "An internal server error occurred.",
+                            "detail": str(e),
+                        }
+                    }
                     yield (f"data: {json.dumps(error_data)}\n\n", 500)
 
             raw_stream = error_aware_stream()
 
-            from letta.server.rest_api.streaming_response import StreamingResponseWithStatusCode, add_keepalive_to_stream
+            from letta.server.rest_api.streaming_response import (
+                StreamingResponseWithStatusCode,
+                add_keepalive_to_stream,
+            )
 
             if request.background and settings.track_agent_run:
                 if isinstance(redis_client, NoopAsyncRedisClient):
@@ -1438,7 +1721,12 @@ async def send_message_streaming(
             job_update_metadata = {"error": str(e)}
             job_status = JobStatus.failed
         raise HTTPException(
-            status_code=409, detail={"code": "PENDING_APPROVAL", "message": str(e), "pending_request_id": e.pending_request_id}
+            status_code=409,
+            detail={
+                "code": "PENDING_APPROVAL",
+                "message": str(e),
+                "pending_request_id": e.pending_request_id,
+            },
         )
     except Exception as e:
         if settings.track_agent_run:
@@ -1448,7 +1736,10 @@ async def send_message_streaming(
     finally:
         if settings.track_agent_run:
             await server.job_manager.safe_update_job_status_async(
-                job_id=run.id, new_status=job_status, actor=actor, metadata=job_update_metadata
+                job_id=run.id,
+                new_status=job_status,
+                actor=actor,
+                metadata=job_update_metadata,
             )
 
 
@@ -1498,7 +1789,11 @@ async def cancel_agent_run(
     return results
 
 
-@router.post("/messages/search", response_model=List[MessageSearchResult], operation_id="search_messages")
+@router.post(
+    "/messages/search",
+    response_model=List[MessageSearchResult],
+    operation_id="search_messages",
+)
 async def search_messages(
     request: MessageSearchRequest = Body(...),
     server: SyncServer = Depends(get_letta_server),
@@ -1515,7 +1810,10 @@ async def search_messages(
     # check if any agents exist in the org
     agent_count = await server.agent_manager.size_async(actor=actor)
     if agent_count == 0:
-        raise HTTPException(status_code=400, detail="No agents found in organization to derive embedding configuration from")
+        raise HTTPException(
+            status_code=400,
+            detail="No agents found in organization to derive embedding configuration from",
+        )
 
     try:
         results = await server.message_manager.search_messages_org_async(
@@ -1550,7 +1848,15 @@ async def _process_message_background(
     request_start_timestamp_ns = get_utc_timestamp_ns()
     try:
         agent = await server.agent_manager.get_agent_by_id_async(
-            agent_id, actor, include_relationships=["memory", "multi_agent_group", "sources", "tool_exec_environment_variables", "tools"]
+            agent_id,
+            actor,
+            include_relationships=[
+                "memory",
+                "multi_agent_group",
+                "sources",
+                "tool_exec_environment_variables",
+                "tools",
+            ],
         )
         agent_eligible = agent.multi_agent_group is None or agent.multi_agent_group.manager_type in ["sleeptime", "voice_sleeptime"]
         model_compatible = agent.llm_config.model_endpoint_type in [
@@ -1603,7 +1909,11 @@ async def _process_message_background(
         job_update = JobUpdate(
             status=JobStatus.failed,
             completed_at=datetime.now(timezone.utc),
-            metadata={"error": str(e), "error_code": "PENDING_APPROVAL", "pending_request_id": e.pending_request_id},
+            metadata={
+                "error": str(e),
+                "error_code": "PENDING_APPROVAL",
+                "pending_request_id": e.pending_request_id,
+            },
         )
         await server.job_manager.update_job_by_id_async(job_id=run_id, job_update=job_update, actor=actor)
     except Exception as e:
@@ -1699,17 +2009,26 @@ async def send_message_async(
     return run
 
 
-@router.patch("/{agent_id}/reset-messages", response_model=AgentState, operation_id="reset_messages")
+@router.patch(
+    "/{agent_id}/reset-messages",
+    response_model=AgentState,
+    operation_id="reset_messages",
+)
 async def reset_messages(
     agent_id: str,
-    add_default_initial_messages: bool = Query(default=False, description="If true, adds the default initial messages after resetting."),
+    add_default_initial_messages: bool = Query(
+        default=False,
+        description="If true, adds the default initial messages after resetting.",
+    ),
     server: "SyncServer" = Depends(get_letta_server),
     headers: HeaderParams = Depends(get_headers),
 ):
     """Resets the messages for an agent"""
     actor = await server.user_manager.get_actor_or_default_async(actor_id=headers.actor_id)
     return await server.agent_manager.reset_messages_async(
-        agent_id=agent_id, actor=actor, add_default_initial_messages=add_default_initial_messages
+        agent_id=agent_id,
+        actor=actor,
+        add_default_initial_messages=add_default_initial_messages,
     )
 
 
@@ -1773,7 +2092,11 @@ async def preview_raw_payload(
         )
 
 
-@router.post("/{agent_id}/summarize", status_code=204, operation_id="summarize_agent_conversation")
+@router.post(
+    "/{agent_id}/summarize",
+    status_code=204,
+    operation_id="summarize_agent_conversation",
+)
 async def summarize_agent_conversation(
     agent_id: str,
     request_obj: Request,  # FastAPI Request

@@ -210,7 +210,14 @@ def plot_agent_creation_latencies(latency_data):
     plt.subplot(2, 1, 2)
     for user_idx in sorted(df["user_index"].unique()):
         user_data = df[df["user_index"] == user_idx]
-        plt.plot(user_data["agent_index"], user_data["latency"], marker=".", linestyle="-", alpha=0.7, label=f"User {user_idx}")
+        plt.plot(
+            user_data["agent_index"],
+            user_data["latency"],
+            marker=".",
+            linestyle="-",
+            alpha=0.7,
+            label=f"User {user_idx}",
+        )
 
     plt.title("Agent Creation Latency Over Time")
     plt.xlabel("Agent Creation Sequence")

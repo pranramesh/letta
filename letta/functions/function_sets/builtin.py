@@ -19,7 +19,17 @@ async def web_search(
     query: str,
     num_results: int = 10,
     category: Optional[
-        Literal["company", "research paper", "news", "pdf", "github", "tweet", "personal site", "linkedin profile", "financial report"]
+        Literal[
+            "company",
+            "research paper",
+            "news",
+            "pdf",
+            "github",
+            "tweet",
+            "personal site",
+            "linkedin profile",
+            "financial report",
+        ]
     ] = None,
     include_text: bool = False,
     include_domains: Optional[List[str]] = None,

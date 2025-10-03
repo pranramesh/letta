@@ -115,7 +115,9 @@ class SleeptimeMultiAgentV2(BaseAgent):
             turns_counter is not None and turns_counter % self.group.sleeptime_agent_frequency == 0
         ):
             last_processed_message_id = await self.group_manager.get_last_processed_message_id_and_update_async(
-                group_id=self.group.id, last_processed_message_id=last_response_messages[-1].id, actor=self.actor
+                group_id=self.group.id,
+                last_processed_message_id=last_response_messages[-1].id,
+                actor=self.actor,
             )
             for participant_agent_id in self.group.agent_ids:
                 try:
@@ -210,7 +212,9 @@ class SleeptimeMultiAgentV2(BaseAgent):
             turns_counter is not None and turns_counter % self.group.sleeptime_agent_frequency == 0
         ):
             last_processed_message_id = await self.group_manager.get_last_processed_message_id_and_update_async(
-                group_id=self.group.id, last_processed_message_id=last_response_messages[-1].id, actor=self.actor
+                group_id=self.group.id,
+                last_processed_message_id=last_response_messages[-1].id,
+                actor=self.actor,
             )
             for sleeptime_agent_id in self.group.agent_ids:
                 run_id = await self._issue_background_task(

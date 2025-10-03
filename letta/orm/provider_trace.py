@@ -16,7 +16,9 @@ class ProviderTrace(SqlalchemyBase, OrganizationMixin):
     __table_args__ = (Index("ix_step_id", "step_id"),)
 
     id: Mapped[str] = mapped_column(
-        primary_key=True, doc="Unique provider trace identifier", default=lambda: f"provider_trace-{uuid.uuid4()}"
+        primary_key=True,
+        doc="Unique provider trace identifier",
+        default=lambda: f"provider_trace-{uuid.uuid4()}",
     )
     request_json: Mapped[dict] = mapped_column(JSON, doc="JSON content of the provider request")
     response_json: Mapped[dict] = mapped_column(JSON, doc="JSON content of the provider response")

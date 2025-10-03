@@ -24,7 +24,10 @@ from letta.services.helpers.tool_execution_helper import (
     find_python_executable,
     install_pip_requirements_for_sandbox,
 )
-from letta.services.helpers.tool_parser_helper import convert_param_to_str_value, parse_function_arguments
+from letta.services.helpers.tool_parser_helper import (
+    convert_param_to_str_value,
+    parse_function_arguments,
+)
 from letta.services.organization_manager import OrganizationManager
 from letta.services.sandbox_config_manager import SandboxConfigManager
 from letta.services.tool_manager import ToolManager
@@ -48,7 +51,13 @@ class ToolExecutionSandbox:
     LOCAL_SANDBOX_RESULT_VAR_NAME = "result_ZQqiequkcFwRwwGQMqkt"
 
     def __init__(
-        self, tool_name: str, args: dict, user: User, force_recreate=True, force_recreate_venv=False, tool_object: Optional[Tool] = None
+        self,
+        tool_name: str,
+        args: dict,
+        user: User,
+        force_recreate=True,
+        force_recreate_venv=False,
+        tool_object: Optional[Tool] = None,
     ):
         self.tool_name = tool_name
         self.args = args
@@ -120,7 +129,9 @@ class ToolExecutionSandbox:
 
     @trace_method
     def run_local_dir_sandbox(
-        self, agent_state: Optional[AgentState] = None, additional_env_vars: Optional[Dict] = None
+        self,
+        agent_state: Optional[AgentState] = None,
+        additional_env_vars: Optional[Dict] = None,
     ) -> ToolExecutionResult:
         sbx_config = self.sandbox_config_manager.get_or_create_default_sandbox_config(sandbox_type=SandboxType.LOCAL, actor=self.user)
         local_configs = sbx_config.get_local_config()
@@ -181,15 +192,27 @@ class ToolExecutionSandbox:
         # Recreate venv if required
         if self.force_recreate_venv or not os.path.isdir(venv_path):
             logger.warning(f"Virtual environment directory does not exist at: {venv_path}, creating one now...")
-            log_event(name="start create_venv_for_local_sandbox", attributes={"venv_path": venv_path})
+            log_event(
+                name="start create_venv_for_local_sandbox",
+                attributes={"venv_path": venv_path},
+            )
             create_venv_for_local_sandbox(
-                sandbox_dir_path=sandbox_dir, venv_path=venv_path, env=env, force_recreate=self.force_recreate_venv
+                sandbox_dir_path=sandbox_dir,
+                venv_path=venv_path,
+                env=env,
+                force_recreate=self.force_recreate_venv,
             )
             log_event(name="finish create_venv_for_local_sandbox")
 
-        log_event(name="start install_pip_requirements_for_sandbox", attributes={"local_configs": local_configs.model_dump_json()})
+        log_event(
+            name="start install_pip_requirements_for_sandbox",
+            attributes={"local_configs": local_configs.model_dump_json()},
+        )
         install_pip_requirements_for_sandbox(local_configs, env=env)
-        log_event(name="finish install_pip_requirements_for_sandbox", attributes={"local_configs": local_configs.model_dump_json()})
+        log_event(
+            name="finish install_pip_requirements_for_sandbox",
+            attributes={"local_configs": local_configs.model_dump_json()},
+        )
 
         # Ensure Python executable exists
         python_executable = find_python_executable(local_configs)
@@ -205,7 +228,13 @@ class ToolExecutionSandbox:
         try:
             log_event(name="start subprocess")
             result = subprocess.run(
-                [python_executable, temp_file_path], env=env, cwd=sandbox_dir, timeout=60, capture_output=True, text=True, check=True
+                [python_executable, temp_file_path],
+                env=env,
+                cwd=sandbox_dir,
+                timeout=60,
+                capture_output=True,
+                text=True,
+                check=True,
             )
             log_event(name="finish subprocess")
             func_result, stdout = self.parse_out_function_results_markers(result.stdout)
@@ -318,7 +347,10 @@ class ToolExecutionSandbox:
         marker_len = len(self.LOCAL_SANDBOX_RESULT_START_MARKER)
         start_index = text.index(self.LOCAL_SANDBOX_RESULT_START_MARKER) + marker_len
         end_index = text.index(self.LOCAL_SANDBOX_RESULT_END_MARKER)
-        return text[start_index:end_index], text[: start_index - marker_len] + text[end_index + +marker_len :]
+        return (
+            text[start_index:end_index],
+            text[: start_index - marker_len] + text[end_index + +marker_len :],
+        )
 
     # e2b sandbox specific functions
 
@@ -356,7 +388,12 @@ class ToolExecutionSandbox:
         code = self.generate_execution_script(agent_state=agent_state)
         log_event(
             "e2b_execution_started",
-            {"tool": self.tool_name, "sandbox_id": sbx.sandbox_id, "code": code, "env_vars": env_vars},
+            {
+                "tool": self.tool_name,
+                "sandbox_id": sbx.sandbox_id,
+                "code": code,
+                "env_vars": env_vars,
+            },
         )
         execution = sbx.run_code(code, envs=env_vars)
 
@@ -376,7 +413,9 @@ class ToolExecutionSandbox:
             logger.debug(f"Tool {self.tool_name} raised a {execution.error.name}: {execution.error.value}")
             logger.debug(f"Traceback from e2b sandbox: \n{execution.error.traceback}")
             func_return = get_friendly_error_msg(
-                function_name=self.tool_name, exception_name=execution.error.name, exception_message=execution.error.value
+                function_name=self.tool_name,
+                exception_name=execution.error.name,
+                exception_message=execution.error.value,
             )
             execution.logs.stderr.append(execution.error.traceback)
             log_event(
@@ -443,10 +482,16 @@ class ToolExecutionSandbox:
             },
         )
         if e2b_config.template:
-            sbx = Sandbox(sandbox_config.get_e2b_config().template, metadata={self.METADATA_CONFIG_STATE_KEY: state_hash})
+            sbx = Sandbox(
+                sandbox_config.get_e2b_config().template,
+                metadata={self.METADATA_CONFIG_STATE_KEY: state_hash},
+            )
         else:
             # no template
-            sbx = Sandbox(metadata={self.METADATA_CONFIG_STATE_KEY: state_hash}, **e2b_config.model_dump(exclude={"pip_requirements"}))
+            sbx = Sandbox(
+                metadata={self.METADATA_CONFIG_STATE_KEY: state_hash},
+                **e2b_config.model_dump(exclude={"pip_requirements"}),
+            )
         log_event(
             "e2b_sandbox_create_finished",
             {

@@ -220,7 +220,14 @@ class AsyncRedisClient:
 
     # Stream operations
     @with_retry()
-    async def xadd(self, stream: str, fields: Dict[str, Any], id: str = "*", maxlen: Optional[int] = None, approximate: bool = True) -> str:
+    async def xadd(
+        self,
+        stream: str,
+        fields: Dict[str, Any],
+        id: str = "*",
+        maxlen: Optional[int] = None,
+        approximate: bool = True,
+    ) -> str:
         """Add entry to a stream.
 
         Args:
@@ -237,7 +244,12 @@ class AsyncRedisClient:
         return await client.xadd(stream, fields, id=id, maxlen=maxlen, approximate=approximate)
 
     @with_retry()
-    async def xread(self, streams: Dict[str, str], count: Optional[int] = None, block: Optional[int] = None) -> List[Dict]:
+    async def xread(
+        self,
+        streams: Dict[str, str],
+        count: Optional[int] = None,
+        block: Optional[int] = None,
+    ) -> List[Dict]:
         """Read from streams.
 
         Args:
@@ -411,10 +423,22 @@ class NoopAsyncRedisClient(AsyncRedisClient):
         return 0
 
     # Stream operations
-    async def xadd(self, stream: str, fields: Dict[str, Any], id: str = "*", maxlen: Optional[int] = None, approximate: bool = True) -> str:
+    async def xadd(
+        self,
+        stream: str,
+        fields: Dict[str, Any],
+        id: str = "*",
+        maxlen: Optional[int] = None,
+        approximate: bool = True,
+    ) -> str:
         return ""
 
-    async def xread(self, streams: Dict[str, str], count: Optional[int] = None, block: Optional[int] = None) -> List[Dict]:
+    async def xread(
+        self,
+        streams: Dict[str, str],
+        count: Optional[int] = None,
+        block: Optional[int] = None,
+    ) -> List[Dict]:
         return []
 
     async def xrange(self, stream: str, start: str = "-", end: str = "+", count: Optional[int] = None) -> List[Dict]:

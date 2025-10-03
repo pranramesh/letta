@@ -151,7 +151,7 @@ class SleeptimeMultiAgent(Agent):
             message_creates = [
                 MessageCreate(
                     role=m.role,
-                    content=m.content[0].text if m.content and len(m.content) == 1 else m.content,
+                    content=(m.content[0].text if m.content and len(m.content) == 1 else m.content),
                     name=m.name,
                     otid=m.otid,
                     sender_id=m.sender_id,
@@ -239,7 +239,9 @@ class SleeptimeMultiAgent(Agent):
             ):
                 last_response_messages = [message for sublist in usage_stats.steps_messages for message in sublist]
                 last_processed_message_id = self.group_manager.get_last_processed_message_id_and_update(
-                    group_id=self.group_id, last_processed_message_id=last_response_messages[-1].id, actor=self.user
+                    group_id=self.group_id,
+                    last_processed_message_id=last_response_messages[-1].id,
+                    actor=self.user,
                 )
                 for participant_agent_id in self.agent_ids:
                     try:

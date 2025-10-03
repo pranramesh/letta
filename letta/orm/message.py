@@ -1,13 +1,22 @@
 from typing import List, Optional
 
-from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall as OpenAIToolCall
+from openai.types.chat.chat_completion_message_tool_call import (
+    ChatCompletionMessageToolCall as OpenAIToolCall,
+)
 from sqlalchemy import BigInteger, FetchedValue, ForeignKey, Index, event, text
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
-from letta.orm.custom_columns import MessageContentColumn, ToolCallColumn, ToolReturnColumn
+from letta.orm.custom_columns import (
+    MessageContentColumn,
+    ToolCallColumn,
+    ToolReturnColumn,
+)
 from letta.orm.mixins import AgentMixin, OrganizationMixin
 from letta.orm.sqlalchemy_base import SqlalchemyBase
-from letta.schemas.letta_message_content import MessageContent, TextContent as PydanticTextContent
+from letta.schemas.letta_message_content import (
+    MessageContent,
+    TextContent as PydanticTextContent,
+)
 from letta.schemas.message import Message as PydanticMessage, ToolReturn
 from letta.settings import DatabaseChoice, settings
 
@@ -33,22 +42,28 @@ class Message(SqlalchemyBase, OrganizationMixin, AgentMixin):
     tool_calls: Mapped[List[OpenAIToolCall]] = mapped_column(ToolCallColumn, doc="Tool call information")
     tool_call_id: Mapped[Optional[str]] = mapped_column(nullable=True, doc="ID of the tool call")
     step_id: Mapped[Optional[str]] = mapped_column(
-        ForeignKey("steps.id", ondelete="SET NULL"), nullable=True, doc="ID of the step that this message belongs to"
+        ForeignKey("steps.id", ondelete="SET NULL"),
+        nullable=True,
+        doc="ID of the step that this message belongs to",
     )
     otid: Mapped[Optional[str]] = mapped_column(nullable=True, doc="The offline threading ID associated with this message")
     tool_returns: Mapped[List[ToolReturn]] = mapped_column(
-        ToolReturnColumn, nullable=True, doc="Tool execution return information for prior tool calls"
+        ToolReturnColumn,
+        nullable=True,
+        doc="Tool execution return information for prior tool calls",
     )
     group_id: Mapped[Optional[str]] = mapped_column(nullable=True, doc="The multi-agent group that the message was sent in")
     sender_id: Mapped[Optional[str]] = mapped_column(
-        nullable=True, doc="The id of the sender of the message, can be an identity id or agent id"
+        nullable=True,
+        doc="The id of the sender of the message, can be an identity id or agent id",
     )
     batch_item_id: Mapped[Optional[str]] = mapped_column(
         nullable=True,
         doc="The id of the LLMBatchItem that this message is associated with",
     )
     is_err: Mapped[Optional[bool]] = mapped_column(
-        nullable=True, doc="Whether this message is part of an error step. Used only for debugging purposes."
+        nullable=True,
+        doc="Whether this message is part of an error step. Used only for debugging purposes.",
     )
     approval_request_id: Mapped[Optional[str]] = mapped_column(
         nullable=True,
@@ -71,7 +86,11 @@ class Message(SqlalchemyBase, OrganizationMixin, AgentMixin):
 
     # Job relationship
     job_message: Mapped[Optional["JobMessage"]] = relationship(
-        "JobMessage", back_populates="message", uselist=False, cascade="all, delete-orphan", single_parent=True
+        "JobMessage",
+        back_populates="message",
+        uselist=False,
+        cascade="all, delete-orphan",
+        single_parent=True,
     )
 
     @property

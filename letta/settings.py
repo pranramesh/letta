@@ -93,7 +93,10 @@ class ModelSettings(BaseSettings):
 
     global_max_context_window_limit: int = 32000
 
-    inner_thoughts_kwarg: str | None = Field(default=INNER_THOUGHTS_KWARG, description="Key used for passing in inner thoughts.")
+    inner_thoughts_kwarg: str | None = Field(
+        default=INNER_THOUGHTS_KWARG,
+        description="Key used for passing in inner thoughts.",
+    )
 
     # env_prefix='my_prefix_'
 
@@ -248,7 +251,10 @@ class Settings(BaseSettings):
     # telemetry logging
     otel_exporter_otlp_endpoint: str | None = None  # otel default: "http://localhost:4317"
     otel_preferred_temporality: int | None = Field(
-        default=1, ge=0, le=2, description="Exported metric temporality. {0: UNSPECIFIED, 1: DELTA, 2: CUMULATIVE}"
+        default=1,
+        ge=0,
+        le=2,
+        description="Exported metric temporality. {0: UNSPECIFIED, 1: DELTA, 2: CUMULATIVE}",
     )
     disable_tracing: bool = Field(default=False, description="Disable OTEL Tracing")
     llm_api_logging: bool = Field(default=True, description="Enable LLM API logging at each step")
@@ -256,7 +262,10 @@ class Settings(BaseSettings):
     track_errored_messages: bool = Field(default=True, description="Enable tracking for errored messages")
     track_stop_reason: bool = Field(default=True, description="Enable tracking stop reason on steps.")
     track_agent_run: bool = Field(default=True, description="Enable tracking agent run with cancellation support")
-    track_provider_trace: bool = Field(default=True, description="Enable tracking raw llm request and response at each step")
+    track_provider_trace: bool = Field(
+        default=True,
+        description="Enable tracking raw llm request and response at each step",
+    )
 
     # FastAPI Application Settings
     uvicorn_workers: int = 1
@@ -290,8 +299,18 @@ class Settings(BaseSettings):
     mistral_api_key: Optional[str] = None
 
     # LLM request timeout settings (model + embedding model)
-    llm_request_timeout_seconds: float = Field(default=60.0, ge=10.0, le=1800.0, description="Timeout for LLM requests in seconds")
-    llm_stream_timeout_seconds: float = Field(default=60.0, ge=10.0, le=1800.0, description="Timeout for LLM streaming requests in seconds")
+    llm_request_timeout_seconds: float = Field(
+        default=60.0,
+        ge=10.0,
+        le=1800.0,
+        description="Timeout for LLM requests in seconds",
+    )
+    llm_stream_timeout_seconds: float = Field(
+        default=60.0,
+        ge=10.0,
+        le=1800.0,
+        description="Timeout for LLM streaming requests in seconds",
+    )
 
     # For embeddings
     enable_pinecone: bool = False

@@ -36,15 +36,22 @@ class LLMBatchJob(SqlalchemyBase, OrganizationMixin):
         CreateBatchResponseColumn, doc="Full JSON response from initial batch creation"
     )
     latest_polling_response: Mapped[Union[BetaMessageBatch]] = mapped_column(
-        PollBatchResponseColumn, nullable=True, doc="Last known polling result from LLM provider"
+        PollBatchResponseColumn,
+        nullable=True,
+        doc="Last known polling result from LLM provider",
     )
 
     last_polled_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True, doc="Last time we polled the provider for status"
+        DateTime(timezone=True),
+        nullable=True,
+        doc="Last time we polled the provider for status",
     )
 
     letta_batch_job_id: Mapped[str] = mapped_column(
-        String, ForeignKey("jobs.id", ondelete="CASCADE"), nullable=False, doc="ID of the Letta batch job"
+        String,
+        ForeignKey("jobs.id", ondelete="CASCADE"),
+        nullable=False,
+        doc="ID of the Letta batch job",
     )
 
     organization: Mapped["Organization"] = relationship("Organization", back_populates="llm_batch_jobs")

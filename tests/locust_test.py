@@ -40,11 +40,19 @@ class LettaUser(HttpUser):
         request = CreateAgent(
             name=f"Agent-{name}",
             tools=BASE_TOOLS,
-            memory=ChatMemory(human=get_human_text(DEFAULT_HUMAN), persona=get_persona_text(DEFAULT_PERSONA)),
+            memory=ChatMemory(
+                human=get_human_text(DEFAULT_HUMAN),
+                persona=get_persona_text(DEFAULT_PERSONA),
+            ),
         )
 
         # create an agent
-        with self.client.post("/v1/agents", json=request.model_dump(), headers=self.client.headers, catch_response=True) as response:
+        with self.client.post(
+            "/v1/agents",
+            json=request.model_dump(),
+            headers=self.client.headers,
+            catch_response=True,
+        ) as response:
             if response.status_code != 200:
                 response.failure(f"Failed to create agent: {response.text}")
 
@@ -59,7 +67,10 @@ class LettaUser(HttpUser):
         request = LettaRequest(messages=messages)
 
         with self.client.post(
-            f"/v1/agents/{self.agent_id}/messages", json=request.model_dump(), headers=self.client.headers, catch_response=True
+            f"/v1/agents/{self.agent_id}/messages",
+            json=request.model_dump(),
+            headers=self.client.headers,
+            catch_response=True,
         ) as response:
             if response.status_code != 200:
                 response.failure(f"Failed to send message {response.status_code}: {response.text}")

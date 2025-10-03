@@ -30,26 +30,22 @@ source_name = "employee_handbook"
 source = client.sources.create(
     name=source_name,
     description="Provides reference information for the employee handbook",
-    embedding="openai/text-embedding-3-small" # must match agent
+    embedding="openai/text-embedding-3-small",  # must match agent
 )
 # attach the source to the agent
-client.agents.sources.attach(
-    source_id=source.id,
-    agent_id=agent.id
-)
+client.agents.sources.attach(source_id=source.id, agent_id=agent.id)
 
 # upload a file: this will trigger processing
 with open("handbook.pdf", "rb") as f:
-    job = client.sources.files.upload(
-        file=f,
-        source_id=source.id
-    )
+    job = client.sources.files.upload(file=f, source_id=source.id)
 
 time.sleep(2)
 
 # get employee handbook block (same name as the source)
 print("Agent blocks", [b.label for b in client.agents.blocks.list(agent_id=agent.id)])
-block = client.agents.blocks.retrieve(agent_id=agent.id, block_label="employee_handbook")
+block = client.agents.blocks.retrieve(
+    agent_id=agent.id, block_label="employee_handbook"
+)
 
 
 # get attached agents

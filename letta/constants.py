@@ -36,7 +36,10 @@ LETTA_TOOL_MODULE_NAMES = [
 DEFAULT_ORG_ID = "org-00000000-0000-4000-8000-000000000000"
 DEFAULT_ORG_NAME = "default_org"
 
-AGENT_ID_PATTERN = re.compile(r"^agent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$", re.IGNORECASE)
+AGENT_ID_PATTERN = re.compile(
+    r"^agent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+    re.IGNORECASE,
+)
 
 # String in the error message for when the context window is too large
 # Example full message:
@@ -86,7 +89,12 @@ DEFAULT_HUMAN_BLOCK_DESCRIPTION = "The human block: Stores key details about the
 SEND_MESSAGE_TOOL_NAME = "send_message"
 # Base tools that cannot be edited, as they access agent state directly
 # Note that we don't include "conversation_search_date" for now
-BASE_TOOLS = [SEND_MESSAGE_TOOL_NAME, "conversation_search", "archival_memory_insert", "archival_memory_search"]
+BASE_TOOLS = [
+    SEND_MESSAGE_TOOL_NAME,
+    "conversation_search",
+    "archival_memory_insert",
+    "archival_memory_search",
+]
 DEPRECATED_LETTA_TOOLS = ["archival_memory_insert", "archival_memory_search"]
 # Base memory tools CAN be edited, and are added by default by the server
 BASE_MEMORY_TOOLS = ["core_memory_append", "core_memory_replace"]
@@ -99,7 +107,11 @@ BASE_MEMORY_TOOLS_V2 = [
     # "memory_finish_edits",
 ]
 # Base tools if the memgpt agent has enable_sleeptime on
-BASE_SLEEPTIME_CHAT_TOOLS = [SEND_MESSAGE_TOOL_NAME, "conversation_search", "archival_memory_search"]
+BASE_SLEEPTIME_CHAT_TOOLS = [
+    SEND_MESSAGE_TOOL_NAME,
+    "conversation_search",
+    "archival_memory_search",
+]
 # Base memory tools for sleeptime agent
 BASE_SLEEPTIME_TOOLS = [
     "memory_replace",
@@ -119,7 +131,11 @@ BASE_VOICE_SLEEPTIME_TOOLS = [
     "finish_rethinking_memory",
 ]
 # Multi agent tools
-MULTI_AGENT_TOOLS = ["send_message_to_agent_and_wait_for_reply", "send_message_to_agents_matching_tags", "send_message_to_agent_async"]
+MULTI_AGENT_TOOLS = [
+    "send_message_to_agent_and_wait_for_reply",
+    "send_message_to_agents_matching_tags",
+    "send_message_to_agent_async",
+]
 LOCAL_ONLY_MULTI_AGENT_TOOLS = ["send_message_to_agent_async"]
 
 # Used to catch if line numbers are pushed in
@@ -180,7 +196,15 @@ REQUEST_HEARTBEAT_DESCRIPTION = "Request an immediate heartbeat after function e
 STRUCTURED_OUTPUT_MODELS = {"gpt-4o", "gpt-4o-mini"}
 
 # LOGGER_LOG_LEVEL is use to convert Text to Logging level value for logging mostly for Cli input to setting level
-LOGGER_LOG_LEVELS = {"CRITICAL": CRITICAL, "ERROR": ERROR, "WARN": WARN, "WARNING": WARNING, "INFO": INFO, "DEBUG": DEBUG, "NOTSET": NOTSET}
+LOGGER_LOG_LEVELS = {
+    "CRITICAL": CRITICAL,
+    "ERROR": ERROR,
+    "WARN": WARN,
+    "WARNING": WARNING,
+    "INFO": INFO,
+    "DEBUG": DEBUG,
+    "NOTSET": NOTSET,
+}
 
 FIRST_MESSAGE_ATTEMPTS = 10
 
@@ -401,6 +425,11 @@ WEB_SEARCH_MODEL_ENV_VAR_NAME = "LETTA_BUILTIN_WEBSEARCH_OPENAI_MODEL_NAME"
 WEB_SEARCH_MODEL_ENV_VAR_DEFAULT_VALUE = "gpt-4.1-mini-2025-04-14"
 
 # Excluded model keywords from base tool rules
-EXCLUDE_MODEL_KEYWORDS_FROM_BASE_TOOL_RULES = ["claude-4-sonnet", "claude-3-5-sonnet", "gpt-5", "gemini-2.5-pro"]
+EXCLUDE_MODEL_KEYWORDS_FROM_BASE_TOOL_RULES = [
+    "claude-4-sonnet",
+    "claude-3-5-sonnet",
+    "gpt-5",
+    "gemini-2.5-pro",
+]
 # But include models with these keywords in base tool rules (overrides exclusion)
 INCLUDE_MODEL_KEYWORDS_BASE_TOOL_RULES = ["mini"]

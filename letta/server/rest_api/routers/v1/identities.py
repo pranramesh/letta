@@ -5,8 +5,19 @@ from fastapi import APIRouter, Body, Depends, Header, HTTPException, Query
 from letta.orm.errors import NoResultFound, UniqueConstraintViolationError
 from letta.schemas.agent import AgentState
 from letta.schemas.block import Block
-from letta.schemas.identity import Identity, IdentityCreate, IdentityProperty, IdentityType, IdentityUpdate, IdentityUpsert
-from letta.server.rest_api.dependencies import HeaderParams, get_headers, get_letta_server
+from letta.schemas.identity import (
+    Identity,
+    IdentityCreate,
+    IdentityProperty,
+    IdentityType,
+    IdentityUpdate,
+    IdentityUpsert,
+)
+from letta.server.rest_api.dependencies import (
+    HeaderParams,
+    get_headers,
+    get_letta_server,
+)
 
 if TYPE_CHECKING:
     from letta.server.server import SyncServer
@@ -14,7 +25,12 @@ if TYPE_CHECKING:
 router = APIRouter(prefix="/identities", tags=["identities"])
 
 
-@router.get("/", tags=["identities"], response_model=List[Identity], operation_id="list_identities")
+@router.get(
+    "/",
+    tags=["identities"],
+    response_model=List[Identity],
+    operation_id="list_identities",
+)
 async def list_identities(
     name: Optional[str] = Query(None),
     project_id: Optional[str] = Query(None),
@@ -30,7 +46,8 @@ async def list_identities(
     ),
     limit: Optional[int] = Query(50, description="Maximum number of identities to return"),
     order: Literal["asc", "desc"] = Query(
-        "desc", description="Sort order for identities by creation time. 'asc' for oldest first, 'desc' for newest first"
+        "desc",
+        description="Sort order for identities by creation time. 'asc' for oldest first, 'desc' for newest first",
     ),
     order_by: Literal["created_at"] = Query("created_at", description="Field to sort by"),
     server: "SyncServer" = Depends(get_letta_server),
@@ -81,7 +98,12 @@ async def count_identities(
         raise HTTPException(status_code=500, detail=f"{e}")
 
 
-@router.get("/{identity_id}", tags=["identities"], response_model=Identity, operation_id="retrieve_identity")
+@router.get(
+    "/{identity_id}",
+    tags=["identities"],
+    response_model=Identity,
+    operation_id="retrieve_identity",
+)
 async def retrieve_identity(
     identity_id: str,
     server: "SyncServer" = Depends(get_letta_server),
@@ -100,7 +122,9 @@ async def create_identity(
     server: "SyncServer" = Depends(get_letta_server),
     headers: HeaderParams = Depends(get_headers),
     x_project: Optional[str] = Header(
-        None, alias="X-Project", description="The project slug to associate with the identity (cloud only)."
+        None,
+        alias="X-Project",
+        description="The project slug to associate with the identity (cloud only).",
     ),  # Only handled by next js middleware
 ):
     try:
@@ -115,7 +139,10 @@ async def create_identity(
                 detail=f"An identity with identifier key {identity.identifier_key} already exists for project {identity.project_id}",
             )
         else:
-            raise HTTPException(status_code=409, detail=f"An identity with identifier key {identity.identifier_key} already exists")
+            raise HTTPException(
+                status_code=409,
+                detail=f"An identity with identifier key {identity.identifier_key} already exists",
+            )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"{e}")
 
@@ -126,7 +153,9 @@ async def upsert_identity(
     server: "SyncServer" = Depends(get_letta_server),
     headers: HeaderParams = Depends(get_headers),
     x_project: Optional[str] = Header(
-        None, alias="X-Project", description="The project slug to associate with the identity (cloud only)."
+        None,
+        alias="X-Project",
+        description="The project slug to associate with the identity (cloud only).",
     ),  # Only handled by next js middleware
 ):
     try:
@@ -140,7 +169,12 @@ async def upsert_identity(
         raise HTTPException(status_code=500, detail=f"{e}")
 
 
-@router.patch("/{identity_id}", tags=["identities"], response_model=Identity, operation_id="update_identity")
+@router.patch(
+    "/{identity_id}",
+    tags=["identities"],
+    response_model=Identity,
+    operation_id="update_identity",
+)
 async def modify_identity(
     identity_id: str,
     identity: IdentityUpdate = Body(...),
@@ -158,7 +192,11 @@ async def modify_identity(
         raise HTTPException(status_code=500, detail=f"{e}")
 
 
-@router.put("/{identity_id}/properties", tags=["identities"], operation_id="upsert_identity_properties")
+@router.put(
+    "/{identity_id}/properties",
+    tags=["identities"],
+    operation_id="upsert_identity_properties",
+)
 async def upsert_identity_properties(
     identity_id: str,
     properties: List[IdentityProperty] = Body(...),
@@ -196,7 +234,11 @@ async def delete_identity(
         raise HTTPException(status_code=500, detail=f"{e}")
 
 
-@router.get("/{identity_id}/agents", response_model=List[AgentState], operation_id="list_agents_for_identity")
+@router.get(
+    "/{identity_id}/agents",
+    response_model=List[AgentState],
+    operation_id="list_agents_for_identity",
+)
 async def list_agents_for_identity(
     identity_id: str,
     before: Optional[str] = Query(
@@ -209,7 +251,8 @@ async def list_agents_for_identity(
     ),
     limit: Optional[int] = Query(50, description="Maximum number of agents to return"),
     order: Literal["asc", "desc"] = Query(
-        "desc", description="Sort order for agents by creation time. 'asc' for oldest first, 'desc' for newest first"
+        "desc",
+        description="Sort order for agents by creation time. 'asc' for oldest first, 'desc' for newest first",
     ),
     order_by: Literal["created_at"] = Query("created_at", description="Field to sort by"),
     server: "SyncServer" = Depends(get_letta_server),
@@ -234,7 +277,11 @@ async def list_agents_for_identity(
         raise HTTPException(status_code=500, detail=f"{e}")
 
 
-@router.get("/{identity_id}/blocks", response_model=List[Block], operation_id="list_blocks_for_identity")
+@router.get(
+    "/{identity_id}/blocks",
+    response_model=List[Block],
+    operation_id="list_blocks_for_identity",
+)
 async def list_blocks_for_identity(
     identity_id: str,
     before: Optional[str] = Query(
@@ -247,7 +294,8 @@ async def list_blocks_for_identity(
     ),
     limit: Optional[int] = Query(50, description="Maximum number of blocks to return"),
     order: Literal["asc", "desc"] = Query(
-        "desc", description="Sort order for blocks by creation time. 'asc' for oldest first, 'desc' for newest first"
+        "desc",
+        description="Sort order for blocks by creation time. 'asc' for oldest first, 'desc' for newest first",
     ),
     order_by: Literal["created_at"] = Query("created_at", description="Field to sort by"),
     server: "SyncServer" = Depends(get_letta_server),

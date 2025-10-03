@@ -2,7 +2,11 @@ from collections.abc import AsyncGenerator
 from typing import Any
 
 from openai import AsyncStream
-from openai.types.chat.chat_completion_chunk import ChatCompletionChunk, Choice, ChoiceDelta
+from openai.types.chat.chat_completion_chunk import (
+    ChatCompletionChunk,
+    Choice,
+    ChoiceDelta,
+)
 
 from letta.constants import PRE_EXECUTION_MESSAGE_ARG
 from letta.interfaces.utils import _format_sse_chunk
@@ -102,7 +106,13 @@ class OpenAIChatCompletionsStreamingInterface:
                     object=chunk.object,
                     created=chunk.created,
                     model=chunk.model,
-                    choices=[Choice(index=0, delta=ChoiceDelta(content=content, role="assistant"), finish_reason=None)],
+                    choices=[
+                        Choice(
+                            index=0,
+                            delta=ChoiceDelta(content=content, role="assistant"),
+                            finish_reason=None,
+                        )
+                    ],
                 )
             )
 

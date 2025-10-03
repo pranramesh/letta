@@ -4,7 +4,11 @@ import traceback
 from typing import List, Optional, Tuple, Union
 
 from letta.agents.ephemeral_summary_agent import EphemeralSummaryAgent
-from letta.constants import DEFAULT_MESSAGE_TOOL, DEFAULT_MESSAGE_TOOL_KWARG, MESSAGE_SUMMARY_REQUEST_ACK
+from letta.constants import (
+    DEFAULT_MESSAGE_TOOL,
+    DEFAULT_MESSAGE_TOOL_KWARG,
+    MESSAGE_SUMMARY_REQUEST_ACK,
+)
 from letta.helpers.message_helper import convert_message_creates_to_messages
 from letta.llm_api.llm_client import LLMClient
 from letta.log import get_logger
@@ -200,7 +204,10 @@ class Summarizer:
         )
 
         updated_in_context_messages = all_in_context_messages[assistant_message_index:]
-        return [all_in_context_messages[0], summary_message_obj] + updated_in_context_messages, True
+        return [
+            all_in_context_messages[0],
+            summary_message_obj,
+        ] + updated_in_context_messages, True
 
     def _static_buffer_summarization(
         self,
@@ -287,7 +294,14 @@ class Summarizer:
 
             # Fire-and-forget the summarization task
             self.fire_and_forget(
-                self.summarizer_agent.step([MessageCreate(role=MessageRole.user, content=[TextContent(text=summary_request_text)])])
+                self.summarizer_agent.step(
+                    [
+                        MessageCreate(
+                            role=MessageRole.user,
+                            content=[TextContent(text=summary_request_text)],
+                        )
+                    ]
+                )
             )
 
         return [all_in_context_messages[0]] + updated_in_context_messages, True
@@ -353,7 +367,12 @@ def simple_message_wrapper(openai_msg: dict) -> Message:
         raise ValueError(f"Unknown role: {openai_msg['role']}")
 
 
-async def simple_summary(messages: List[Message], llm_config: LLMConfig, actor: User, include_ack: bool = True) -> str:
+async def simple_summary(
+    messages: List[Message],
+    llm_config: LLMConfig,
+    actor: User,
+    include_ack: bool = True,
+) -> str:
     """Generate a simple summary from a list of messages.
 
     Intentionally kept functional due to the simplicity of the prompt.

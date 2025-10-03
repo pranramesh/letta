@@ -13,16 +13,13 @@ def step_streaming_example(client: Letta, agent_id: str):
     # Send a message with step streaming (default)
     stream = client.agents.messages.create_stream(
         agent_id=agent_id,
-        messages=[{
-            "role": "user",
-            "content": "Hi! My name is Alice. What's 2+2?"
-        }]
+        messages=[{"role": "user", "content": "Hi! My name is Alice. What's 2+2?"}],
     )
 
     for chunk in stream:
         # Each chunk is a complete message
-        if hasattr(chunk, 'message_type'):
-            if chunk.message_type == 'assistant_message':
+        if hasattr(chunk, "message_type"):
+            if chunk.message_type == "assistant_message":
                 print(chunk.content)
 
 
@@ -31,26 +28,25 @@ def token_streaming_example(client: Letta, agent_id: str):
     # Send a message with token streaming enabled
     stream = client.agents.messages.create_stream(
         agent_id=agent_id,
-        messages=[{
-            "role": "user",
-            "content": "What's my name? And tell me a short joke."
-        }],
-        stream_tokens=True  # Enable token streaming
+        messages=[
+            {"role": "user", "content": "What's my name? And tell me a short joke."}
+        ],
+        stream_tokens=True,  # Enable token streaming
     )
 
     # Track messages by ID for reassembly
     message_accumulators: Dict[str, str] = {}
 
     for chunk in stream:
-        if hasattr(chunk, 'id') and chunk.message_type == 'assistant_message':
+        if hasattr(chunk, "id") and chunk.message_type == "assistant_message":
             msg_id = chunk.id
 
             # Initialize accumulator for new messages
             if msg_id not in message_accumulators:
-                message_accumulators[msg_id] = ''
+                message_accumulators[msg_id] = ""
 
             # Accumulate and print content
-            content_chunk = chunk.content or ''
+            content_chunk = chunk.content or ""
             message_accumulators[msg_id] += content_chunk
             print(content_chunk, end="", flush=True)
 
@@ -74,13 +70,13 @@ def main():
         memory_blocks=[
             {
                 "label": "human",
-                "value": "The user is exploring streaming capabilities."
+                "value": "The user is exploring streaming capabilities.",
             },
             {
                 "label": "persona",
-                "value": "I am a helpful assistant demonstrating streaming responses."
-            }
-        ]
+                "value": "I am a helpful assistant demonstrating streaming responses.",
+            },
+        ],
     )
 
     try:

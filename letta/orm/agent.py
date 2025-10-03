@@ -8,9 +8,19 @@ from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from letta.orm.block import Block
-from letta.orm.custom_columns import EmbeddingConfigColumn, LLMConfigColumn, ResponseFormatColumn, ToolRulesColumn
+from letta.orm.custom_columns import (
+    EmbeddingConfigColumn,
+    LLMConfigColumn,
+    ResponseFormatColumn,
+    ToolRulesColumn,
+)
 from letta.orm.identity import Identity
-from letta.orm.mixins import OrganizationMixin, ProjectMixin, TemplateEntityMixin, TemplateMixin
+from letta.orm.mixins import (
+    OrganizationMixin,
+    ProjectMixin,
+    TemplateEntityMixin,
+    TemplateMixin,
+)
 from letta.orm.organization import Organization
 from letta.orm.sqlalchemy_base import SqlalchemyBase
 from letta.schemas.agent import AgentState as PydanticAgentState
@@ -32,7 +42,14 @@ if TYPE_CHECKING:
     from letta.orm.tool import Tool
 
 
-class Agent(SqlalchemyBase, OrganizationMixin, ProjectMixin, TemplateEntityMixin, TemplateMixin, AsyncAttrs):
+class Agent(
+    SqlalchemyBase,
+    OrganizationMixin,
+    ProjectMixin,
+    TemplateEntityMixin,
+    TemplateMixin,
+    AsyncAttrs,
+):
     __tablename__ = "agents"
     __pydantic_model__ = PydanticAgentState
     __table_args__ = (
@@ -47,7 +64,11 @@ class Agent(SqlalchemyBase, OrganizationMixin, ProjectMixin, TemplateEntityMixin
 
     # Descriptor fields
     agent_type: Mapped[Optional[AgentType]] = mapped_column(String, nullable=True, doc="The type of Agent")
-    name: Mapped[Optional[str]] = mapped_column(String, nullable=True, doc="a human-readable identifier for an agent, non-unique.")
+    name: Mapped[Optional[str]] = mapped_column(
+        String,
+        nullable=True,
+        doc="a human-readable identifier for an agent, non-unique.",
+    )
     description: Mapped[Optional[str]] = mapped_column(String, nullable=True, doc="The description of the agent.")
 
     # System prompt
@@ -66,7 +87,9 @@ class Agent(SqlalchemyBase, OrganizationMixin, ProjectMixin, TemplateEntityMixin
     # Metadata and configs
     metadata_: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True, doc="metadata for the agent.")
     llm_config: Mapped[Optional[LLMConfig]] = mapped_column(
-        LLMConfigColumn, nullable=True, doc="the LLM backend configuration object for this agent."
+        LLMConfigColumn,
+        nullable=True,
+        doc="the LLM backend configuration object for this agent.",
     )
     embedding_config: Mapped[Optional[EmbeddingConfig]] = mapped_column(
         EmbeddingConfigColumn, doc="the embedding configuration object for this agent."
@@ -77,18 +100,24 @@ class Agent(SqlalchemyBase, OrganizationMixin, ProjectMixin, TemplateEntityMixin
 
     # Stateless
     message_buffer_autoclear: Mapped[bool] = mapped_column(
-        Boolean, doc="If set to True, the agent will not remember previous messages. Not recommended unless you have an advanced use case."
+        Boolean,
+        doc="If set to True, the agent will not remember previous messages. Not recommended unless you have an advanced use case.",
     )
     enable_sleeptime: Mapped[Optional[bool]] = mapped_column(
-        Boolean, doc="If set to True, memory management will move to a background agent thread."
+        Boolean,
+        doc="If set to True, memory management will move to a background agent thread.",
     )
 
     # Run metrics
     last_run_completion: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True, doc="The timestamp when the agent last completed a run."
+        DateTime(timezone=True),
+        nullable=True,
+        doc="The timestamp when the agent last completed a run.",
     )
     last_run_duration_ms: Mapped[Optional[int]] = mapped_column(
-        Integer, nullable=True, doc="The duration in milliseconds of the agent's last run."
+        Integer,
+        nullable=True,
+        doc="The duration in milliseconds of the agent's last run.",
     )
 
     # timezone
@@ -96,14 +125,23 @@ class Agent(SqlalchemyBase, OrganizationMixin, ProjectMixin, TemplateEntityMixin
 
     # file related controls
     max_files_open: Mapped[Optional[int]] = mapped_column(
-        Integer, nullable=True, doc="Maximum number of files that can be open at once for this agent."
+        Integer,
+        nullable=True,
+        doc="Maximum number of files that can be open at once for this agent.",
     )
     per_file_view_window_char_limit: Mapped[Optional[int]] = mapped_column(
-        Integer, nullable=True, doc="The per-file view window character limit for this agent."
+        Integer,
+        nullable=True,
+        doc="The per-file view window character limit for this agent.",
     )
 
     # indexing controls
-    hidden: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True, default=None, doc="If set to True, the agent will be hidden.")
+    hidden: Mapped[Optional[bool]] = mapped_column(
+        Boolean,
+        nullable=True,
+        default=None,
+        doc="If set to True, the agent will be hidden.",
+    )
     _vector_db_namespace: Mapped[Optional[str]] = mapped_column(String, nullable=True, doc="Private field for vector database namespace")
 
     # relationships
@@ -353,8 +391,24 @@ class Agent(SqlalchemyBase, OrganizationMixin, ProjectMixin, TemplateEntityMixin
         )
         file_agents = self.awaitable_attrs.file_agents if "memory" in include_relationships else empty_list_async()
 
-        (tags, tools, sources, memory, identities, multi_agent_group, tool_exec_environment_variables, file_agents) = await asyncio.gather(
-            tags, tools, sources, memory, identities, multi_agent_group, tool_exec_environment_variables, file_agents
+        (
+            tags,
+            tools,
+            sources,
+            memory,
+            identities,
+            multi_agent_group,
+            tool_exec_environment_variables,
+            file_agents,
+        ) = await asyncio.gather(
+            tags,
+            tools,
+            sources,
+            memory,
+            identities,
+            multi_agent_group,
+            tool_exec_environment_variables,
+            file_agents,
         )
 
         state["tags"] = [t.tag for t in tags]

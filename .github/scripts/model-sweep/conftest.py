@@ -8,7 +8,10 @@ from typing import Generator
 
 import pytest
 import requests
-from anthropic.types.beta.messages import BetaMessageBatch, BetaMessageBatchRequestCounts
+from anthropic.types.beta.messages import (
+    BetaMessageBatch,
+    BetaMessageBatchRequestCounts,
+)
 from dotenv import load_dotenv
 from letta_client import AsyncLetta, Letta
 

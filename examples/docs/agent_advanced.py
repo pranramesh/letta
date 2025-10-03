@@ -42,7 +42,7 @@ print(f"Created agent with name {agent_state.name} and unique ID {agent_state.id
 
 # message an agent as a user
 response = client.agents.messages.create(
-    agent_id=agent_state.id, 
+    agent_id=agent_state.id,
     messages=[
         MessageCreate(
             role="user",
@@ -55,7 +55,7 @@ print("Agent messages", response.messages)
 
 # message a system message (non-user)
 response = client.agents.messages.create(
-    agent_id=agent_state.id, 
+    agent_id=agent_state.id,
     messages=[
         MessageCreate(
             role="system",

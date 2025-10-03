@@ -58,7 +58,10 @@ def get_lmstudio_completion_chatcompletions(endpoint, auth_type, auth_key, model
             "strict": "true",
             "schema": {
                 "type": "object",
-                "properties": {"function": {"type": "string"}, "params": {"type": "object"}},
+                "properties": {
+                    "function": {"type": "string"},
+                    "params": {"type": "object"},
+                },
                 "required": ["function", "params"],
             },
         },

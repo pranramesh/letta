@@ -8,10 +8,21 @@ import openai
 from letta.agents.base_agent import BaseAgent
 from letta.agents.exceptions import IncompatibleAgentType
 from letta.agents.voice_sleeptime_agent import VoiceSleeptimeAgent
-from letta.constants import DEFAULT_MAX_STEPS, NON_USER_MSG_PREFIX, PRE_EXECUTION_MESSAGE_ARG, REQUEST_HEARTBEAT_PARAM
+from letta.constants import (
+    DEFAULT_MAX_STEPS,
+    NON_USER_MSG_PREFIX,
+    PRE_EXECUTION_MESSAGE_ARG,
+    REQUEST_HEARTBEAT_PARAM,
+)
 from letta.helpers.datetime_helpers import get_utc_time
-from letta.helpers.tool_execution_helper import add_pre_execution_message, enable_strict_mode, remove_request_heartbeat
-from letta.interfaces.openai_chat_completions_streaming_interface import OpenAIChatCompletionsStreamingInterface
+from letta.helpers.tool_execution_helper import (
+    add_pre_execution_message,
+    enable_strict_mode,
+    remove_request_heartbeat,
+)
+from letta.interfaces.openai_chat_completions_streaming_interface import (
+    OpenAIChatCompletionsStreamingInterface,
+)
 from letta.log import get_logger
 from letta.prompts.prompt_generator import PromptGenerator
 from letta.schemas.agent import AgentState
@@ -68,7 +79,11 @@ class VoiceAgent(BaseAgent):
         actor: User,
     ):
         super().__init__(
-            agent_id=agent_id, openai_client=openai_client, message_manager=message_manager, agent_manager=agent_manager, actor=actor
+            agent_id=agent_id,
+            openai_client=openai_client,
+            message_manager=message_manager,
+            agent_manager=agent_manager,
+            actor=actor,
         )
 
         # Summarizer settings
@@ -124,7 +139,12 @@ class VoiceAgent(BaseAgent):
 
         agent_state = await self.agent_manager.get_agent_by_id_async(
             agent_id=self.agent_id,
-            include_relationships=["tools", "memory", "tool_exec_environment_variables", "multi_agent_group"],
+            include_relationships=[
+                "tools",
+                "memory",
+                "tool_exec_environment_variables",
+                "multi_agent_group",
+            ],
             actor=self.actor,
         )
 
@@ -138,7 +158,10 @@ class VoiceAgent(BaseAgent):
 
         # Safety check
         if agent_state.agent_type != AgentType.voice_convo_agent:
-            raise IncompatibleAgentType(expected_type=AgentType.voice_convo_agent, actual_type=agent_state.agent_type)
+            raise IncompatibleAgentType(
+                expected_type=AgentType.voice_convo_agent,
+                actual_type=agent_state.agent_type,
+            )
 
         summarizer = self.init_summarizer(agent_state=agent_state)
 
@@ -155,7 +178,10 @@ class VoiceAgent(BaseAgent):
             max_files_open=agent_state.max_files_open,
         )
         letta_message_db_queue = create_input_messages(
-            input_messages=input_messages, agent_id=agent_state.id, timezone=agent_state.timezone, actor=self.actor
+            input_messages=input_messages,
+            agent_id=agent_state.id,
+            timezone=agent_state.timezone,
+            actor=self.actor,
         )
         in_memory_message_history = self.pre_process_input_message(input_messages)
 
@@ -289,17 +315,23 @@ class VoiceAgent(BaseAgent):
             return not streaming_interface.finish_reason_stop
 
     async def _rebuild_context_window(
-        self, summarizer: Summarizer, in_context_messages: List[Message], letta_message_db_queue: List[Message]
+        self,
+        summarizer: Summarizer,
+        in_context_messages: List[Message],
+        letta_message_db_queue: List[Message],
     ) -> None:
         new_letta_messages = await self.message_manager.create_many_messages_async(letta_message_db_queue, actor=self.actor)
 
         # TODO: Make this more general and configurable, less brittle
         new_in_context_messages, updated = await summarizer.summarize(
-            in_context_messages=in_context_messages, new_letta_messages=new_letta_messages
+            in_context_messages=in_context_messages,
+            new_letta_messages=new_letta_messages,
         )
 
         await self.agent_manager.update_message_ids_async(
-            agent_id=self.agent_id, message_ids=[m.id for m in new_in_context_messages], actor=self.actor
+            agent_id=self.agent_id,
+            message_ids=[m.id for m in new_in_context_messages],
+            actor=self.actor,
         )
 
     async def _rebuild_memory_async(
@@ -319,7 +351,10 @@ class VoiceAgent(BaseAgent):
             )
 
         return await super()._rebuild_memory_async(
-            in_context_messages, agent_state, num_messages=self.num_messages, num_archival_memories=self.num_archival_memories
+            in_context_messages,
+            agent_state,
+            num_messages=self.num_messages,
+            num_archival_memories=self.num_archival_memories,
         )
 
     def _build_openai_request(self, openai_messages: List[Dict], agent_state: AgentState) -> ChatCompletionRequest:
@@ -344,7 +379,13 @@ class VoiceAgent(BaseAgent):
                 t
                 for t in agent_state.tools
                 if t.tool_type
-                in {ToolType.EXTERNAL_COMPOSIO, ToolType.CUSTOM, ToolType.LETTA_FILES_CORE, ToolType.LETTA_BUILTIN, ToolType.EXTERNAL_MCP}
+                in {
+                    ToolType.EXTERNAL_COMPOSIO,
+                    ToolType.CUSTOM,
+                    ToolType.LETTA_FILES_CORE,
+                    ToolType.LETTA_BUILTIN,
+                    ToolType.EXTERNAL_MCP,
+                }
             ]
         else:
             tools = agent_state.tools
@@ -408,7 +449,10 @@ class VoiceAgent(BaseAgent):
 
         # TODO: Customize whether or not to have heartbeats, pre_exec_message, etc.
         return [search_memory_json] + [
-            Tool(type="function", function=enable_strict_mode(add_pre_execution_message(remove_request_heartbeat(t.json_schema))))
+            Tool(
+                type="function",
+                function=enable_strict_mode(add_pre_execution_message(remove_request_heartbeat(t.json_schema))),
+            )
             for t in tools
         ]
 

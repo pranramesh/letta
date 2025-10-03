@@ -2,7 +2,11 @@ from typing import TYPE_CHECKING, List, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 
-from letta.schemas.organization import Organization, OrganizationCreate, OrganizationUpdate
+from letta.schemas.organization import (
+    Organization,
+    OrganizationCreate,
+    OrganizationUpdate,
+)
 from letta.server.rest_api.dependencies import get_letta_server
 
 if TYPE_CHECKING:
@@ -43,7 +47,12 @@ async def create_org(
     return org
 
 
-@router.delete("/", tags=["admin"], response_model=Organization, operation_id="delete_organization_by_id")
+@router.delete(
+    "/",
+    tags=["admin"],
+    response_model=Organization,
+    operation_id="delete_organization_by_id",
+)
 async def delete_org(
     org_id: str = Query(..., description="The org_id key to be deleted."),
     server: "SyncServer" = Depends(get_letta_server),

@@ -79,7 +79,10 @@ class ArchivalPassage(BasePassage, ArchiveMixin):
 
     # junction table for efficient tag queries (complements json column above)
     passage_tags: Mapped[List["PassageTag"]] = relationship(
-        "PassageTag", back_populates="passage", cascade="all, delete-orphan", lazy="noload"
+        "PassageTag",
+        back_populates="passage",
+        cascade="all, delete-orphan",
+        lazy="noload",
     )
 
     @declared_attr

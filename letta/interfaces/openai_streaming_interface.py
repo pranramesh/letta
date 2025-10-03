@@ -138,7 +138,7 @@ class OpenAIStreamingInterface:
 
             if self.tools:
                 # Convert tools to dict format for token counting
-                tool_dicts = [tool["function"] if isinstance(tool, dict) and "function" in tool else tool for tool in self.tools]
+                tool_dicts = [(tool["function"] if isinstance(tool, dict) and "function" in tool else tool) for tool in self.tools]
                 self.fallback_input_tokens += num_tokens_from_functions(tool_dicts)
 
         prev_message_type = None
@@ -157,7 +157,11 @@ class OpenAIStreamingInterface:
                     except asyncio.CancelledError as e:
                         import traceback
 
-                        logger.info("Cancelled stream attempt but overriding %s: %s", e, traceback.format_exc())
+                        logger.info(
+                            "Cancelled stream attempt but overriding %s: %s",
+                            e,
+                            traceback.format_exc(),
+                        )
                         async for message in self._process_chunk(chunk, ttft_span, prev_message_type, message_index):
                             new_message_type = message.message_type
                             if new_message_type != prev_message_type:
@@ -176,7 +180,11 @@ class OpenAIStreamingInterface:
             if ttft_span:
                 ttft_span.add_event(
                     name="stop_reason",
-                    attributes={"stop_reason": StopReasonType.error.value, "error": str(e), "stacktrace": traceback.format_exc()},
+                    attributes={
+                        "stop_reason": StopReasonType.error.value,
+                        "error": str(e),
+                        "stacktrace": traceback.format_exc(),
+                    },
                 )
             yield LettaStopReason(stop_reason=StopReasonType.error)
             raise e

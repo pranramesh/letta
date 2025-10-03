@@ -3,7 +3,12 @@ from typing import List, Optional, Tuple, Union
 from letta.orm.provider import Provider as ProviderModel
 from letta.otel.tracing import trace_method
 from letta.schemas.enums import ProviderCategory, ProviderType
-from letta.schemas.providers import Provider as PydanticProvider, ProviderCheck, ProviderCreate, ProviderUpdate
+from letta.schemas.providers import (
+    Provider as PydanticProvider,
+    ProviderCheck,
+    ProviderCreate,
+    ProviderUpdate,
+)
 from letta.schemas.user import User as PydanticUser
 from letta.server.db import db_registry
 from letta.utils import enforce_types
@@ -15,7 +20,10 @@ class ProviderManager:
     def create_provider(self, request: ProviderCreate, actor: PydanticUser) -> PydanticProvider:
         """Create a new provider if it doesn't already exist."""
         with db_registry.session() as session:
-            provider_create_args = {**request.model_dump(), "provider_category": ProviderCategory.byok}
+            provider_create_args = {
+                **request.model_dump(),
+                "provider_category": ProviderCategory.byok,
+            }
             provider = PydanticProvider(**provider_create_args)
 
             if provider.name == provider.provider_type.value:
@@ -36,7 +44,10 @@ class ProviderManager:
     async def create_provider_async(self, request: ProviderCreate, actor: PydanticUser) -> PydanticProvider:
         """Create a new provider if it doesn't already exist."""
         async with db_registry.async_session() as session:
-            provider_create_args = {**request.model_dump(), "provider_category": ProviderCategory.byok}
+            provider_create_args = {
+                **request.model_dump(),
+                "provider_category": ProviderCategory.byok,
+            }
             provider = PydanticProvider(**provider_create_args)
 
             if provider.name == provider.provider_type.value:
@@ -58,7 +69,12 @@ class ProviderManager:
         """Update provider details."""
         with db_registry.session() as session:
             # Retrieve the existing provider by ID
-            existing_provider = ProviderModel.read(db_session=session, identifier=provider_id, actor=actor, check_is_deleted=True)
+            existing_provider = ProviderModel.read(
+                db_session=session,
+                identifier=provider_id,
+                actor=actor,
+                check_is_deleted=True,
+            )
 
             # Update only the fields that are provided in ProviderUpdate
             update_data = provider_update.model_dump(to_orm=True, exclude_unset=True, exclude_none=True)
@@ -76,7 +92,10 @@ class ProviderManager:
         async with db_registry.async_session() as session:
             # Retrieve the existing provider by ID
             existing_provider = await ProviderModel.read_async(
-                db_session=session, identifier=provider_id, actor=actor, check_is_deleted=True
+                db_session=session,
+                identifier=provider_id,
+                actor=actor,
+                check_is_deleted=True,
             )
 
             # Update only the fields that are provided in ProviderUpdate
@@ -94,7 +113,12 @@ class ProviderManager:
         """Delete a provider."""
         with db_registry.session() as session:
             # Clear api key field
-            existing_provider = ProviderModel.read(db_session=session, identifier=provider_id, actor=actor, check_is_deleted=True)
+            existing_provider = ProviderModel.read(
+                db_session=session,
+                identifier=provider_id,
+                actor=actor,
+                check_is_deleted=True,
+            )
             existing_provider.api_key = None
             existing_provider.update(session, actor=actor)
 
@@ -110,7 +134,10 @@ class ProviderManager:
         async with db_registry.async_session() as session:
             # Clear api key field
             existing_provider = await ProviderModel.read_async(
-                db_session=session, identifier=provider_id, actor=actor, check_is_deleted=True
+                db_session=session,
+                identifier=provider_id,
+                actor=actor,
+                check_is_deleted=True,
             )
             existing_provider.api_key = None
             await existing_provider.update_async(session, actor=actor)

@@ -17,7 +17,10 @@ class AsyncBaseMCPClient:
     AGENT_ID_HEADER = "X-Agent-Id"
 
     def __init__(
-        self, server_config: BaseServerConfig, oauth_provider: Optional[OAuthClientProvider] = None, agent_id: Optional[str] = None
+        self,
+        server_config: BaseServerConfig,
+        oauth_provider: Optional[OAuthClientProvider] = None,
+        agent_id: Optional[str] = None,
     ):
         self.server_config = server_config
         self.oauth_provider = oauth_provider

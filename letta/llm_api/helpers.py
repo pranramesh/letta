@@ -304,7 +304,11 @@ def unpack_inner_thoughts_from_kwargs(choice: Choice, inner_thoughts_key: str) -
     return rewritten_choice
 
 
-def calculate_summarizer_cutoff(in_context_messages: List[Message], token_counts: List[int], logger: "logging.Logger") -> int:
+def calculate_summarizer_cutoff(
+    in_context_messages: List[Message],
+    token_counts: List[int],
+    logger: "logging.Logger",
+) -> int:
     if len(in_context_messages) != len(token_counts):
         raise ValueError(
             f"Given in_context_messages has different length from given token_counts: {len(in_context_messages)} != {len(token_counts)}"
@@ -356,7 +360,9 @@ def get_token_counts_for_messages(in_context_messages: List[Message]) -> List[in
     return token_counts
 
 
-def is_context_overflow_error(exception: Union[requests.exceptions.RequestException, Exception]) -> bool:
+def is_context_overflow_error(
+    exception: Union[requests.exceptions.RequestException, Exception],
+) -> bool:
     """Checks if an exception is due to context overflow (based on common OpenAI response messages)"""
     from letta.utils import printd
 

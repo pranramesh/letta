@@ -14,7 +14,10 @@ from letta.schemas.message import Message, MessageCreate, MessageCreateBase
 from letta.schemas.tool_execution_result import ToolExecutionResult
 from letta.schemas.usage import LettaUsageStatistics
 from letta.schemas.user import User
-from letta.server.rest_api.utils import create_approval_response_message_from_input, create_input_messages
+from letta.server.rest_api.utils import (
+    create_approval_response_message_from_input,
+    create_input_messages,
+)
 from letta.services.message_manager import MessageManager
 
 logger = get_logger(__name__)
@@ -35,7 +38,9 @@ def _create_letta_response(
 
     # Convert to Letta messages first
     response_messages = Message.to_letta_messages_from_list(
-        messages=filter_user_messages, use_assistant_message=use_assistant_message, reverse=False
+        messages=filter_user_messages,
+        use_assistant_message=use_assistant_message,
+        reverse=False,
     )
     # Filter approval response messages
     response_messages = [m for m in response_messages if m.message_type != "approval_response_message"]
@@ -78,7 +83,12 @@ def _prepare_in_context_messages(
 
     # Create a new user message from the input and store it
     new_in_context_messages = message_manager.create_many_messages(
-        create_input_messages(input_messages=input_messages, agent_id=agent_state.id, timezone=agent_state.timezone, actor=actor),
+        create_input_messages(
+            input_messages=input_messages,
+            agent_id=agent_state.id,
+            timezone=agent_state.timezone,
+            actor=actor,
+        ),
         actor=actor,
     )
 
@@ -116,7 +126,12 @@ async def _prepare_in_context_messages_async(
 
     # Create a new user message from the input and store it
     new_in_context_messages = await message_manager.create_many_messages_async(
-        create_input_messages(input_messages=input_messages, agent_id=agent_state.id, timezone=agent_state.timezone, actor=actor),
+        create_input_messages(
+            input_messages=input_messages,
+            agent_id=agent_state.id,
+            timezone=agent_state.timezone,
+            actor=actor,
+        ),
         actor=actor,
         project_id=agent_state.project_id,
     )
@@ -173,7 +188,10 @@ async def _prepare_in_context_messages_no_persist_async(
 
         # Create a new user message from the input but dont store it yet
         new_in_context_messages = create_input_messages(
-            input_messages=input_messages, agent_id=agent_state.id, timezone=agent_state.timezone, actor=actor
+            input_messages=input_messages,
+            agent_id=agent_state.id,
+            timezone=agent_state.timezone,
+            actor=actor,
         )
 
     return current_in_context_messages, new_in_context_messages

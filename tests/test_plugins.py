@@ -21,7 +21,11 @@ async def test_default_experimental_decorator():
 async def test_overwrite_arg_success():
     settings.plugin_register = "experimental_check=tests.helpers.plugins_helper:is_experimental_okay"
 
-    @experimental("test_override_kwarg", fallback_function=lambda *args, **kwargs: False, bool_val=True)
+    @experimental(
+        "test_override_kwarg",
+        fallback_function=lambda *args, **kwargs: False,
+        bool_val=True,
+    )
     async def _return_true(a_val: bool, bool_val: bool):
         assert bool_val is False
         return True
@@ -35,14 +39,22 @@ async def test_overwrite_arg_fail():
     # Should fallback to lambda
     settings.plugin_register = "experimental_check=tests.helpers.plugins_helper:is_experimental_okay"
 
-    @experimental("test_override_kwarg", fallback_function=lambda *args, **kwargs: True, bool_val=False)
+    @experimental(
+        "test_override_kwarg",
+        fallback_function=lambda *args, **kwargs: True,
+        bool_val=False,
+    )
     async def _return_false(a_val: bool, bool_val: bool):
         assert bool_val is True
         return False
 
     assert _return_false(False, True)
 
-    @experimental("test_override_kwarg", fallback_function=lambda *args, **kwargs: False, bool_val=True)
+    @experimental(
+        "test_override_kwarg",
+        fallback_function=lambda *args, **kwargs: False,
+        bool_val=True,
+    )
     async def _return_true(a_val: bool, bool_val: bool):
         assert bool_val is False
         return True

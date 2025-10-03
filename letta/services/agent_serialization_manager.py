@@ -160,7 +160,10 @@ class AgentSerializationManager:
         return sorted(unique_blocks.values(), key=lambda x: x.label)
 
     async def _extract_unique_sources_and_files_from_agents(
-        self, agent_states: List[AgentState], actor: User, files_agents_cache: dict = None
+        self,
+        agent_states: List[AgentState],
+        actor: User,
+        files_agents_cache: dict = None,
     ) -> tuple[List[Source], List[FileMetadata]]:
         """Extract unique sources and files from agent states using bulk operations"""
 
@@ -204,7 +207,10 @@ class AgentSerializationManager:
                 per_file_view_window_char_limit=agent_state.per_file_view_window_char_limit,
             )
         agent_schema = await AgentSchema.from_agent_state(
-            agent_state, message_manager=self.message_manager, files_agents=files_agents, actor=actor
+            agent_state,
+            message_manager=self.message_manager,
+            files_agents=files_agents,
+            actor=actor,
         )
         agent_schema.id = agent_file_id
 
@@ -335,7 +341,9 @@ class AgentSerializationManager:
             ]
             if hasattr(group_schema.manager_config, "manager_agent_id"):
                 group_schema.manager_config.manager_agent_id = self._map_db_to_file_id(
-                    group_schema.manager_config.manager_agent_id, AgentSchema.__id_prefix__, allow_new=False
+                    group_schema.manager_config.manager_agent_id,
+                    AgentSchema.__id_prefix__,
+                    allow_new=False,
                 )
             return group_schema
         except Exception as e:
@@ -501,7 +509,9 @@ class AgentSerializationManager:
 
                 # bulk upsert all tools at once
                 created_tools = await self.tool_manager.bulk_upsert_tools_async(
-                    pydantic_tools, actor, override_existing_tools=override_existing_tools
+                    pydantic_tools,
+                    actor,
+                    override_existing_tools=override_existing_tools,
                 )
 
                 # map file ids to database ids
@@ -596,7 +606,9 @@ class AgentSerializationManager:
                 embedder_config = override_embedding_config if override_embedding_config else schema.agents[0].embedding_config
                 # determine which embedder to use - turbopuffer takes precedence
                 if should_use_tpuf():
-                    from letta.services.file_processor.embedder.turbopuffer_embedder import TurbopufferEmbedder
+                    from letta.services.file_processor.embedder.turbopuffer_embedder import (
+                        TurbopufferEmbedder,
+                    )
 
                     embedder = TurbopufferEmbedder(embedding_config=embedder_config)
                 elif should_use_pinecone():
@@ -626,7 +638,10 @@ class AgentSerializationManager:
                         # TODO: This can be moved to celery or RQ or something
                         task = safe_create_task(
                             self._process_file_async(
-                                file_metadata=file_metadata, source_id=source_db_id, file_processor=file_processor, actor=actor
+                                file_metadata=file_metadata,
+                                source_id=source_db_id,
+                                file_processor=file_processor,
+                                actor=actor,
                             ),
                             label=f"process_file_{file_metadata.file_name}",
                         )
@@ -946,7 +961,13 @@ class AgentSerializationManager:
             allowed = model_cls.__fields__.keys()  # Pydantic v1
         return {k: v for k, v in data.items() if k in allowed}
 
-    async def _process_file_async(self, file_metadata: FileMetadata, source_id: str, file_processor: FileProcessor, actor: User):
+    async def _process_file_async(
+        self,
+        file_metadata: FileMetadata,
+        source_id: str,
+        file_processor: FileProcessor,
+        actor: User,
+    ):
         """
         Process a file asynchronously in the background.
 
@@ -982,7 +1003,7 @@ class AgentSerializationManager:
                     file_id=file_id,
                     actor=actor,
                     processing_status=FileProcessingStatus.ERROR,
-                    error_message=str(e) if str(e) else f"Agent serialization failed: {type(e).__name__}",
+                    error_message=(str(e) if str(e) else f"Agent serialization failed: {type(e).__name__}"),
                 )
             except Exception as update_error:
                 logger.error(f"Failed to update file status to ERROR for {file_id}: {update_error}")

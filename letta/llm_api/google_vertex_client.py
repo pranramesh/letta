@@ -37,7 +37,14 @@ from letta.otel.tracing import trace_method
 from letta.schemas.llm_config import LLMConfig
 from letta.schemas.message import Message as PydanticMessage
 from letta.schemas.openai.chat_completion_request import Tool
-from letta.schemas.openai.chat_completion_response import ChatCompletionResponse, Choice, FunctionCall, Message, ToolCall, UsageStatistics
+from letta.schemas.openai.chat_completion_response import (
+    ChatCompletionResponse,
+    Choice,
+    FunctionCall,
+    Message,
+    ToolCall,
+    UsageStatistics,
+)
 from letta.settings import model_settings, settings
 from letta.utils import get_tool_call_id
 
@@ -169,7 +176,13 @@ class GoogleVertexClient(LLMClientBase):
         # Per https://ai.google.dev/gemini-api/docs/function-calling?example=meeting#notes_and_limitations
         # * Only a subset of the OpenAPI schema is supported.
         # * Supported parameter types in Python are limited.
-        unsupported_keys = ["default", "exclusiveMaximum", "exclusiveMinimum", "additionalProperties", "$schema"]
+        unsupported_keys = [
+            "default",
+            "exclusiveMaximum",
+            "exclusiveMinimum",
+            "additionalProperties",
+            "$schema",
+        ]
         keys_to_remove_at_this_level = [key for key in unsupported_keys if key in schema_part]
         for key_to_remove in keys_to_remove_at_this_level:
             logger.debug(f"Removing unsupported keyword 	'{key_to_remove}' from schema part.")
@@ -261,7 +274,10 @@ class GoogleVertexClient(LLMClientBase):
 
             # Add inner thoughts
             if llm_config.put_inner_thoughts_in_kwargs:
-                from letta.local_llm.constants import INNER_THOUGHTS_KWARG_DESCRIPTION, INNER_THOUGHTS_KWARG_VERTEX
+                from letta.local_llm.constants import (
+                    INNER_THOUGHTS_KWARG_DESCRIPTION,
+                    INNER_THOUGHTS_KWARG_VERTEX,
+                )
 
                 func["parameters"]["properties"][INNER_THOUGHTS_KWARG_VERTEX] = {
                     "type": "string",
@@ -412,7 +428,9 @@ class GoogleVertexClient(LLMClientBase):
 
                         # NOTE: this also involves stripping the inner monologue out of the function
                         if llm_config.put_inner_thoughts_in_kwargs:
-                            from letta.local_llm.constants import INNER_THOUGHTS_KWARG_VERTEX
+                            from letta.local_llm.constants import (
+                                INNER_THOUGHTS_KWARG_VERTEX,
+                            )
 
                             assert INNER_THOUGHTS_KWARG_VERTEX in function_args, (
                                 f"Couldn't find inner thoughts in function args:\n{function_call}"
@@ -448,7 +466,9 @@ class GoogleVertexClient(LLMClientBase):
 
                             # NOTE: this also involves stripping the inner monologue out of the function
                             if llm_config.put_inner_thoughts_in_kwargs:
-                                from letta.local_llm.constants import INNER_THOUGHTS_KWARG_VERTEX
+                                from letta.local_llm.constants import (
+                                    INNER_THOUGHTS_KWARG_VERTEX,
+                                )
 
                                 assert INNER_THOUGHTS_KWARG_VERTEX in function_args, (
                                     f"Couldn't find inner thoughts in function args:\n{function_call}"

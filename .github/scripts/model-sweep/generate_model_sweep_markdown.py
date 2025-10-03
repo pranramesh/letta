@@ -123,7 +123,12 @@ def get_github_repo_info():
         # Try to get the GitHub repo URL from git remote
         import subprocess
 
-        result = subprocess.run(["git", "remote", "get-url", "origin"], capture_output=True, text=True, cwd=os.path.dirname(__file__))
+        result = subprocess.run(
+            ["git", "remote", "get-url", "origin"],
+            capture_output=True,
+            text=True,
+            cwd=os.path.dirname(__file__),
+        )
         if result.returncode == 0:
             remote_url = result.stdout.strip()
             # Parse GitHub URL
@@ -185,7 +190,11 @@ def generate_test_details(model_info, feature_mapping):
 
 def calculate_column_widths(all_provider_data, feature_mapping):
     """Calculate the maximum width needed for each column across all providers."""
-    widths = {"model": len("Model"), "context_window": len("Context Window"), "last_scanned": len("Last Scanned")}
+    widths = {
+        "model": len("Model"),
+        "context_window": len("Context Window"),
+        "last_scanned": len("Last Scanned"),
+    }
 
     # Feature column widths
     for feature in feature_mapping.keys():
@@ -330,7 +339,8 @@ def process_model_sweep_report(input_file, output_file, config_file=None, debug=
             # Try to get time_last_scanned from metadata, fallback to current time
             try:
                 last_scanned = model_tests[0]["metadata"].get(
-                    "time_last_scanned", model_tests[0]["metadata"].get("timestamp", datetime.now().isoformat())
+                    "time_last_scanned",
+                    model_tests[0]["metadata"].get("timestamp", datetime.now().isoformat()),
                 )
                 # Format timestamp if it's a full ISO string
                 if "T" in str(last_scanned):

@@ -1,17 +1,29 @@
 import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
-from anthropic.types.beta.messages import BetaMessageBatch, BetaMessageBatchIndividualResponse
+from anthropic.types.beta.messages import (
+    BetaMessageBatch,
+    BetaMessageBatchIndividualResponse,
+)
 from sqlalchemy import desc, func, select, tuple_
 
-from letta.jobs.types import BatchPollingResult, ItemUpdateInfo, RequestStatusUpdateInfo, StepStatusUpdateInfo
+from letta.jobs.types import (
+    BatchPollingResult,
+    ItemUpdateInfo,
+    RequestStatusUpdateInfo,
+    StepStatusUpdateInfo,
+)
 from letta.log import get_logger
 from letta.orm import Message as MessageModel
 from letta.orm.llm_batch_items import LLMBatchItem
 from letta.orm.llm_batch_job import LLMBatchJob
 from letta.otel.tracing import trace_method
 from letta.schemas.enums import AgentStepStatus, JobStatus, ProviderType
-from letta.schemas.llm_batch_job import AgentStepState, LLMBatchItem as PydanticLLMBatchItem, LLMBatchJob as PydanticLLMBatchJob
+from letta.schemas.llm_batch_job import (
+    AgentStepState,
+    LLMBatchItem as PydanticLLMBatchItem,
+    LLMBatchJob as PydanticLLMBatchJob,
+)
 from letta.schemas.llm_config import LLMConfig
 from letta.schemas.message import Message as PydanticMessage
 from letta.schemas.user import User as PydanticUser
@@ -206,7 +218,10 @@ class LLMBatchManager:
     @enforce_types
     @trace_method
     async def list_running_llm_batches_async(
-        self, actor: Optional[PydanticUser] = None, weeks: Optional[int] = None, batch_size: Optional[int] = None
+        self,
+        actor: Optional[PydanticUser] = None,
+        weeks: Optional[int] = None,
+        batch_size: Optional[int] = None,
     ) -> List[PydanticLLMBatchJob]:
         """Return all running LLM batch jobs, optionally filtered by actor's organization and recent weeks."""
         async with db_registry.async_session() as session:
@@ -372,7 +387,10 @@ class LLMBatchManager:
 
     @trace_method
     async def bulk_update_llm_batch_items_async(
-        self, llm_batch_id_agent_id_pairs: List[Tuple[str, str]], field_updates: List[Dict[str, Any]], strict: bool = True
+        self,
+        llm_batch_id_agent_id_pairs: List[Tuple[str, str]],
+        field_updates: List[Dict[str, Any]],
+        strict: bool = True,
     ) -> None:
         """
         Efficiently update multiple LLMBatchItem rows by (llm_batch_id, agent_id) pairs.

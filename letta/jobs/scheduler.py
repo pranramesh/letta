@@ -44,7 +44,8 @@ async def _try_acquire_lock_and_start_scheduler(server: SyncServer) -> bool:
         else:
             lock_session = db_registry.get_async_session_factory()()
             result = await lock_session.execute(
-                text("SELECT pg_try_advisory_lock(CAST(:lock_key AS bigint))"), {"lock_key": ADVISORY_LOCK_KEY}
+                text("SELECT pg_try_advisory_lock(CAST(:lock_key AS bigint))"),
+                {"lock_key": ADVISORY_LOCK_KEY},
             )
             acquired_lock = result.scalar()
             await lock_session.commit()
@@ -86,7 +87,10 @@ async def _try_acquire_lock_and_start_scheduler(server: SyncServer) -> bool:
             try:
                 await _release_advisory_lock(lock_session)
             except Exception as unlock_err:
-                logger.error(f"Failed to release lock during error handling: {unlock_err}", exc_info=True)
+                logger.error(
+                    f"Failed to release lock during error handling: {unlock_err}",
+                    exc_info=True,
+                )
             finally:
                 _advisory_lock_session = None
                 _is_scheduler_leader = False
@@ -142,7 +146,10 @@ async def _release_advisory_lock(target_lock_session=None):
     if lock_session is not None:
         logger.info(f"Attempting to release PostgreSQL advisory lock {ADVISORY_LOCK_KEY}")
         try:
-            await lock_session.execute(text("SELECT pg_advisory_unlock(CAST(:lock_key AS bigint))"), {"lock_key": ADVISORY_LOCK_KEY})
+            await lock_session.execute(
+                text("SELECT pg_advisory_unlock(CAST(:lock_key AS bigint))"),
+                {"lock_key": ADVISORY_LOCK_KEY},
+            )
             logger.info(f"Executed pg_advisory_unlock for lock {ADVISORY_LOCK_KEY}")
             await lock_session.commit()
         except Exception as e:
@@ -213,7 +220,10 @@ async def shutdown_scheduler_and_release_lock():
             except Exception as e:
                 logger.warning(f"Exception during APScheduler shutdown: {e}")
                 if "not running" not in str(e).lower():
-                    logger.error(f"Unexpected error shutting down APScheduler: {e}", exc_info=True)
+                    logger.error(
+                        f"Unexpected error shutting down APScheduler: {e}",
+                        exc_info=True,
+                    )
 
         await _release_advisory_lock()
         _is_scheduler_leader = False

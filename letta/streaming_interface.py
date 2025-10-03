@@ -9,9 +9,15 @@ from rich.live import Live
 from rich.markup import escape
 
 from letta.interface import CLIInterface
-from letta.local_llm.constants import ASSISTANT_MESSAGE_CLI_SYMBOL, INNER_THOUGHTS_CLI_SYMBOL
+from letta.local_llm.constants import (
+    ASSISTANT_MESSAGE_CLI_SYMBOL,
+    INNER_THOUGHTS_CLI_SYMBOL,
+)
 from letta.schemas.message import Message
-from letta.schemas.openai.chat_completion_response import ChatCompletionChunkResponse, ChatCompletionResponse
+from letta.schemas.openai.chat_completion_response import (
+    ChatCompletionChunkResponse,
+    ChatCompletionResponse,
+)
 
 # init(autoreset=True)
 
@@ -33,7 +39,12 @@ class AgentChunkStreamingInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def internal_monologue(self, msg: str, msg_obj: Optional[Message] = None, chunk_index: Optional[int] = None):
+    def internal_monologue(
+        self,
+        msg: str,
+        msg_obj: Optional[Message] = None,
+        chunk_index: Optional[int] = None,
+    ):
         """Letta generates some internal monologue"""
         raise NotImplementedError
 
@@ -43,7 +54,12 @@ class AgentChunkStreamingInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def function_message(self, msg: str, msg_obj: Optional[Message] = None, chunk_index: Optional[int] = None):
+    def function_message(
+        self,
+        msg: str,
+        msg_obj: Optional[Message] = None,
+        chunk_index: Optional[int] = None,
+    ):
         """Letta calls a function"""
         raise NotImplementedError
 
@@ -196,11 +212,22 @@ class StreamingCLIInterface(AgentChunkStreamingInterface):
         StreamingCLIInterface.nonstreaming_interface(msg, msg_obj)
 
     @staticmethod
-    def user_message(msg: str, msg_obj: Optional[Message] = None, raw: bool = False, dump: bool = False, debug: bool = DEBUG):
+    def user_message(
+        msg: str,
+        msg_obj: Optional[Message] = None,
+        raw: bool = False,
+        dump: bool = False,
+        debug: bool = DEBUG,
+    ):
         StreamingCLIInterface.nonstreaming_interface(msg, msg_obj)
 
     @staticmethod
-    def function_message(msg: str, msg_obj: Optional[Message] = None, debug: bool = DEBUG, chunk_index: Optional[int] = None):
+    def function_message(
+        msg: str,
+        msg_obj: Optional[Message] = None,
+        debug: bool = DEBUG,
+        chunk_index: Optional[int] = None,
+    ):
         StreamingCLIInterface.nonstreaming_interface(msg, msg_obj)
 
     @staticmethod
@@ -232,7 +259,12 @@ class AgentRefreshStreamingInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def internal_monologue(self, msg: str, msg_obj: Optional[Message] = None, chunk_index: Optional[int] = None):
+    def internal_monologue(
+        self,
+        msg: str,
+        msg_obj: Optional[Message] = None,
+        chunk_index: Optional[int] = None,
+    ):
         """Letta generates some internal monologue"""
         raise NotImplementedError
 
@@ -242,7 +274,12 @@ class AgentRefreshStreamingInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def function_message(self, msg: str, msg_obj: Optional[Message] = None, chunk_index: Optional[int] = None):
+    def function_message(
+        self,
+        msg: str,
+        msg_obj: Optional[Message] = None,
+        chunk_index: Optional[int] = None,
+    ):
         """Letta calls a function"""
         raise NotImplementedError
 
@@ -278,7 +315,12 @@ class StreamingRefreshCLIInterface(AgentRefreshStreamingInterface):
 
     nonstreaming_interface = CLIInterface
 
-    def __init__(self, fancy: bool = True, separate_send_message: bool = True, disable_inner_mono_call: bool = True):
+    def __init__(
+        self,
+        fancy: bool = True,
+        separate_send_message: bool = True,
+        disable_inner_mono_call: bool = True,
+    ):
         """Initialize the streaming CLI interface state."""
         self.console = Console()
 
@@ -369,7 +411,12 @@ class StreamingRefreshCLIInterface(AgentRefreshStreamingInterface):
     def warning_message(msg: str):
         StreamingCLIInterface.nonstreaming_interface.warning_message(msg)
 
-    def internal_monologue(self, msg: str, msg_obj: Optional[Message] = None, chunk_index: Optional[int] = None):
+    def internal_monologue(
+        self,
+        msg: str,
+        msg_obj: Optional[Message] = None,
+        chunk_index: Optional[int] = None,
+    ):
         if self.disable_inner_mono_call:
             return
         StreamingCLIInterface.nonstreaming_interface.internal_monologue(msg, msg_obj)
@@ -388,11 +435,22 @@ class StreamingRefreshCLIInterface(AgentRefreshStreamingInterface):
         StreamingCLIInterface.nonstreaming_interface.system_message(msg, msg_obj)
 
     @staticmethod
-    def user_message(msg: str, msg_obj: Optional[Message] = None, raw: bool = False, dump: bool = False, debug: bool = DEBUG):
+    def user_message(
+        msg: str,
+        msg_obj: Optional[Message] = None,
+        raw: bool = False,
+        dump: bool = False,
+        debug: bool = DEBUG,
+    ):
         StreamingCLIInterface.nonstreaming_interface.user_message(msg, msg_obj)
 
     @staticmethod
-    def function_message(msg: str, msg_obj: Optional[Message] = None, debug: bool = DEBUG, chunk_index: Optional[int] = None):
+    def function_message(
+        msg: str,
+        msg_obj: Optional[Message] = None,
+        debug: bool = DEBUG,
+        chunk_index: Optional[int] = None,
+    ):
         StreamingCLIInterface.nonstreaming_interface.function_message(msg, msg_obj)
 
     @staticmethod

@@ -12,10 +12,18 @@ from letta.functions.function_sets.base import core_memory_append, core_memory_r
 from letta.orm.sandbox_config import SandboxConfig, SandboxEnvironmentVariable
 from letta.schemas.agent import AgentState, CreateAgent
 from letta.schemas.block import CreateBlock
-from letta.schemas.environment_variables import AgentEnvironmentVariable, SandboxEnvironmentVariableCreate
+from letta.schemas.environment_variables import (
+    AgentEnvironmentVariable,
+    SandboxEnvironmentVariableCreate,
+)
 from letta.schemas.organization import Organization
 from letta.schemas.pip_requirement import PipRequirement
-from letta.schemas.sandbox_config import E2BSandboxConfig, LocalSandboxConfig, SandboxConfigCreate, SandboxConfigUpdate
+from letta.schemas.sandbox_config import (
+    E2BSandboxConfig,
+    LocalSandboxConfig,
+    SandboxConfigCreate,
+    SandboxConfigUpdate,
+)
 from letta.schemas.user import User
 from letta.server.server import SyncServer
 from letta.services.organization_manager import OrganizationManager
@@ -198,7 +206,9 @@ def clear_core_memory_tool(test_user):
 
 @pytest.fixture
 def external_codebase_tool(test_user):
-    from tests.test_tool_sandbox.restaurant_management_system.adjust_menu_prices import adjust_menu_prices
+    from tests.test_tool_sandbox.restaurant_management_system.adjust_menu_prices import (
+        adjust_menu_prices,
+    )
 
     tool = create_tool_from_func(adjust_menu_prices)
     tool = ToolManager().create_or_update_tool(tool, test_user)
@@ -249,7 +259,9 @@ def custom_test_sandbox_config(test_user):
     external_codebase_path = str(Path(__file__).parent / "test_tool_sandbox" / "restaurant_management_system")
     # tqdm is used in this codebase, but NOT in the requirements.txt, this tests that we can successfully install pip requirements
     local_sandbox_config = LocalSandboxConfig(
-        sandbox_dir=external_codebase_path, use_venv=True, pip_requirements=[PipRequirement(name="tqdm")]
+        sandbox_dir=external_codebase_path,
+        use_venv=True,
+        pip_requirements=[PipRequirement(name="tqdm")],
     )
 
     # Create the sandbox configuration
@@ -326,7 +338,9 @@ def test_local_sandbox_env(disable_e2b_api_key, get_env_tool, test_user):
     key = "secret_word"
     long_random_string = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(20))
     manager.create_sandbox_env_var(
-        SandboxEnvironmentVariableCreate(key=key, value=long_random_string), sandbox_config_id=config.id, actor=test_user
+        SandboxEnvironmentVariableCreate(key=key, value=long_random_string),
+        sandbox_config_id=config.id,
+        actor=test_user,
     )
 
     # Create tool and args
@@ -354,7 +368,9 @@ def test_local_sandbox_per_agent_env(disable_e2b_api_key, get_env_tool, agent_st
     # We expect that the agent's env var supersedes this
     wrong_long_random_string = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(20))
     manager.create_sandbox_env_var(
-        SandboxEnvironmentVariableCreate(key=key, value=wrong_long_random_string), sandbox_config_id=config.id, actor=test_user
+        SandboxEnvironmentVariableCreate(key=key, value=wrong_long_random_string),
+        sandbox_config_id=config.id,
+        actor=test_user,
     )
 
     # Make a environment variable with a long random string and put into agent state
@@ -417,7 +433,9 @@ def test_local_sandbox_with_venv_pip_installs_basic(disable_e2b_api_key, cowsay_
     key = "secret_word"
     long_random_string = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(20))
     manager.create_sandbox_env_var(
-        SandboxEnvironmentVariableCreate(key=key, value=long_random_string), sandbox_config_id=config.id, actor=test_user
+        SandboxEnvironmentVariableCreate(key=key, value=long_random_string),
+        sandbox_config_id=config.id,
+        actor=test_user,
     )
 
     sandbox = ToolExecutionSandbox(cowsay_tool.name, {}, user=test_user, force_recreate_venv=True)
@@ -435,7 +453,9 @@ def test_local_sandbox_with_venv_pip_installs_with_update(disable_e2b_api_key, c
     key = "secret_word"
     long_random_string = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(20))
     manager.create_sandbox_env_var(
-        SandboxEnvironmentVariableCreate(key=key, value=long_random_string), sandbox_config_id=config.id, actor=test_user
+        SandboxEnvironmentVariableCreate(key=key, value=long_random_string),
+        sandbox_config_id=config.id,
+        actor=test_user,
     )
 
     sandbox = ToolExecutionSandbox(cowsay_tool.name, {}, user=test_user, force_recreate_venv=True)
@@ -487,7 +507,9 @@ def test_e2b_sandbox_pip_installs(check_e2b_key_is_set, cowsay_tool, test_user):
     key = "secret_word"
     long_random_string = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(20))
     manager.create_sandbox_env_var(
-        SandboxEnvironmentVariableCreate(key=key, value=long_random_string), sandbox_config_id=config.id, actor=test_user
+        SandboxEnvironmentVariableCreate(key=key, value=long_random_string),
+        sandbox_config_id=config.id,
+        actor=test_user,
     )
 
     sandbox = ToolExecutionSandbox(cowsay_tool.name, {}, user=test_user)
@@ -537,7 +559,9 @@ def test_e2b_sandbox_inject_env_var_existing_sandbox(check_e2b_key_is_set, get_e
     key = "secret_word"
     long_random_string = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(20))
     manager.create_sandbox_env_var(
-        SandboxEnvironmentVariableCreate(key=key, value=long_random_string), sandbox_config_id=config.id, actor=test_user
+        SandboxEnvironmentVariableCreate(key=key, value=long_random_string),
+        sandbox_config_id=config.id,
+        actor=test_user,
     )
 
     # Assert that the environment variable gets injected correctly, even when the sandbox is NOT refreshed
@@ -562,7 +586,9 @@ def test_e2b_sandbox_per_agent_env(check_e2b_key_is_set, get_env_tool, agent_sta
     # We expect that the agent's env var supersedes this
     wrong_long_random_string = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(20))
     manager.create_sandbox_env_var(
-        SandboxEnvironmentVariableCreate(key=key, value=wrong_long_random_string), sandbox_config_id=config.id, actor=test_user
+        SandboxEnvironmentVariableCreate(key=key, value=wrong_long_random_string),
+        sandbox_config_id=config.id,
+        actor=test_user,
     )
 
     # Make a environment variable with a long random string and put into agent state

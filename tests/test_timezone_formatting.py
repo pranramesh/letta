@@ -78,7 +78,13 @@ class TestTimezoneFormatting:
 
     def test_get_heartbeat_timezone_accuracy(self):
         """Test that get_heartbeat produces accurate timestamps for different timezones"""
-        test_timezones = ["UTC", "America/New_York", "America/Los_Angeles", "Europe/London", "Asia/Tokyo"]
+        test_timezones = [
+            "UTC",
+            "America/New_York",
+            "America/Los_Angeles",
+            "Europe/London",
+            "Asia/Tokyo",
+        ]
 
         for tz in test_timezones:
             heartbeat = get_heartbeat(timezone=tz, reason="Test heartbeat")
@@ -114,7 +120,12 @@ class TestTimezoneFormatting:
 
     def test_package_system_message_timezone_accuracy(self):
         """Test that package_system_message produces accurate timestamps for different timezones"""
-        test_timezones = ["UTC", "America/Phoenix", "Europe/Rome", "Asia/Kolkata"]  # Mumbai is now called Kolkata in pytz
+        test_timezones = [
+            "UTC",
+            "America/Phoenix",
+            "Europe/Rome",
+            "Asia/Kolkata",
+        ]  # Mumbai is now called Kolkata in pytz
 
         for tz in test_timezones:
             message = package_system_message("System alert", timezone=tz)
@@ -127,14 +138,24 @@ class TestTimezoneFormatting:
 
         for tz in test_timezones:
             summary = package_summarize_message(
-                summary="Test summary", summary_message_count=2, hidden_message_count=5, total_message_count=7, timezone=tz
+                summary="Test summary",
+                summary_message_count=2,
+                hidden_message_count=5,
+                total_message_count=7,
+                timezone=tz,
             )
             time_str = self._extract_time_from_json(summary)
             self._validate_timezone_accuracy(time_str, tz)
 
     def test_get_local_time_timezone_direct(self):
         """Test get_local_time_timezone directly for accuracy"""
-        test_timezones = ["UTC", "America/New_York", "Europe/London", "Asia/Tokyo", "Australia/Melbourne"]
+        test_timezones = [
+            "UTC",
+            "America/New_York",
+            "Europe/London",
+            "Asia/Tokyo",
+            "Australia/Melbourne",
+        ]
 
         for tz in test_timezones:
             time_str = get_local_time_timezone(timezone=tz)
@@ -192,7 +213,10 @@ class TestTimezoneFormatting:
             ("America/New_York", ["EST", "EDT"]),  # Either EST or EDT depending on date
             ("Europe/London", ["GMT", "BST"]),  # Either GMT or BST depending on date
             ("Asia/Tokyo", ["JST", "+0900"]),
-            ("Australia/Sydney", ["AEDT", "AEST"]),  # Either AEDT or AEST depending on date
+            (
+                "Australia/Sydney",
+                ["AEDT", "AEST"],
+            ),  # Either AEDT or AEST depending on date
         ],
     )
     def test_timezone_format_components(self, timezone_str, expected_format_parts):

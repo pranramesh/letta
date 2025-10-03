@@ -272,7 +272,10 @@ class PassageManager:
     @enforce_types
     @trace_method
     def create_source_passage(
-        self, pydantic_passage: PydanticPassage, file_metadata: PydanticFileMetadata, actor: PydanticUser
+        self,
+        pydantic_passage: PydanticPassage,
+        file_metadata: PydanticFileMetadata,
+        actor: PydanticUser,
     ) -> PydanticPassage:
         """Create a new source passage."""
         if not pydantic_passage.source_id:
@@ -312,7 +315,10 @@ class PassageManager:
     @enforce_types
     @trace_method
     async def create_source_passage_async(
-        self, pydantic_passage: PydanticPassage, file_metadata: PydanticFileMetadata, actor: PydanticUser
+        self,
+        pydantic_passage: PydanticPassage,
+        file_metadata: PydanticFileMetadata,
+        actor: PydanticUser,
     ) -> PydanticPassage:
         """Create a new source passage."""
         if not pydantic_passage.source_id:
@@ -357,7 +363,9 @@ class PassageManager:
         import warnings
 
         warnings.warn(
-            "create_passage is deprecated. Use create_agent_passage() or create_source_passage() instead.", DeprecationWarning, stacklevel=2
+            "create_passage is deprecated. Use create_agent_passage() or create_source_passage() instead.",
+            DeprecationWarning,
+            stacklevel=2,
         )
 
         passage = self._preprocess_passage_for_creation(pydantic_passage=pydantic_passage)
@@ -456,7 +464,10 @@ class PassageManager:
     @enforce_types
     @trace_method
     def create_many_source_passages(
-        self, passages: List[PydanticPassage], file_metadata: PydanticFileMetadata, actor: PydanticUser
+        self,
+        passages: List[PydanticPassage],
+        file_metadata: PydanticFileMetadata,
+        actor: PydanticUser,
     ) -> List[PydanticPassage]:
         """Create multiple source passages."""
         return [self.create_source_passage(p, file_metadata, actor) for p in passages]
@@ -464,7 +475,10 @@ class PassageManager:
     @enforce_types
     @trace_method
     async def create_many_source_passages_async(
-        self, passages: List[PydanticPassage], file_metadata: PydanticFileMetadata, actor: PydanticUser
+        self,
+        passages: List[PydanticPassage],
+        file_metadata: PydanticFileMetadata,
+        actor: PydanticUser,
     ) -> List[PydanticPassage]:
         """Create multiple source passages."""
         source_passages = []
@@ -1095,7 +1109,10 @@ class PassageManager:
                 # Count passages through the archives relationship
                 return (
                     session.query(ArchivalPassage)
-                    .join(ArchivesAgents, ArchivalPassage.archive_id == ArchivesAgents.archive_id)
+                    .join(
+                        ArchivesAgents,
+                        ArchivalPassage.archive_id == ArchivesAgents.archive_id,
+                    )
                     .filter(
                         ArchivesAgents.agent_id == agent_id,
                         ArchivalPassage.organization_id == actor.organization_id,
@@ -1118,7 +1135,11 @@ class PassageManager:
         """DEPRECATED: Use agent_passage_size() instead (this only counted agent passages anyway)."""
         import warnings
 
-        warnings.warn("size is deprecated. Use agent_passage_size() instead.", DeprecationWarning, stacklevel=2)
+        warnings.warn(
+            "size is deprecated. Use agent_passage_size() instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self.agent_passage_size(actor=actor, agent_id=agent_id)
 
     @enforce_types
@@ -1140,7 +1161,10 @@ class PassageManager:
 
                 result = await session.execute(
                     select(func.count(ArchivalPassage.id))
-                    .join(ArchivesAgents, ArchivalPassage.archive_id == ArchivesAgents.archive_id)
+                    .join(
+                        ArchivesAgents,
+                        ArchivalPassage.archive_id == ArchivesAgents.archive_id,
+                    )
                     .where(
                         ArchivesAgents.agent_id == agent_id,
                         ArchivalPassage.organization_id == actor.organization_id,

@@ -132,7 +132,10 @@ def build_deepseek_chat_completions_request(
         if function_call is None:
             tool_choice = None
         elif function_call not in ["none", "auto", "required"]:
-            tool_choice = ToolFunctionChoice(type="function", function=ToolFunctionChoiceFunctionCall(name=function_call))
+            tool_choice = ToolFunctionChoice(
+                type="function",
+                function=ToolFunctionChoiceFunctionCall(name=function_call),
+            )
         else:
             tool_choice = function_call
 
@@ -158,7 +161,7 @@ def build_deepseek_chat_completions_request(
             data = ChatCompletionRequest(
                 model=model,
                 messages=openai_message_list,
-                tools=[Tool(type="function", function=f) for f in functions] if functions else None,
+                tools=([Tool(type="function", function=f) for f in functions] if functions else None),
                 tool_choice=tool_choice,
                 user=str(user_id),
                 max_completion_tokens=max_tokens,

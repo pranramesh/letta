@@ -12,7 +12,11 @@ import pytest
 from dotenv import load_dotenv
 from letta_client import Letta, McpTool, ToolCallMessage, ToolReturnMessage
 
-from letta.functions.mcp_client.types import SSEServerConfig, StdioServerConfig, StreamableHTTPServerConfig
+from letta.functions.mcp_client.types import (
+    SSEServerConfig,
+    StdioServerConfig,
+    StreamableHTTPServerConfig,
+)
 from letta.schemas.embedding_config import EmbeddingConfig
 from letta.schemas.letta_message_content import TextContent
 from letta.schemas.llm_config import LLMConfig
@@ -57,7 +61,11 @@ def create_virtualenv_and_install_requirements(requirements_path: Path, name="ve
 
     try:
         # Upgrade pip first to avoid potential issues
-        subprocess.check_call([str(pip_path), "install", "--upgrade", "pip"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.check_call(
+            [str(pip_path), "install", "--upgrade", "pip"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
         # Install requirements
         subprocess.check_call([str(pip_path), "install", "-r", str(requirements_path)])
     except subprocess.CalledProcessError as exc:

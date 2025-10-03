@@ -23,7 +23,11 @@ class GoogleAIClient(GoogleVertexClient):
 
 
 def get_gemini_endpoint_and_headers(
-    base_url: str, model: Optional[str], api_key: str, key_in_header: bool = True, generate_content: bool = False
+    base_url: str,
+    model: Optional[str],
+    api_key: str,
+    key_in_header: bool = True,
+    generate_content: bool = False,
 ) -> Tuple[str, dict]:
     """
     Dynamically generate the model endpoint and headers.
@@ -60,14 +64,20 @@ def google_ai_check_valid_api_key(api_key: str):
     except genai.errors.ClientError as e:
         # google api returns 400 invalid argument for invalid api key
         if e.code == 400:
-            raise LLMAuthenticationError(message=f"Failed to authenticate with Google AI: {e}", code=ErrorCode.UNAUTHENTICATED)
+            raise LLMAuthenticationError(
+                message=f"Failed to authenticate with Google AI: {e}",
+                code=ErrorCode.UNAUTHENTICATED,
+            )
         raise e
     except Exception as e:
         raise LLMError(message=f"{e}", code=ErrorCode.INTERNAL_SERVER_ERROR)
 
 
 async def google_ai_get_model_list_async(
-    base_url: str, api_key: str, key_in_header: bool = True, client: Optional[httpx.AsyncClient] = None
+    base_url: str,
+    api_key: str,
+    key_in_header: bool = True,
+    client: Optional[httpx.AsyncClient] = None,
 ) -> List[dict]:
     """Asynchronous version to get model list from Google AI API using httpx."""
     from letta.utils import printd
@@ -154,7 +164,11 @@ def google_ai_get_model_details(base_url: str, api_key: str, model: str, key_in_
 
 
 async def google_ai_get_model_details_async(
-    base_url: str, api_key: str, model: str, key_in_header: bool = True, client: Optional[httpx.AsyncClient] = None
+    base_url: str,
+    api_key: str,
+    model: str,
+    key_in_header: bool = True,
+    client: Optional[httpx.AsyncClient] = None,
 ) -> dict:
     """Asynchronous version to get model details from Google AI API using httpx."""
     import httpx

@@ -3,7 +3,11 @@ from collections import deque
 from datetime import datetime
 from typing import AsyncGenerator, Optional, Union
 
-from openai.types.chat.chat_completion_chunk import ChatCompletionChunk, Choice, ChoiceDelta
+from openai.types.chat.chat_completion_chunk import (
+    ChatCompletionChunk,
+    Choice,
+    ChoiceDelta,
+)
 
 from letta.constants import DEFAULT_MESSAGE_TOOL, DEFAULT_MESSAGE_TOOL_KWARG
 from letta.local_llm.constants import INNER_THOUGHTS_KWARG
@@ -179,7 +183,12 @@ class ChatCompletionsStreamingInterface(AgentChunkStreamingInterface):
         """
         return
 
-    def internal_monologue(self, msg: str, msg_obj: Optional[Message] = None, chunk_index: Optional[int] = None) -> None:
+    def internal_monologue(
+        self,
+        msg: str,
+        msg_obj: Optional[Message] = None,
+        chunk_index: Optional[int] = None,
+    ) -> None:
         """
         Handle LLM reasoning or internal monologue. Example usage: if you want
         to capture chain-of-thought for debugging in a non-streaming scenario.
@@ -193,7 +202,12 @@ class ChatCompletionsStreamingInterface(AgentChunkStreamingInterface):
         """
         return
 
-    def function_message(self, msg: str, msg_obj: Optional[Message] = None, chunk_index: Optional[int] = None) -> None:
+    def function_message(
+        self,
+        msg: str,
+        msg_obj: Optional[Message] = None,
+        chunk_index: Optional[int] = None,
+    ) -> None:
         """
         Handle function-related log messages, typically of the form:
         It's a no-op by default.
@@ -244,7 +258,10 @@ class ChatCompletionsStreamingInterface(AgentChunkStreamingInterface):
                         choices=[
                             Choice(
                                 index=choice.index,
-                                delta=ChoiceDelta(content=self.current_function_arguments[-1], role=self.ASSISTANT_STR),
+                                delta=ChoiceDelta(
+                                    content=self.current_function_arguments[-1],
+                                    role=self.ASSISTANT_STR,
+                                ),
                                 finish_reason=None,
                             )
                         ],

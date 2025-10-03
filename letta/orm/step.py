@@ -36,7 +36,9 @@ class Step(SqlalchemyBase, ProjectMixin):
         doc="The unique identifier of the provider that was configured for this step",
     )
     job_id: Mapped[Optional[str]] = mapped_column(
-        ForeignKey("jobs.id", ondelete="SET NULL"), nullable=True, doc="The unique identified of the job run that triggered this step"
+        ForeignKey("jobs.id", ondelete="SET NULL"),
+        nullable=True,
+        doc="The unique identified of the job run that triggered this step",
     )
     agent_id: Mapped[Optional[str]] = mapped_column(None, nullable=True, doc="The name of the model used for this step.")
     provider_name: Mapped[Optional[str]] = mapped_column(None, nullable=True, doc="The name of the provider used for this step.")
@@ -55,13 +57,17 @@ class Step(SqlalchemyBase, ProjectMixin):
     tid: Mapped[Optional[str]] = mapped_column(None, nullable=True, doc="Transaction ID that processed the step.")
     trace_id: Mapped[Optional[str]] = mapped_column(None, nullable=True, doc="The trace id of the agent step.")
     feedback: Mapped[Optional[str]] = mapped_column(
-        None, nullable=True, doc="The feedback for this step. Must be either 'positive' or 'negative'."
+        None,
+        nullable=True,
+        doc="The feedback for this step. Must be either 'positive' or 'negative'.",
     )
 
     # error handling
     error_type: Mapped[Optional[str]] = mapped_column(None, nullable=True, doc="The type/class of the error that occurred")
     error_data: Mapped[Optional[Dict]] = mapped_column(
-        JSON, nullable=True, doc="Error details including message, traceback, and additional context"
+        JSON,
+        nullable=True,
+        doc="Error details including message, traceback, and additional context",
     )
     status: Mapped[Optional[StepStatus]] = mapped_column(None, nullable=True, doc="Step status: pending, success, or failed")
 
@@ -73,5 +79,9 @@ class Step(SqlalchemyBase, ProjectMixin):
     # Relationships (backrefs)
     messages: Mapped[List["Message"]] = relationship("Message", back_populates="step", cascade="save-update", lazy="noload")
     metrics: Mapped[Optional["StepMetrics"]] = relationship(
-        "StepMetrics", back_populates="step", cascade="all, delete-orphan", lazy="noload", uselist=False
+        "StepMetrics",
+        back_populates="step",
+        cascade="all, delete-orphan",
+        lazy="noload",
+        uselist=False,
     )

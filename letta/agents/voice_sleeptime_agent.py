@@ -10,7 +10,12 @@ from letta.schemas.enums import MessageStreamStatus, ToolType
 from letta.schemas.letta_message import LegacyLettaMessage, LettaMessage, MessageType
 from letta.schemas.letta_response import LettaResponse
 from letta.schemas.message import MessageCreate
-from letta.schemas.tool_rule import ChildToolRule, ContinueToolRule, InitToolRule, TerminalToolRule
+from letta.schemas.tool_rule import (
+    ChildToolRule,
+    ContinueToolRule,
+    InitToolRule,
+    TerminalToolRule,
+)
 from letta.schemas.user import User
 from letta.services.agent_manager import AgentManager
 from letta.services.block_manager import BlockManager
@@ -86,14 +91,20 @@ class VoiceSleeptimeAgent(LettaAgent):
         ]
 
         # Summarize
-        current_in_context_messages, new_in_context_messages, stop_reason, usage = await super()._step(
-            agent_state=agent_state, input_messages=input_messages, max_steps=max_steps
-        )
+        (
+            current_in_context_messages,
+            new_in_context_messages,
+            stop_reason,
+            usage,
+        ) = await super()._step(agent_state=agent_state, input_messages=input_messages, max_steps=max_steps)
         new_in_context_messages, updated = await self.summarizer.summarize(
-            in_context_messages=current_in_context_messages, new_letta_messages=new_in_context_messages
+            in_context_messages=current_in_context_messages,
+            new_letta_messages=new_in_context_messages,
         )
         self.agent_manager.set_in_context_messages(
-            agent_id=self.agent_id, message_ids=[m.id for m in new_in_context_messages], actor=self.actor
+            agent_id=self.agent_id,
+            message_ids=[m.id for m in new_in_context_messages],
+            actor=self.actor,
         )
 
         return _create_letta_response(
@@ -126,7 +137,10 @@ class VoiceSleeptimeAgent(LettaAgent):
         try:
             if target_tool.name == "rethink_user_memory" and target_tool.tool_type == ToolType.LETTA_VOICE_SLEEPTIME_CORE:
                 func_return, success_flag = self.rethink_user_memory(agent_state=agent_state, **tool_args)
-                return ToolExecutionResult(func_return=func_return, status="success" if success_flag else "error")
+                return ToolExecutionResult(
+                    func_return=func_return,
+                    status="success" if success_flag else "error",
+                )
             elif target_tool.name == "finish_rethinking_memory" and target_tool.tool_type == ToolType.LETTA_VOICE_SLEEPTIME_CORE:
                 return ToolExecutionResult(func_return="", status="success")
             elif target_tool.name == "store_memories" and target_tool.tool_type == ToolType.LETTA_VOICE_SLEEPTIME_CORE:
@@ -137,7 +151,8 @@ class VoiceSleeptimeAgent(LettaAgent):
                 aggregated_success = all(success for _, success in results)
 
                 return ToolExecutionResult(
-                    func_return=aggregated_result, status="success" if aggregated_success else "error"
+                    func_return=aggregated_result,
+                    status="success" if aggregated_success else "error",
                 )  # Note that here we store to the convo agent's archival memory
             else:
                 result = f"Voice sleeptime agent tried invoking invalid tool with type {target_tool.tool_type}: {target_tool}"
@@ -152,7 +167,11 @@ class VoiceSleeptimeAgent(LettaAgent):
         agent_state.memory.update_block_value(label=self.target_block_label, value=new_memory)
 
         target_block = agent_state.memory.get_block(self.target_block_label)
-        self.block_manager.update_block(block_id=target_block.id, block_update=BlockUpdate(value=target_block.value), actor=self.actor)
+        self.block_manager.update_block(
+            block_id=target_block.id,
+            block_update=BlockUpdate(value=target_block.value),
+            actor=self.actor,
+        )
 
         return "", True
 
@@ -172,7 +191,10 @@ class VoiceSleeptimeAgent(LettaAgent):
 
             return "", True
         except Exception as e:
-            return f"Failed to store memory given start_index {start_index} and end_index {end_index}: {e}", False
+            return (
+                f"Failed to store memory given start_index {start_index} and end_index {end_index}: {e}",
+                False,
+            )
 
     async def step_stream(
         self,

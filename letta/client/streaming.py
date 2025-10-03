@@ -9,7 +9,13 @@ from letta.constants import OPENAI_CONTEXT_WINDOW_ERROR_SUBSTRING
 from letta.errors import LLMError
 from letta.log import get_logger
 from letta.schemas.enums import MessageStreamStatus
-from letta.schemas.letta_message import AssistantMessage, HiddenReasoningMessage, ReasoningMessage, ToolCallMessage, ToolReturnMessage
+from letta.schemas.letta_message import (
+    AssistantMessage,
+    HiddenReasoningMessage,
+    ReasoningMessage,
+    ToolCallMessage,
+    ToolReturnMessage,
+)
 from letta.schemas.letta_response import LettaStreamingResponse
 from letta.schemas.usage import LettaUsageStatistics
 

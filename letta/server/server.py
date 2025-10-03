@@ -23,7 +23,13 @@ from letta.config import LettaConfig
 from letta.constants import LETTA_TOOL_EXECUTION_DIR
 from letta.data_sources.connectors import DataConnector, load_data
 from letta.errors import HandleNotFoundError
-from letta.functions.mcp_client.types import MCPServerType, MCPTool, MCPToolHealth, SSEServerConfig, StdioServerConfig
+from letta.functions.mcp_client.types import (
+    MCPServerType,
+    MCPTool,
+    MCPToolHealth,
+    SSEServerConfig,
+    StdioServerConfig,
+)
 from letta.functions.schema_validator import validate_complete_json_schema
 from letta.groups.helpers import load_multi_agent
 from letta.helpers.datetime_helpers import get_utc_time
@@ -43,11 +49,29 @@ from letta.schemas.block import Block, BlockUpdate, CreateBlock
 from letta.schemas.embedding_config import EmbeddingConfig
 
 # openai schemas
-from letta.schemas.enums import AgentType, JobStatus, MessageStreamStatus, ProviderCategory, ProviderType, SandboxType, ToolSourceType
+from letta.schemas.enums import (
+    AgentType,
+    JobStatus,
+    MessageStreamStatus,
+    ProviderCategory,
+    ProviderType,
+    SandboxType,
+    ToolSourceType,
+)
 from letta.schemas.environment_variables import SandboxEnvironmentVariableCreate
-from letta.schemas.group import GroupCreate, ManagerType, SleeptimeManager, VoiceSleeptimeManager
+from letta.schemas.group import (
+    GroupCreate,
+    ManagerType,
+    SleeptimeManager,
+    VoiceSleeptimeManager,
+)
 from letta.schemas.job import Job, JobUpdate
-from letta.schemas.letta_message import LegacyLettaMessage, LettaMessage, MessageType, ToolReturnMessage
+from letta.schemas.letta_message import (
+    LegacyLettaMessage,
+    LettaMessage,
+    MessageType,
+    ToolReturnMessage,
+)
 from letta.schemas.letta_message_content import TextContent
 from letta.schemas.letta_response import LettaResponse
 from letta.schemas.letta_stop_reason import LettaStopReason, StopReasonType
@@ -78,7 +102,9 @@ from letta.schemas.source import Source
 from letta.schemas.tool import Tool
 from letta.schemas.usage import LettaUsageStatistics
 from letta.schemas.user import User
-from letta.server.rest_api.chat_completions_interface import ChatCompletionsStreamingInterface
+from letta.server.rest_api.chat_completions_interface import (
+    ChatCompletionsStreamingInterface,
+)
 from letta.server.rest_api.interface import StreamingServerInterface
 from letta.server.rest_api.utils import sse_async_generator
 from letta.services.agent_manager import AgentManager
@@ -109,7 +135,12 @@ from letta.services.tool_manager import ToolManager
 from letta.services.user_manager import UserManager
 from letta.settings import DatabaseChoice, model_settings, settings, tool_settings
 from letta.streaming_interface import AgentChunkStreamingInterface
-from letta.utils import get_friendly_error_msg, get_persona_text, make_key, safe_create_task
+from letta.utils import (
+    get_friendly_error_msg,
+    get_persona_text,
+    make_key,
+    safe_create_task,
+)
 
 config = LettaConfig.load()
 logger = get_logger(__name__)
@@ -285,10 +316,15 @@ class SyncServer(Server):
                     )
 
                 sandbox_config_create = SandboxConfigCreate(
-                    config=LocalSandboxConfig(sandbox_dir=tool_settings.tool_exec_dir, use_venv=use_venv, venv_name=venv_name)
+                    config=LocalSandboxConfig(
+                        sandbox_dir=tool_settings.tool_exec_dir,
+                        use_venv=use_venv,
+                        venv_name=venv_name,
+                    )
                 )
                 sandbox_config = self.sandbox_config_manager.create_or_update_sandbox_config(
-                    sandbox_config_create=sandbox_config_create, actor=oss_default_user
+                    sandbox_config_create=sandbox_config_create,
+                    actor=oss_default_user,
                 )
                 logger.info(f"Successfully created default local sandbox config:\n{sandbox_config.get_local_config().model_dump()}")
 
@@ -443,11 +479,20 @@ class SyncServer(Server):
         # TODO: Voice sleeptime agents turn into normal agents when being messaged
         if agent_state.multi_agent_group and agent_state.multi_agent_group.manager_type != ManagerType.voice_sleeptime:
             return load_multi_agent(
-                group=agent_state.multi_agent_group, agent_state=agent_state, actor=actor, interface=interface, mcp_clients=self.mcp_clients
+                group=agent_state.multi_agent_group,
+                agent_state=agent_state,
+                actor=actor,
+                interface=interface,
+                mcp_clients=self.mcp_clients,
             )
 
         interface = interface or self.default_interface_factory()
-        return Agent(agent_state=agent_state, interface=interface, user=actor, mcp_clients=self.mcp_clients)
+        return Agent(
+            agent_state=agent_state,
+            interface=interface,
+            user=actor,
+            mcp_clients=self.mcp_clients,
+        )
 
     def _step(
         self,
@@ -538,7 +583,10 @@ class SyncServer(Server):
             if amount == 0:
                 letta_agent.interface.print_messages(letta_agent.messages, dump=True)
             else:
-                letta_agent.interface.print_messages(letta_agent.messages[-min(amount, len(letta_agent.messages)) :], dump=True)
+                letta_agent.interface.print_messages(
+                    letta_agent.messages[-min(amount, len(letta_agent.messages)) :],
+                    dump=True,
+                )
 
         elif command.lower() == "dumpraw":
             letta_agent.interface.print_messages_raw(letta_agent.messages)
@@ -795,7 +843,11 @@ class SyncServer(Server):
         actor: User,
         interface: AgentInterface | None = None,
     ) -> AgentState:
-        warnings.warn("This method is deprecated, use create_agent_async where possible.", DeprecationWarning, stacklevel=2)
+        warnings.warn(
+            "This method is deprecated, use create_agent_async where possible.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         if request.llm_config is None:
             if request.model is None:
                 raise ValueError("Must specify either model or llm_config in request")
@@ -817,9 +869,15 @@ class SyncServer(Server):
                 "handle": request.embedding,
                 "embedding_chunk_size": request.embedding_chunk_size or constants.DEFAULT_EMBEDDING_CHUNK_SIZE,
             }
-            log_event(name="start get_cached_embedding_config", attributes=embedding_config_params)
+            log_event(
+                name="start get_cached_embedding_config",
+                attributes=embedding_config_params,
+            )
             request.embedding_config = self.get_cached_embedding_config(actor=actor, **embedding_config_params)
-            log_event(name="end get_cached_embedding_config", attributes=embedding_config_params)
+            log_event(
+                name="end get_cached_embedding_config",
+                attributes=embedding_config_params,
+            )
 
         log_event(name="start create_agent db")
         main_agent = self.agent_manager.create_agent(
@@ -872,9 +930,15 @@ class SyncServer(Server):
                 "handle": request.embedding,
                 "embedding_chunk_size": request.embedding_chunk_size or constants.DEFAULT_EMBEDDING_CHUNK_SIZE,
             }
-            log_event(name="start get_cached_embedding_config", attributes=embedding_config_params)
+            log_event(
+                name="start get_cached_embedding_config",
+                attributes=embedding_config_params,
+            )
             request.embedding_config = await self.get_cached_embedding_config_async(actor=actor, **embedding_config_params)
-            log_event(name="end get_cached_embedding_config", attributes=embedding_config_params)
+            log_event(
+                name="end get_cached_embedding_config",
+                attributes=embedding_config_params,
+            )
 
         log_event(name="start create_agent db")
         main_agent = await self.agent_manager.create_agent_async(
@@ -888,7 +952,9 @@ class SyncServer(Server):
             for source_id in request.source_ids:
                 files = await self.file_manager.list_files(source_id, actor, include_content=True)
                 await self.agent_manager.insert_files_into_context_window(
-                    agent_state=main_agent, file_metadata_with_content=files, actor=actor
+                    agent_state=main_agent,
+                    file_metadata_with_content=files,
+                    actor=actor,
                 )
 
             main_agent = await self.agent_manager.refresh_file_blocks(agent_state=main_agent, actor=actor)
@@ -1129,14 +1195,23 @@ class SyncServer(Server):
         return [passage for passage, _, _ in records]
 
     async def insert_archival_memory_async(
-        self, agent_id: str, memory_contents: str, actor: User, tags: Optional[List[str]], created_at: Optional[datetime]
+        self,
+        agent_id: str,
+        memory_contents: str,
+        actor: User,
+        tags: Optional[List[str]],
+        created_at: Optional[datetime],
     ) -> List[Passage]:
         # Get the agent object (loaded in memory)
         agent_state = await self.agent_manager.get_agent_by_id_async(agent_id=agent_id, actor=actor)
 
         # Use passage manager which handles dual-write to Turbopuffer if enabled
         passages = await self.passage_manager.insert_passage(
-            agent_state=agent_state, text=memory_contents, tags=tags, actor=actor, created_at=created_at
+            agent_state=agent_state,
+            text=memory_contents,
+            tags=tags,
+            actor=actor,
+            created_at=created_at,
         )
 
         return passages
@@ -1316,7 +1391,11 @@ class SyncServer(Server):
         pass
 
     async def sleeptime_document_ingest_async(
-        self, main_agent: AgentState, source: Source, actor: User, clear_history: bool = False
+        self,
+        main_agent: AgentState,
+        source: Source,
+        actor: User,
+        clear_history: bool = False,
     ) -> None:
         pass
 
@@ -1373,7 +1452,11 @@ class SyncServer(Server):
         logger.info(f"Removed {deleted_count} files from agent {agent_state.id}")
 
     async def create_document_sleeptime_agent_async(
-        self, main_agent: AgentState, source: Source, actor: User, clear_history: bool = False
+        self,
+        main_agent: AgentState,
+        source: Source,
+        actor: User,
+        clear_history: bool = False,
     ) -> AgentState:
         try:
             block = await self.agent_manager.get_block_with_label_async(agent_id=main_agent.id, block_label=source.name, actor=actor)
@@ -1684,7 +1767,10 @@ class SyncServer(Server):
                 raise ValueError(f"Context window limit ({context_window_limit}) is greater than maximum of ({llm_config.context_window})")
             llm_config.context_window = context_window_limit
         else:
-            llm_config.context_window = min(llm_config.context_window, model_settings.global_max_context_window_limit)
+            llm_config.context_window = min(
+                llm_config.context_window,
+                model_settings.global_max_context_window_limit,
+            )
 
         if max_tokens is not None:
             llm_config.max_tokens = max_tokens
@@ -1739,7 +1825,10 @@ class SyncServer(Server):
                 raise ValueError(f"Context window limit ({context_window_limit}) is greater than maximum of ({llm_config.context_window})")
             llm_config.context_window = context_window_limit
         else:
-            llm_config.context_window = min(llm_config.context_window, model_settings.global_max_context_window_limit)
+            llm_config.context_window = min(
+                llm_config.context_window,
+                model_settings.global_max_context_window_limit,
+            )
 
         if max_tokens is not None:
             llm_config.max_tokens = max_tokens
@@ -1756,7 +1845,10 @@ class SyncServer(Server):
 
     @trace_method
     def get_embedding_config_from_handle(
-        self, actor: User, handle: str, embedding_chunk_size: int = constants.DEFAULT_EMBEDDING_CHUNK_SIZE
+        self,
+        actor: User,
+        handle: str,
+        embedding_chunk_size: int = constants.DEFAULT_EMBEDDING_CHUNK_SIZE,
     ) -> EmbeddingConfig:
         try:
             provider_name, model_name = handle.split("/", 1)
@@ -1785,7 +1877,10 @@ class SyncServer(Server):
 
     @trace_method
     async def get_embedding_config_from_handle_async(
-        self, actor: User, handle: str, embedding_chunk_size: int = constants.DEFAULT_EMBEDDING_CHUNK_SIZE
+        self,
+        actor: User,
+        handle: str,
+        embedding_chunk_size: int = constants.DEFAULT_EMBEDDING_CHUNK_SIZE,
     ) -> EmbeddingConfig:
         try:
             provider_name, model_name = handle.split("/", 1)
@@ -1898,7 +1993,11 @@ class SyncServer(Server):
     ) -> ToolReturnMessage:
         """Run a tool from source code"""
 
-        if tool_source_type not in (None, ToolSourceType.python, ToolSourceType.typescript):
+        if tool_source_type not in (
+            None,
+            ToolSourceType.python,
+            ToolSourceType.typescript,
+        ):
             raise ValueError("Tool source type is not supported at this time. Found {tool_source_type}")
 
         # If tools_json_schema is explicitly passed in, override it on the created Tool object
@@ -1954,7 +2053,11 @@ class SyncServer(Server):
             )
 
         except Exception as e:
-            func_return = get_friendly_error_msg(function_name=tool.name, exception_name=type(e).__name__, exception_message=str(e))
+            func_return = get_friendly_error_msg(
+                function_name=tool.name,
+                exception_name=type(e).__name__,
+                exception_message=str(e),
+            )
             return ToolReturnMessage(
                 id="null",
                 tool_call_id="null",
@@ -2067,7 +2170,9 @@ class SyncServer(Server):
         return tools
 
     async def add_mcp_server_to_config(
-        self, server_config: Union[SSEServerConfig, StdioServerConfig], allow_upsert: bool = True
+        self,
+        server_config: Union[SSEServerConfig, StdioServerConfig],
+        allow_upsert: bool = True,
     ) -> List[Union[SSEServerConfig, StdioServerConfig]]:
         """Add a new server config to the MCP config file"""
 
@@ -2192,7 +2297,10 @@ class SyncServer(Server):
         include_final_message = True
 
         if not stream_steps and stream_tokens:
-            raise HTTPException(status_code=400, detail="stream_steps must be 'true' if stream_tokens is 'true'")
+            raise HTTPException(
+                status_code=400,
+                detail="stream_steps must be 'true' if stream_tokens is 'true'",
+            )
 
         # For streaming response
         try:
@@ -2206,7 +2314,11 @@ class SyncServer(Server):
             # TODO: cleanup this logic
             llm_config = letta_agent.agent_state.llm_config
             # supports_token_streaming = ["openai", "anthropic", "xai", "deepseek"]
-            supports_token_streaming = ["openai", "anthropic", "deepseek"]  # TODO re-enable xAI once streaming is patched
+            supports_token_streaming = [
+                "openai",
+                "anthropic",
+                "deepseek",
+            ]  # TODO re-enable xAI once streaming is patched
             if stream_tokens and (llm_config.model_endpoint_type not in supports_token_streaming):
                 warnings.warn(
                     f"Token streaming is only supported for models with type {' or '.join(supports_token_streaming)} in the model_endpoint: agent has endpoint type {llm_config.model_endpoint_type} and {llm_config.model_endpoint}. Setting stream_tokens to False."

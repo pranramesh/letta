@@ -35,8 +35,18 @@ def upgrade() -> None:
         sa.Column("project_id", sa.String(), nullable=True),
         # From OrganizationMixin
         sa.Column("organization_id", sa.String(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=True),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=True),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=True,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=True,
+        ),
         sa.Column("is_deleted", sa.Boolean(), server_default=sa.text("FALSE"), nullable=False),
         sa.Column("_created_by_id", sa.String(), nullable=True),
         sa.Column("_last_updated_by_id", sa.String(), nullable=True),
@@ -59,7 +69,14 @@ def upgrade() -> None:
     op.add_column("agents", sa.Column("identity_id", sa.String(), nullable=True))
 
     # Add foreign key constraint
-    op.create_foreign_key("fk_agents_identity_id", "agents", "identities", ["identity_id"], ["id"], ondelete="CASCADE")
+    op.create_foreign_key(
+        "fk_agents_identity_id",
+        "agents",
+        "identities",
+        ["identity_id"],
+        ["id"],
+        ondelete="CASCADE",
+    )
 
 
 def downgrade() -> None:

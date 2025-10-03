@@ -7,7 +7,10 @@ from typing import AsyncGenerator, Dict, Iterable, List, Optional, Union, cast
 
 from fastapi import Header, HTTPException
 from openai.types.chat import ChatCompletionMessageParam
-from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall as OpenAIToolCall, Function as OpenAIFunction
+from openai.types.chat.chat_completion_message_tool_call import (
+    ChatCompletionMessageToolCall as OpenAIToolCall,
+    Function as OpenAIFunction,
+)
 from openai.types.chat.completion_create_params import CompletionCreateParams
 from pydantic import BaseModel
 
@@ -27,7 +30,12 @@ from letta.otel.metric_registry import MetricRegistry
 from letta.otel.tracing import tracer
 from letta.schemas.agent import AgentState
 from letta.schemas.enums import MessageRole
-from letta.schemas.letta_message_content import OmittedReasoningContent, ReasoningContent, RedactedReasoningContent, TextContent
+from letta.schemas.letta_message_content import (
+    OmittedReasoningContent,
+    ReasoningContent,
+    RedactedReasoningContent,
+    TextContent,
+)
 from letta.schemas.llm_config import LLMConfig
 from letta.schemas.message import ApprovalCreate, Message, MessageCreate, ToolReturn
 from letta.schemas.tool_execution_result import ToolExecutionResult
@@ -51,7 +59,10 @@ logger = get_logger(__name__)
 
 def sse_formatter(data: Union[dict, str]) -> str:
     """Prefix with 'data: ', and always include double newlines"""
-    assert type(data) in [dict, str], f"Expected type dict or str, got type {type(data)}"
+    assert type(data) in [
+        dict,
+        str,
+    ], f"Expected type dict or str, got type {type(data)}"
     data_str = json.dumps(data, separators=(",", ":")) if isinstance(data, dict) else data
     # print(f"data: {data_str}\n\n")
     return f"data: {data_str}\n\n"
@@ -88,7 +99,10 @@ async def sse_async_generator(
             if first_chunk and ttft_span is not None:
                 now = get_utc_timestamp_ns()
                 ttft_ns = now - request_start_timestamp_ns
-                ttft_span.add_event(name="time_to_first_token_ms", attributes={"ttft_ms": ns_to_ms(ttft_ns)})
+                ttft_span.add_event(
+                    name="time_to_first_token_ms",
+                    attributes={"ttft_ms": ns_to_ms(ttft_ns)},
+                )
                 ttft_span.end()
                 metric_attributes = get_ctx_attributes()
                 if llm_config:
@@ -119,12 +133,22 @@ async def sse_async_generator(
             except ContextWindowExceededError as e:
                 capture_sentry_exception(e)
                 logger.error(f"ContextWindowExceededError error: {e}")
-                yield sse_formatter({"error": f"Stream failed: {e}", "code": str(e.code.value) if e.code else None})
+                yield sse_formatter(
+                    {
+                        "error": f"Stream failed: {e}",
+                        "code": str(e.code.value) if e.code else None,
+                    }
+                )
 
             except RateLimitExceededError as e:
                 capture_sentry_exception(e)
                 logger.error(f"RateLimitExceededError error: {e}")
-                yield sse_formatter({"error": f"Stream failed: {e}", "code": str(e.code.value) if e.code else None})
+                yield sse_formatter(
+                    {
+                        "error": f"Stream failed: {e}",
+                        "code": str(e.code.value) if e.code else None,
+                    }
+                )
 
             except Exception as e:
                 capture_sentry_exception(e)
@@ -156,7 +180,13 @@ def create_input_messages(input_messages: List[MessageCreate], agent_id: str, ti
     we should unify this when it's clear what message attributes we need.
     """
 
-    messages = convert_message_creates_to_messages(input_messages, agent_id, timezone, wrap_user_message=False, wrap_system_message=False)
+    messages = convert_message_creates_to_messages(
+        input_messages,
+        agent_id,
+        timezone,
+        wrap_user_message=False,
+        wrap_system_message=False,
+    )
     return messages
 
 
@@ -181,7 +211,16 @@ def create_approval_request_message_from_llm_response(
     tool_call_id: str,
     actor: User,
     continue_stepping: bool = False,
-    reasoning_content: Optional[List[Union[TextContent, ReasoningContent, RedactedReasoningContent, OmittedReasoningContent]]] = None,
+    reasoning_content: Optional[
+        List[
+            Union[
+                TextContent,
+                ReasoningContent,
+                RedactedReasoningContent,
+                OmittedReasoningContent,
+            ]
+        ]
+    ] = None,
     pre_computed_assistant_message_id: Optional[str] = None,
     step_id: str | None = None,
 ) -> Message:
@@ -226,7 +265,16 @@ def create_letta_messages_from_llm_response(
     actor: User,
     continue_stepping: bool = False,
     heartbeat_reason: Optional[str] = None,
-    reasoning_content: Optional[List[Union[TextContent, ReasoningContent, RedactedReasoningContent, OmittedReasoningContent]]] = None,
+    reasoning_content: Optional[
+        List[
+            Union[
+                TextContent,
+                ReasoningContent,
+                RedactedReasoningContent,
+                OmittedReasoningContent,
+            ]
+        ]
+    ] = None,
     pre_computed_assistant_message_id: Optional[str] = None,
     llm_batch_item_id: Optional[str] = None,
     step_id: str | None = None,
@@ -439,7 +487,9 @@ def convert_in_context_letta_messages_to_openai(in_context_messages: List[Messag
     return openai_messages
 
 
-def get_user_message_from_chat_completions_request(completion_request: CompletionCreateParams) -> List[MessageCreate]:
+def get_user_message_from_chat_completions_request(
+    completion_request: CompletionCreateParams,
+) -> List[MessageCreate]:
     try:
         messages = list(cast(Iterable[ChatCompletionMessageParam], completion_request["messages"]))
     except KeyError:
@@ -450,7 +500,10 @@ def get_user_message_from_chat_completions_request(completion_request: Completio
         raise HTTPException(status_code=400, detail="The 'messages' field must be an iterable.")
     except Exception as e:
         # Catch any other unexpected errors and include the exception message
-        raise HTTPException(status_code=400, detail=f"An error occurred while processing 'messages': {str(e)}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"An error occurred while processing 'messages': {str(e)}",
+        )
 
     if messages[-1]["role"] != "user":
         logger.error(f"The last message does not have a `user` role: {messages}")
@@ -463,4 +516,9 @@ def get_user_message_from_chat_completions_request(completion_request: Completio
 
     for message in reversed(messages):
         if message["role"] == "user":
-            return [MessageCreate(role=MessageRole.user, content=[TextContent(text=message["content"])])]
+            return [
+                MessageCreate(
+                    role=MessageRole.user,
+                    content=[TextContent(text=message["content"])],
+                )
+            ]

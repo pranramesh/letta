@@ -5,7 +5,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from letta.orm.errors import NoResultFound
 from letta.schemas.enums import JobStatus
 from letta.schemas.job import Job
-from letta.server.rest_api.dependencies import HeaderParams, get_headers, get_letta_server
+from letta.server.rest_api.dependencies import (
+    HeaderParams,
+    get_headers,
+    get_letta_server,
+)
 from letta.server.server import SyncServer
 from letta.settings import settings
 
@@ -20,7 +24,10 @@ async def list_jobs(
     after: Optional[str] = Query(None, description="Cursor for pagination"),
     limit: Optional[int] = Query(50, description="Limit for pagination"),
     active: bool = Query(False, description="Filter for active jobs."),
-    ascending: bool = Query(True, description="Whether to sort jobs oldest to newest (True, default) or newest to oldest (False)"),
+    ascending: bool = Query(
+        True,
+        description="Whether to sort jobs oldest to newest (True, default) or newest to oldest (False)",
+    ),
     headers: HeaderParams = Depends(get_headers),
 ):
     """
@@ -44,7 +51,12 @@ async def list_jobs(
     )
 
 
-@router.get("/active", response_model=List[Job], operation_id="list_active_jobs", deprecated=True)
+@router.get(
+    "/active",
+    response_model=List[Job],
+    operation_id="list_active_jobs",
+    deprecated=True,
+)
 async def list_active_jobs(
     server: "SyncServer" = Depends(get_letta_server),
     headers: HeaderParams = Depends(get_headers),
@@ -52,7 +64,10 @@ async def list_active_jobs(
     before: Optional[str] = Query(None, description="Cursor for pagination"),
     after: Optional[str] = Query(None, description="Cursor for pagination"),
     limit: Optional[int] = Query(50, description="Limit for pagination"),
-    ascending: bool = Query(True, description="Whether to sort jobs oldest to newest (True, default) or newest to oldest (False)"),
+    ascending: bool = Query(
+        True,
+        description="Whether to sort jobs oldest to newest (True, default) or newest to oldest (False)",
+    ),
 ):
     """
     List all active jobs.

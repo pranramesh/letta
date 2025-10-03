@@ -113,7 +113,12 @@ def upgrade() -> None:
     # Step 7: Set the server-side default for sequence_id so that future inserts automatically use the sequence.
     # The server default calls nextval() on the sequence, and the "::regclass" cast helps PostgreSQL resolve the sequence name correctly.
     print_flush(f"Step 7: Setting server default for '{COLUMN_NAME}' to use sequence '{SEQUENCE_NAME}'...")
-    op.alter_column(TABLE_NAME, COLUMN_NAME, existing_type=sa.BigInteger(), server_default=sa.text(f"nextval('{SEQUENCE_NAME}'::regclass)"))
+    op.alter_column(
+        TABLE_NAME,
+        COLUMN_NAME,
+        existing_type=sa.BigInteger(),
+        server_default=sa.text(f"nextval('{SEQUENCE_NAME}'::regclass)"),
+    )
 
     # Step 8: Create an index on (agent_id, sequence_id) to improve performance of queries filtering on these columns.
     print_flush(f"Step 8: Creating index '{INDEX_NAME}' on (agent_id, {COLUMN_NAME})...")

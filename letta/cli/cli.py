@@ -5,7 +5,9 @@ from typing import Annotated, Optional
 import typer
 
 from letta.log import get_logger
-from letta.streaming_interface import StreamingRefreshCLIInterface as interface  # for printing to terminal
+from letta.streaming_interface import (
+    StreamingRefreshCLIInterface as interface,
+)  # for printing to terminal
 
 logger = get_logger(__name__)
 
@@ -18,7 +20,10 @@ class ServerChoice(Enum):
 def server(
     type: Annotated[ServerChoice, typer.Option(help="Server to run")] = "rest",
     port: Annotated[Optional[int], typer.Option(help="Port to run the server on")] = None,
-    host: Annotated[Optional[str], typer.Option(help="Host to run the server on (default to localhost)")] = None,
+    host: Annotated[
+        Optional[str],
+        typer.Option(help="Host to run the server on (default to localhost)"),
+    ] = None,
     debug: Annotated[bool, typer.Option(help="Turn debugging output on")] = False,
     reload: Annotated[bool, typer.Option(help="Enable hot-reload")] = False,
     ade: Annotated[bool, typer.Option(help="Allows remote access")] = False,  # NOTE: deprecated

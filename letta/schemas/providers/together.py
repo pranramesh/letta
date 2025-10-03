@@ -20,7 +20,8 @@ class TogetherProvider(OpenAIProvider):
     base_url: str = "https://api.together.xyz/v1"
     api_key: str = Field(..., description="API key for the Together API.")
     default_prompt_formatter: Optional[str] = Field(
-        None, description="Default prompt formatter (aka model wrapper) to use on vLLM /completions API."
+        None,
+        description="Default prompt formatter (aka model wrapper) to use on vLLM /completions API.",
     )
 
     async def list_llm_models_async(self) -> list[LLMConfig]:
@@ -94,4 +95,7 @@ class TogetherProvider(OpenAIProvider):
         try:
             await self.list_llm_models_async()
         except Exception as e:
-            raise LLMAuthenticationError(message=f"Failed to authenticate with Together: {e}", code=ErrorCode.UNAUTHENTICATED)
+            raise LLMAuthenticationError(
+                message=f"Failed to authenticate with Together: {e}",
+                code=ErrorCode.UNAUTHENTICATED,
+            )

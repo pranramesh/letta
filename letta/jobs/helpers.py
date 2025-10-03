@@ -16,7 +16,9 @@ def map_anthropic_batch_job_status_to_job_status(anthropic_status: str) -> JobSt
     return mapping.get(anthropic_status, JobStatus.pending)  # fallback just in case
 
 
-def map_anthropic_individual_batch_item_status_to_job_status(individual_item: BetaMessageBatchIndividualResponse) -> JobStatus:
+def map_anthropic_individual_batch_item_status_to_job_status(
+    individual_item: BetaMessageBatchIndividualResponse,
+) -> JobStatus:
     if isinstance(individual_item.result, BetaMessageBatchSucceededResult):
         return JobStatus.completed
     elif isinstance(individual_item.result, BetaMessageBatchCanceledResult):

@@ -16,7 +16,10 @@ class ProviderBase(LettaBase):
 
 
 class Provider(ProviderBase):
-    id: str | None = Field(None, description="The id of the provider, lazily created by the database manager.")
+    id: str | None = Field(
+        None,
+        description="The id of the provider, lazily created by the database manager.",
+    )
     name: str = Field(..., description="The name of the provider")
     provider_type: ProviderType = Field(..., description="The type of the provider")
     provider_category: ProviderCategory = Field(..., description="The category of the provider (base or byok)")
@@ -47,7 +50,11 @@ class Provider(ProviderBase):
         import asyncio
         import warnings
 
-        warnings.warn("list_llm_models is deprecated, use list_llm_models_async instead", DeprecationWarning, stacklevel=2)
+        warnings.warn(
+            "list_llm_models is deprecated, use list_llm_models_async instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
         # Simplified asyncio handling - just use asyncio.run()
         # This works in most contexts and avoids complex event loop detection
@@ -72,7 +79,11 @@ class Provider(ProviderBase):
         import asyncio
         import warnings
 
-        warnings.warn("list_embedding_models is deprecated, use list_embedding_models_async instead", DeprecationWarning, stacklevel=2)
+        warnings.warn(
+            "list_embedding_models is deprecated, use list_embedding_models_async instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
         # Simplified asyncio handling - just use asyncio.run()
         # This works in most contexts and avoids complex event loop detection

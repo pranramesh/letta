@@ -56,7 +56,10 @@ def client(request):
 def agent(client: Letta):
     agent_state = client.agents.create(
         name="test_client",
-        memory_blocks=[{"label": "human", "value": ""}, {"label": "persona", "value": ""}],
+        memory_blocks=[
+            {"label": "human", "value": ""},
+            {"label": "persona", "value": ""},
+        ],
         model="letta/letta-free",
         embedding="letta/letta-free",
     )
@@ -72,7 +75,10 @@ def agent(client: Letta):
 def search_agent_one(client: Letta):
     agent_state = client.agents.create(
         name="Search Agent One",
-        memory_blocks=[{"label": "human", "value": ""}, {"label": "persona", "value": ""}],
+        memory_blocks=[
+            {"label": "human", "value": ""},
+            {"label": "persona", "value": ""},
+        ],
         model="letta/letta-free",
         embedding="letta/letta-free",
     )
@@ -88,7 +94,10 @@ def search_agent_one(client: Letta):
 def search_agent_two(client: Letta):
     agent_state = client.agents.create(
         name="Search Agent Two",
-        memory_blocks=[{"label": "human", "value": ""}, {"label": "persona", "value": ""}],
+        memory_blocks=[
+            {"label": "human", "value": ""},
+            {"label": "persona", "value": ""},
+        ],
         model="letta/letta-free",
         embedding="letta/letta-free",
     )
@@ -239,7 +248,10 @@ def test_shared_blocks(disable_e2b_api_key, client: Letta):
     )
 
     # update memory
-    client.agents.messages.create(agent_id=agent_state1.id, messages=[{"role": "user", "content": "my name is actually charles"}])
+    client.agents.messages.create(
+        agent_id=agent_state1.id,
+        messages=[{"role": "user", "content": "my name is actually charles"}],
+    )
 
     # check agent 2 memory
     assert "charles" in client.agents.blocks.retrieve(agent_id=agent_state2.id, block_label="human").value.lower()
@@ -252,7 +264,11 @@ def test_shared_blocks(disable_e2b_api_key, client: Letta):
 def test_update_agent_memory_label(client: Letta):
     """Test that we can update the label of a block in an agent's memory"""
 
-    agent = client.agents.create(model="letta/letta-free", embedding="letta/letta-free", memory_blocks=[{"label": "human", "value": ""}])
+    agent = client.agents.create(
+        model="letta/letta-free",
+        embedding="letta/letta-free",
+        memory_blocks=[{"label": "human", "value": ""}],
+    )
 
     try:
         current_labels = [block.label for block in client.agents.blocks.list(agent_id=agent.id)]
@@ -378,7 +394,12 @@ def test_function_always_error(client: Letta):
     # get function response
     response = client.agents.messages.create(
         agent_id=agent.id,
-        messages=[MessageCreate(role="user", content="call the testing_method function and tell me the result")],
+        messages=[
+            MessageCreate(
+                role="user",
+                content="call the testing_method function and tell me the result",
+            )
+        ],
     )
     print(response.messages)
 
@@ -621,7 +642,10 @@ def test_attach_detach_agent_source(client: Letta, agent: AgentState):
 def test_initial_sequence(client: Letta):
     # create an agent
     agent = client.agents.create(
-        memory_blocks=[{"label": "human", "value": ""}, {"label": "persona", "value": ""}],
+        memory_blocks=[
+            {"label": "human", "value": ""},
+            {"label": "persona", "value": ""},
+        ],
         model="letta/letta-free",
         embedding="letta/letta-free",
         initial_message_sequence=[
@@ -688,7 +712,10 @@ def test_initial_sequence(client: Letta):
 
 def test_attach_sleeptime_block(client: Letta):
     agent = client.agents.create(
-        memory_blocks=[{"label": "human", "value": ""}, {"label": "persona", "value": ""}],
+        memory_blocks=[
+            {"label": "human", "value": ""},
+            {"label": "persona", "value": ""},
+        ],
         model="letta/letta-free",
         embedding="letta/letta-free",
         enable_sleeptime=True,

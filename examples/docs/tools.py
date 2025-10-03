@@ -10,6 +10,7 @@ letta server
 
 client = Letta(base_url="http://localhost:8283")
 
+
 # define a function with a docstring
 def roll_d20() -> str:
     """
@@ -54,13 +55,15 @@ agent_state = client.agents.create(
         TerminalToolRule(tool_name=tool.name),
         # exit after send_message is called (default behavior)
         TerminalToolRule(tool_name="send_message"),
-    ]
+    ],
 )
-print(f"Created agent with name {agent_state.name} with tools {[t.name for t in agent_state.tools]}")
+print(
+    f"Created agent with name {agent_state.name} with tools {[t.name for t in agent_state.tools]}"
+)
 
 # Message an agent
 response = client.agents.messages.create(
-    agent_id=agent_state.id, 
+    agent_id=agent_state.id,
     messages=[
         MessageCreate(
             role="user",
@@ -90,7 +93,7 @@ agent_state = client.agents.create(
     ],
     model="openai/gpt-4o-mini",
     embedding="openai/text-embedding-3-small",
-    include_base_tools=False, 
+    include_base_tools=False,
     tool_ids=[tool.id, send_message_tool.id],
 )
 

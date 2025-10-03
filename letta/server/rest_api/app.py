@@ -26,10 +26,19 @@ from letta.errors import (
     LLMRateLimitError,
     LLMTimeoutError,
 )
-from letta.helpers.pinecone_utils import get_pinecone_indices, should_use_pinecone, upsert_pinecone_indices
+from letta.helpers.pinecone_utils import (
+    get_pinecone_indices,
+    should_use_pinecone,
+    upsert_pinecone_indices,
+)
 from letta.jobs.scheduler import start_scheduler_with_leader_election
 from letta.log import get_logger
-from letta.orm.errors import DatabaseTimeoutError, ForeignKeyConstraintViolationError, NoResultFound, UniqueConstraintViolationError
+from letta.orm.errors import (
+    DatabaseTimeoutError,
+    ForeignKeyConstraintViolationError,
+    NoResultFound,
+    UniqueConstraintViolationError,
+)
 from letta.schemas.letta_message import create_letta_message_union_schema
 from letta.schemas.letta_message_content import (
     create_letta_assistant_message_content_union_schema,
@@ -41,13 +50,24 @@ from letta.server.constants import REST_DEFAULT_PORT
 from letta.server.db import db_registry
 
 # NOTE(charles): these are extra routes that are not part of v1 but we still need to mount to pass tests
-from letta.server.rest_api.auth.index import setup_auth_router  # TODO: probably remove right?
+from letta.server.rest_api.auth.index import (
+    setup_auth_router,
+)  # TODO: probably remove right?
 from letta.server.rest_api.interface import StreamingServerInterface
-from letta.server.rest_api.middleware import CheckPasswordMiddleware, ProfilerContextMiddleware
-from letta.server.rest_api.routers.openai.chat_completions.chat_completions import router as openai_chat_completions_router
+from letta.server.rest_api.middleware import (
+    CheckPasswordMiddleware,
+    ProfilerContextMiddleware,
+)
+from letta.server.rest_api.routers.openai.chat_completions.chat_completions import (
+    router as openai_chat_completions_router,
+)
 from letta.server.rest_api.routers.v1 import ROUTERS as v1_routes
-from letta.server.rest_api.routers.v1.organizations import router as organizations_router
-from letta.server.rest_api.routers.v1.users import router as users_router  # TODO: decide on admin
+from letta.server.rest_api.routers.v1.organizations import (
+    router as organizations_router,
+)
+from letta.server.rest_api.routers.v1.users import (
+    router as users_router,
+)  # TODO: decide on admin
 from letta.server.rest_api.static_files import mount_static_files
 from letta.server.rest_api.utils import SENTRY_ENABLED
 from letta.server.server import SyncServer
@@ -161,7 +181,9 @@ async def lifespan(app_: FastAPI):
     # Cleanup SQLAlchemy instrumentation
     if not settings.disable_tracing and settings.sqlalchemy_tracing:
         try:
-            from letta.otel.sqlalchemy_instrumentation_integration import teardown_letta_db_instrumentation
+            from letta.otel.sqlalchemy_instrumentation_integration import (
+                teardown_letta_db_instrumentation,
+            )
 
             teardown_letta_db_instrumentation()
             logger.info(f"[Worker {worker_id}] SQLAlchemy instrumentation shutdown completed")
@@ -243,7 +265,11 @@ def create_application() -> "FastAPI":
 
     @app.exception_handler(IncompatibleAgentType)
     async def handle_incompatible_agent_type(request: Request, exc: IncompatibleAgentType):
-        logger.error("Incompatible agent types. Expected: %s, Actual: %s", exc.expected_type, exc.actual_type)
+        logger.error(
+            "Incompatible agent types. Expected: %s, Actual: %s",
+            exc.expected_type,
+            exc.actual_type,
+        )
         if SENTRY_ENABLED:
             sentry_sdk.capture_exception(exc)
 
@@ -374,7 +400,9 @@ def create_application() -> "FastAPI":
 
         # Set up SQLAlchemy synchronous operation instrumentation
         if settings.sqlalchemy_tracing:
-            from letta.otel.sqlalchemy_instrumentation_integration import setup_letta_db_instrumentation
+            from letta.otel.sqlalchemy_instrumentation_integration import (
+                setup_letta_db_instrumentation,
+            )
 
             try:
                 setup_letta_db_instrumentation(

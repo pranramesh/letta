@@ -74,7 +74,12 @@ class JobStatus(StrEnum):
 
     @property
     def is_terminal(self):
-        return self in (JobStatus.completed, JobStatus.failed, JobStatus.cancelled, JobStatus.expired)
+        return self in (
+            JobStatus.completed,
+            JobStatus.failed,
+            JobStatus.cancelled,
+            JobStatus.expired,
+        )
 
 
 class AgentStepStatus(str, Enum):

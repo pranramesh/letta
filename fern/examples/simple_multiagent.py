@@ -8,7 +8,10 @@ try:
     supervisor_agent = client.agents.create(
         name="supervisor_agent",
         memory_blocks=[
-            {"label": "persona", "value": "I am the supervisor, and I can communicate with worker agents with the tag `worker`"}
+            {
+                "label": "persona",
+                "value": "I am the supervisor, and I can communicate with worker agents with the tag `worker`",
+            }
         ],
         model="anthropic/claude-3-5-sonnet-20241022",
         embedding="openai/text-embedding-3-small",
@@ -27,7 +30,12 @@ try:
     # create a worker agent
     worker_agent = client.agents.create(
         name="worker_agent",
-        memory_blocks=[{"label": "persona", "value": f"I am the worker, my supervisor agent has ID {supervisor_agent.id}"}],
+        memory_blocks=[
+            {
+                "label": "persona",
+                "value": f"I am the worker, my supervisor agent has ID {supervisor_agent.id}",
+            }
+        ],
         model="anthropic/claude-3-5-sonnet-20241022",
         embedding="openai/text-embedding-3-small",
         tool_ids=[tool.id],
@@ -39,7 +47,12 @@ try:
     # send a message to the supervisor agent
     response = client.agents.messages.create(
         agent_id=worker_agent.id,
-        messages=[{"role": "user", "content": "Ask the worker agents what their name is, then tell me with send_message"}],
+        messages=[
+            {
+                "role": "user",
+                "content": "Ask the worker agents what their name is, then tell me with send_message",
+            }
+        ],
     )
     print(response.messages)
     print(response.usage)

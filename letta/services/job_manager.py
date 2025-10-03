@@ -16,7 +16,12 @@ from letta.orm.sqlalchemy_base import AccessType
 from letta.orm.step import Step, Step as StepModel
 from letta.otel.tracing import log_event, trace_method
 from letta.schemas.enums import JobStatus, JobType, MessageRole
-from letta.schemas.job import BatchJob as PydanticBatchJob, Job as PydanticJob, JobUpdate, LettaRequestConfig
+from letta.schemas.job import (
+    BatchJob as PydanticBatchJob,
+    Job as PydanticJob,
+    JobUpdate,
+    LettaRequestConfig,
+)
 from letta.schemas.letta_message import LettaMessage
 from letta.schemas.letta_stop_reason import StopReasonType
 from letta.schemas.message import Message as PydanticMessage
@@ -36,7 +41,9 @@ class JobManager:
     @enforce_types
     @trace_method
     def create_job(
-        self, pydantic_job: Union[PydanticJob, PydanticRun, PydanticBatchJob], actor: PydanticUser
+        self,
+        pydantic_job: Union[PydanticJob, PydanticRun, PydanticBatchJob],
+        actor: PydanticUser,
     ) -> Union[PydanticJob, PydanticRun, PydanticBatchJob]:
         """Create a new job based on the JobCreate schema."""
         with db_registry.session() as session:
@@ -51,7 +58,9 @@ class JobManager:
     @enforce_types
     @trace_method
     async def create_job_async(
-        self, pydantic_job: Union[PydanticJob, PydanticRun, PydanticBatchJob], actor: PydanticUser
+        self,
+        pydantic_job: Union[PydanticJob, PydanticRun, PydanticBatchJob],
+        actor: PydanticUser,
     ) -> Union[PydanticJob, PydanticRun, PydanticBatchJob]:
         """Create a new job based on the JobCreate schema."""
         async with db_registry.async_session() as session:
@@ -131,7 +140,11 @@ class JobManager:
     @enforce_types
     @trace_method
     async def update_job_by_id_async(
-        self, job_id: str, job_update: JobUpdate, actor: PydanticUser, safe_update: bool = False
+        self,
+        job_id: str,
+        job_update: JobUpdate,
+        actor: PydanticUser,
+        safe_update: bool = False,
     ) -> PydanticJob:
         """Update a job by its ID with the given JobUpdate object asynchronously."""
         # First check if we need to dispatch a callback
@@ -251,7 +264,12 @@ class JobManager:
         """Fetch a job by its ID."""
         with db_registry.session() as session:
             # Retrieve job by ID using the Job model's read method
-            job = JobModel.read(db_session=session, identifier=job_id, actor=actor, access_type=AccessType.USER)
+            job = JobModel.read(
+                db_session=session,
+                identifier=job_id,
+                actor=actor,
+                access_type=AccessType.USER,
+            )
             return job.to_pydantic()
 
     @enforce_types
@@ -260,7 +278,12 @@ class JobManager:
         """Fetch a job by its ID asynchronously."""
         async with db_registry.async_session() as session:
             # Retrieve job by ID using the Job model's read method
-            job = await JobModel.read_async(db_session=session, identifier=job_id, actor=actor, access_type=AccessType.USER)
+            job = await JobModel.read_async(
+                db_session=session,
+                identifier=job_id,
+                actor=actor,
+                access_type=AccessType.USER,
+            )
             return job.to_pydantic()
 
     @enforce_types
@@ -365,7 +388,10 @@ class JobManager:
                     conditions.append(
                         or_(
                             JobModel.created_at < before_timestamp,
-                            and_(JobModel.created_at == before_timestamp, JobModel.id < before_obj.id),
+                            and_(
+                                JobModel.created_at == before_timestamp,
+                                JobModel.id < before_obj.id,
+                            ),
                         )
                     )
 
@@ -374,7 +400,13 @@ class JobManager:
                     after_timestamp = after_obj.created_at
 
                     conditions.append(
-                        or_(JobModel.created_at > after_timestamp, and_(JobModel.created_at == after_timestamp, JobModel.id > after_obj.id))
+                        or_(
+                            JobModel.created_at > after_timestamp,
+                            and_(
+                                JobModel.created_at == after_timestamp,
+                                JobModel.id > after_obj.id,
+                            ),
+                        )
                     )
 
                 if conditions:
@@ -459,7 +491,10 @@ class JobManager:
                 limit=limit,
                 actor=actor,
                 join_model=JobMessage,
-                join_conditions=[MessageModel.id == JobMessage.message_id, JobMessage.job_id == job_id],
+                join_conditions=[
+                    MessageModel.id == JobMessage.message_id,
+                    JobMessage.job_id == job_id,
+                ],
                 **filters,
             )
 
@@ -854,7 +889,7 @@ class JobManager:
         payload = {
             "job_id": callback_info["job_id"],
             "status": callback_info["status"],
-            "completed_at": callback_info["completed_at"].isoformat() if callback_info["completed_at"] else None,
+            "completed_at": (callback_info["completed_at"].isoformat() if callback_info["completed_at"] else None),
             "metadata": callback_info["metadata"],
         }
 
@@ -882,7 +917,7 @@ class JobManager:
         payload = {
             "job_id": callback_info["job_id"],
             "status": callback_info["status"],
-            "completed_at": callback_info["completed_at"].isoformat() if callback_info["completed_at"] else None,
+            "completed_at": (callback_info["completed_at"].isoformat() if callback_info["completed_at"] else None),
             "metadata": callback_info["metadata"],
         }
 

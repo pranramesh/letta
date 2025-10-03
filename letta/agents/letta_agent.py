@@ -21,7 +21,12 @@ from letta.agents.helpers import (
 from letta.constants import DEFAULT_MAX_STEPS, NON_USER_MSG_PREFIX
 from letta.errors import ContextWindowExceededError
 from letta.helpers import ToolRulesSolver
-from letta.helpers.datetime_helpers import AsyncTimer, get_utc_time, get_utc_timestamp_ns, ns_to_ms
+from letta.helpers.datetime_helpers import (
+    AsyncTimer,
+    get_utc_time,
+    get_utc_timestamp_ns,
+    ns_to_ms,
+)
 from letta.helpers.reasoning_helper import scrub_inner_thoughts_from_messages
 from letta.helpers.tool_execution_helper import enable_strict_mode
 from letta.interfaces.anthropic_streaming_interface import AnthropicStreamingInterface
@@ -34,9 +39,20 @@ from letta.otel.context import get_ctx_attributes
 from letta.otel.metric_registry import MetricRegistry
 from letta.otel.tracing import log_event, trace_method, tracer
 from letta.schemas.agent import AgentState, UpdateAgent
-from letta.schemas.enums import JobStatus, MessageRole, ProviderType, StepStatus, ToolType
+from letta.schemas.enums import (
+    JobStatus,
+    MessageRole,
+    ProviderType,
+    StepStatus,
+    ToolType,
+)
 from letta.schemas.letta_message import MessageType
-from letta.schemas.letta_message_content import OmittedReasoningContent, ReasoningContent, RedactedReasoningContent, TextContent
+from letta.schemas.letta_message_content import (
+    OmittedReasoningContent,
+    ReasoningContent,
+    RedactedReasoningContent,
+    TextContent,
+)
 from letta.schemas.letta_response import LettaResponse
 from letta.schemas.letta_stop_reason import LettaStopReason, StopReasonType
 from letta.schemas.llm_config import LLMConfig
@@ -48,7 +64,10 @@ from letta.schemas.step_metrics import StepMetrics
 from letta.schemas.tool_execution_result import ToolExecutionResult
 from letta.schemas.usage import LettaUsageStatistics
 from letta.schemas.user import User
-from letta.server.rest_api.utils import create_approval_request_message_from_llm_response, create_letta_messages_from_llm_response
+from letta.server.rest_api.utils import (
+    create_approval_request_message_from_llm_response,
+    create_letta_messages_from_llm_response,
+)
 from letta.services.agent_manager import AgentManager
 from letta.services.block_manager import BlockManager
 from letta.services.helpers.tool_parser_helper import runtime_override_tool_json_schema
@@ -94,7 +113,13 @@ class LettaAgent(BaseAgent):
         # for partial_evict mode
         partial_evict_summarizer_percentage: float = summarizer_settings.partial_evict_summarizer_percentage,
     ):
-        super().__init__(agent_id=agent_id, openai_client=None, message_manager=message_manager, agent_manager=agent_manager, actor=actor)
+        super().__init__(
+            agent_id=agent_id,
+            openai_client=None,
+            message_manager=message_manager,
+            agent_manager=agent_manager,
+            actor=actor,
+        )
 
         # TODO: Make this more general, factorable
         # Summarizer settings
@@ -175,7 +200,12 @@ class LettaAgent(BaseAgent):
         # TODO (cliandy): pass in run_id and use at send_message endpoints for all step functions
         agent_state = await self.agent_manager.get_agent_by_id_async(
             agent_id=self.agent_id,
-            include_relationships=["tools", "memory", "tool_exec_environment_variables", "sources"],
+            include_relationships=[
+                "tools",
+                "memory",
+                "tool_exec_environment_variables",
+                "sources",
+            ],
             actor=self.actor,
         )
         result = await self._step(
@@ -211,7 +241,12 @@ class LettaAgent(BaseAgent):
     ):
         agent_state = await self.agent_manager.get_agent_by_id_async(
             agent_id=self.agent_id,
-            include_relationships=["tools", "memory", "tool_exec_environment_variables", "sources"],
+            include_relationships=[
+                "tools",
+                "memory",
+                "tool_exec_environment_variables",
+                "sources",
+            ],
             actor=self.actor,
         )
         current_in_context_messages, new_in_context_messages = await _prepare_in_context_messages_no_persist_async(
@@ -263,7 +298,9 @@ class LettaAgent(BaseAgent):
                 # TODO: improve TTFT
                 filter_user_messages = [m for m in persisted_messages if m.role != "user" and m.role != "approval"]
                 letta_messages = Message.to_letta_messages_from_list(
-                    filter_user_messages, use_assistant_message=use_assistant_message, reverse=False
+                    filter_user_messages,
+                    use_assistant_message=use_assistant_message,
+                    reverse=False,
                 )
 
                 for message in letta_messages:
@@ -340,7 +377,11 @@ class LettaAgent(BaseAgent):
                     usage.prompt_tokens += response.usage.prompt_tokens
                     usage.total_tokens += response.usage.total_tokens
                     MetricRegistry().message_output_tokens.record(
-                        response.usage.completion_tokens, dict(get_ctx_attributes(), **{"model.name": agent_state.llm_config.model})
+                        response.usage.completion_tokens,
+                        dict(
+                            get_ctx_attributes(),
+                            **{"model.name": agent_state.llm_config.model},
+                        ),
                     )
 
                     if not response.choices[0].message.tool_calls:
@@ -413,7 +454,9 @@ class LettaAgent(BaseAgent):
                     # TODO: improve TTFT
                     filter_user_messages = [m for m in persisted_messages if m.role != "user"]
                     letta_messages = Message.to_letta_messages_from_list(
-                        filter_user_messages, use_assistant_message=use_assistant_message, reverse=False
+                        filter_user_messages,
+                        use_assistant_message=use_assistant_message,
+                        reverse=False,
                     )
                     letta_messages = [m for m in letta_messages if m.message_type != "approval_response_message"]
 
@@ -442,14 +485,24 @@ class LettaAgent(BaseAgent):
                     # This indicates we failed after we decided to stop stepping, which indicates a bug with our flow.
                     if not stop_reason:
                         stop_reason = LettaStopReason(stop_reason=StopReasonType.error.value)
-                    elif stop_reason.stop_reason in (StopReasonType.end_turn, StopReasonType.max_steps, StopReasonType.tool_rule):
-                        self.logger.error("Error occurred during step processing, with valid stop reason: %s", stop_reason.stop_reason)
+                    elif stop_reason.stop_reason in (
+                        StopReasonType.end_turn,
+                        StopReasonType.max_steps,
+                        StopReasonType.tool_rule,
+                    ):
+                        self.logger.error(
+                            "Error occurred during step processing, with valid stop reason: %s",
+                            stop_reason.stop_reason,
+                        )
                     elif stop_reason.stop_reason not in (
                         StopReasonType.no_tool_call,
                         StopReasonType.invalid_tool_call,
                         StopReasonType.invalid_llm_response,
                     ):
-                        self.logger.error("Error occurred during step processing, with unexpected stop reason: %s", stop_reason.stop_reason)
+                        self.logger.error(
+                            "Error occurred during step processing, with unexpected stop reason: %s",
+                            stop_reason.stop_reason,
+                        )
 
                     # Send error stop reason to client and re-raise
                     yield f"data: {stop_reason.model_dump_json()}\n\n", 500
@@ -481,8 +534,8 @@ class LettaAgent(BaseAgent):
                                 await self.step_manager.update_step_error_async(
                                     actor=self.actor,
                                     step_id=step_id,  # Use original step_id for telemetry
-                                    error_type=type(e).__name__ if "e" in locals() else "Unknown",
-                                    error_message=str(e) if "e" in locals() else "Unknown error",
+                                    error_type=(type(e).__name__ if "e" in locals() else "Unknown"),
+                                    error_message=(str(e) if "e" in locals() else "Unknown error"),
                                     error_traceback=traceback.format_exc(),
                                     stop_reason=stop_reason,
                                 )
@@ -509,7 +562,12 @@ class LettaAgent(BaseAgent):
                             self.logger.error("Invalid StepProgression value")
 
                         if settings.track_stop_reason:
-                            await self._log_request(request_start_timestamp_ns, request_span, job_update_metadata, is_error=True)
+                            await self._log_request(
+                                request_start_timestamp_ns,
+                                request_span,
+                                job_update_metadata,
+                                is_error=True,
+                            )
 
                         # Record partial step metrics on failure (capture whatever timing data we have)
                         if logged_step and step_metrics and step_progression < StepProgression.FINISHED:
@@ -538,7 +596,12 @@ class LettaAgent(BaseAgent):
                 force=False,
             )
 
-        await self._log_request(request_start_timestamp_ns, request_span, job_update_metadata, is_error=False)
+        await self._log_request(
+            request_start_timestamp_ns,
+            request_span,
+            job_update_metadata,
+            is_error=False,
+        )
 
         # Return back usage
         for finish_chunk in self.get_finish_chunks_for_stream(usage, stop_reason):
@@ -552,7 +615,10 @@ class LettaAgent(BaseAgent):
         run_id: str | None = None,
         request_start_timestamp_ns: int | None = None,
         dry_run: bool = False,
-    ) -> Union[tuple[list[Message], list[Message], LettaStopReason | None, LettaUsageStatistics], dict]:
+    ) -> Union[
+        tuple[list[Message], list[Message], LettaStopReason | None, LettaUsageStatistics],
+        dict,
+    ]:
         """
         Carries out an invocation of the agent loop. In each step, the agent
             1. Rebuilds its memory
@@ -684,7 +750,11 @@ class LettaAgent(BaseAgent):
                     usage.total_tokens += response.usage.total_tokens
                     usage.run_ids = [run_id] if run_id else None
                     MetricRegistry().message_output_tokens.record(
-                        response.usage.completion_tokens, dict(get_ctx_attributes(), **{"model.name": agent_state.llm_config.model})
+                        response.usage.completion_tokens,
+                        dict(
+                            get_ctx_attributes(),
+                            **{"model.name": agent_state.llm_config.model},
+                        ),
                     )
 
                     if not response.choices[0].message.tool_calls:
@@ -776,14 +846,24 @@ class LettaAgent(BaseAgent):
                     # This indicates we failed after we decided to stop stepping, which indicates a bug with our flow.
                     if not stop_reason:
                         stop_reason = LettaStopReason(stop_reason=StopReasonType.error.value)
-                    elif stop_reason.stop_reason in (StopReasonType.end_turn, StopReasonType.max_steps, StopReasonType.tool_rule):
-                        self.logger.error("Error occurred during step processing, with valid stop reason: %s", stop_reason.stop_reason)
+                    elif stop_reason.stop_reason in (
+                        StopReasonType.end_turn,
+                        StopReasonType.max_steps,
+                        StopReasonType.tool_rule,
+                    ):
+                        self.logger.error(
+                            "Error occurred during step processing, with valid stop reason: %s",
+                            stop_reason.stop_reason,
+                        )
                     elif stop_reason.stop_reason not in (
                         StopReasonType.no_tool_call,
                         StopReasonType.invalid_tool_call,
                         StopReasonType.invalid_llm_response,
                     ):
-                        self.logger.error("Error occurred during step processing, with unexpected stop reason: %s", stop_reason.stop_reason)
+                        self.logger.error(
+                            "Error occurred during step processing, with unexpected stop reason: %s",
+                            stop_reason.stop_reason,
+                        )
                     raise
 
                     # Update step if it needs to be updated
@@ -811,8 +891,8 @@ class LettaAgent(BaseAgent):
                                 await self.step_manager.update_step_error_async(
                                     actor=self.actor,
                                     step_id=step_id,  # Use original step_id for telemetry
-                                    error_type=type(e).__name__ if "e" in locals() else "Unknown",
-                                    error_message=str(e) if "e" in locals() else "Unknown error",
+                                    error_type=(type(e).__name__ if "e" in locals() else "Unknown"),
+                                    error_message=(str(e) if "e" in locals() else "Unknown error"),
                                     error_traceback=traceback.format_exc(),
                                     stop_reason=stop_reason,
                                 )
@@ -839,7 +919,12 @@ class LettaAgent(BaseAgent):
                             self.logger.error("Invalid StepProgression value")
 
                         if settings.track_stop_reason:
-                            await self._log_request(request_start_timestamp_ns, request_span, job_update_metadata, is_error=True)
+                            await self._log_request(
+                                request_start_timestamp_ns,
+                                request_span,
+                                job_update_metadata,
+                                is_error=True,
+                            )
 
                         # Record partial step metrics on failure (capture whatever timing data we have)
                         if logged_step and step_metrics and step_progression < StepProgression.FINISHED:
@@ -868,7 +953,12 @@ class LettaAgent(BaseAgent):
                 force=False,
             )
 
-        await self._log_request(request_start_timestamp_ns, request_span, job_update_metadata, is_error=False)
+        await self._log_request(
+            request_start_timestamp_ns,
+            request_span,
+            job_update_metadata,
+            is_error=False,
+        )
 
         return current_in_context_messages, new_in_context_messages, stop_reason, usage
 
@@ -878,7 +968,10 @@ class LettaAgent(BaseAgent):
         try:
             await self.agent_manager.update_agent_async(
                 agent_id=self.agent_id,
-                agent_update=UpdateAgent(last_run_completion=completion_time, last_run_duration_ms=duration_ms),
+                agent_update=UpdateAgent(
+                    last_run_completion=completion_time,
+                    last_run_duration_ms=duration_ms,
+                ),
                 actor=self.actor,
             )
         except Exception as e:
@@ -903,7 +996,12 @@ class LettaAgent(BaseAgent):
         """
         agent_state = await self.agent_manager.get_agent_by_id_async(
             agent_id=self.agent_id,
-            include_relationships=["tools", "memory", "tool_exec_environment_variables", "sources"],
+            include_relationships=[
+                "tools",
+                "memory",
+                "tool_exec_environment_variables",
+                "sources",
+            ],
             actor=self.actor,
         )
         current_in_context_messages, new_in_context_messages = await _prepare_in_context_messages_no_persist_async(
@@ -1018,7 +1116,10 @@ class LettaAgent(BaseAgent):
 
                     # TODO: THIS IS INCREDIBLY UGLY
                     # TODO: THERE ARE MULTIPLE COPIES OF THE LLM_CONFIG EVERYWHERE THAT ARE GETTING MANIPULATED
-                    if agent_state.llm_config.model_endpoint_type in [ProviderType.anthropic, ProviderType.bedrock]:
+                    if agent_state.llm_config.model_endpoint_type in [
+                        ProviderType.anthropic,
+                        ProviderType.bedrock,
+                    ]:
                         interface = AnthropicStreamingInterface(
                             use_assistant_message=use_assistant_message,
                             put_inner_thoughts_in_kwarg=agent_state.llm_config.put_inner_thoughts_in_kwargs,
@@ -1045,7 +1146,10 @@ class LettaAgent(BaseAgent):
                             now = get_utc_timestamp_ns()
                             ttft_ns = now - request_start_timestamp_ns
 
-                            request_span.add_event(name="time_to_first_token_ms", attributes={"ttft_ms": ns_to_ms(ttft_ns)})
+                            request_span.add_event(
+                                name="time_to_first_token_ms",
+                                attributes={"ttft_ms": ns_to_ms(ttft_ns)},
+                            )
                             metric_attributes = get_ctx_attributes()
                             metric_attributes["model.name"] = agent_state.llm_config.model
                             MetricRegistry().ttft_ms_histogram.record(ns_to_ms(ttft_ns), metric_attributes)
@@ -1074,7 +1178,11 @@ class LettaAgent(BaseAgent):
                     usage.prompt_tokens += interface.input_tokens
                     usage.total_tokens += interface.input_tokens + interface.output_tokens
                     MetricRegistry().message_output_tokens.record(
-                        usage.completion_tokens, dict(get_ctx_attributes(), **{"model.name": agent_state.llm_config.model})
+                        usage.completion_tokens,
+                        dict(
+                            get_ctx_attributes(),
+                            **{"model.name": agent_state.llm_config.model},
+                        ),
                     )
 
                     # log LLM request time
@@ -1082,10 +1190,16 @@ class LettaAgent(BaseAgent):
                     step_metrics.llm_request_ns = llm_request_ns
 
                     llm_request_ms = ns_to_ms(llm_request_ns)
-                    agent_step_span.add_event(name="llm_request_ms", attributes={"duration_ms": llm_request_ms})
+                    agent_step_span.add_event(
+                        name="llm_request_ms",
+                        attributes={"duration_ms": llm_request_ms},
+                    )
                     MetricRegistry().llm_execution_time_ms_histogram.record(
                         llm_request_ms,
-                        dict(get_ctx_attributes(), **{"model.name": agent_state.llm_config.model}),
+                        dict(
+                            get_ctx_attributes(),
+                            **{"model.name": agent_state.llm_config.model},
+                        ),
                     )
 
                     # Process resulting stream content
@@ -1214,14 +1328,24 @@ class LettaAgent(BaseAgent):
                     # This indicates we failed after we decided to stop stepping, which indicates a bug with our flow.
                     if not stop_reason:
                         stop_reason = LettaStopReason(stop_reason=StopReasonType.error.value)
-                    elif stop_reason.stop_reason in (StopReasonType.end_turn, StopReasonType.max_steps, StopReasonType.tool_rule):
-                        self.logger.error("Error occurred during step processing, with valid stop reason: %s", stop_reason.stop_reason)
+                    elif stop_reason.stop_reason in (
+                        StopReasonType.end_turn,
+                        StopReasonType.max_steps,
+                        StopReasonType.tool_rule,
+                    ):
+                        self.logger.error(
+                            "Error occurred during step processing, with valid stop reason: %s",
+                            stop_reason.stop_reason,
+                        )
                     elif stop_reason.stop_reason not in (
                         StopReasonType.no_tool_call,
                         StopReasonType.invalid_tool_call,
                         StopReasonType.invalid_llm_response,
                     ):
-                        self.logger.error("Error occurred during step processing, with unexpected stop reason: %s", stop_reason.stop_reason)
+                        self.logger.error(
+                            "Error occurred during step processing, with unexpected stop reason: %s",
+                            stop_reason.stop_reason,
+                        )
 
                     # Send error stop reason to client and re-raise with expected response code
                     yield f"data: {stop_reason.model_dump_json()}\n\n", 500
@@ -1253,8 +1377,8 @@ class LettaAgent(BaseAgent):
                                 await self.step_manager.update_step_error_async(
                                     actor=self.actor,
                                     step_id=step_id,  # Use original step_id for telemetry
-                                    error_type=type(e).__name__ if "e" in locals() else "Unknown",
-                                    error_message=str(e) if "e" in locals() else "Unknown error",
+                                    error_type=(type(e).__name__ if "e" in locals() else "Unknown"),
+                                    error_message=(str(e) if "e" in locals() else "Unknown error"),
                                     error_traceback=traceback.format_exc(),
                                     stop_reason=stop_reason,
                                 )
@@ -1281,7 +1405,12 @@ class LettaAgent(BaseAgent):
 
                         # Do tracking for failure cases. Can consolidate with success conditions later.
                         if settings.track_stop_reason:
-                            await self._log_request(request_start_timestamp_ns, request_span, job_update_metadata, is_error=True)
+                            await self._log_request(
+                                request_start_timestamp_ns,
+                                request_span,
+                                job_update_metadata,
+                                is_error=True,
+                            )
 
                         # Record partial step metrics on failure (capture whatever timing data we have)
                         if logged_step and step_metrics and step_progression < StepProgression.FINISHED:
@@ -1317,19 +1446,31 @@ class LettaAgent(BaseAgent):
                 force=False,
             )
 
-        await self._log_request(request_start_timestamp_ns, request_span, job_update_metadata, is_error=False)
+        await self._log_request(
+            request_start_timestamp_ns,
+            request_span,
+            job_update_metadata,
+            is_error=False,
+        )
 
         for finish_chunk in self.get_finish_chunks_for_stream(usage, stop_reason):
             yield f"data: {finish_chunk}\n\n"
 
     async def _log_request(
-        self, request_start_timestamp_ns: int, request_span: "Span | None", job_update_metadata: dict | None, is_error: bool
+        self,
+        request_start_timestamp_ns: int,
+        request_span: "Span | None",
+        job_update_metadata: dict | None,
+        is_error: bool,
     ):
         if request_start_timestamp_ns:
             now_ns, now = get_utc_timestamp_ns(), get_utc_time()
             duration_ns = now_ns - request_start_timestamp_ns
             if request_span:
-                request_span.add_event(name="letta_request_ms", attributes={"duration_ms": ns_to_ms(duration_ns)})
+                request_span.add_event(
+                    name="letta_request_ms",
+                    attributes={"duration_ms": ns_to_ms(duration_ns)},
+                )
             await self._update_agent_last_run_metrics(now, ns_to_ms(duration_ns))
             if settings.track_agent_run and self.current_run_id:
                 await self.job_manager.record_response_duration(self.current_run_id, duration_ns, self.actor)
@@ -1400,11 +1541,20 @@ class LettaAgent(BaseAgent):
 
                 MetricRegistry().llm_execution_time_ms_histogram.record(
                     timer.elapsed_ms,
-                    dict(get_ctx_attributes(), **{"model.name": agent_state.llm_config.model}),
+                    dict(
+                        get_ctx_attributes(),
+                        **{"model.name": agent_state.llm_config.model},
+                    ),
                 )
                 agent_step_span.add_event(name="llm_request_ms", attributes={"duration_ms": timer.elapsed_ms})
 
-                return request_data, response, current_in_context_messages, new_in_context_messages, valid_tool_names
+                return (
+                    request_data,
+                    response,
+                    current_in_context_messages,
+                    new_in_context_messages,
+                    valid_tool_names,
+                )
 
             except Exception as e:
                 if attempt == self.max_summarization_retries:
@@ -1433,7 +1583,17 @@ class LettaAgent(BaseAgent):
         agent_state: AgentState,
         llm_client: LLMClientBase,
         tool_rules_solver: ToolRulesSolver,
-    ) -> tuple[dict, AsyncStream[ChatCompletionChunk], list[Message], list[Message], list[str], int] | None:
+    ) -> (
+        tuple[
+            dict,
+            AsyncStream[ChatCompletionChunk],
+            list[Message],
+            list[Message],
+            list[str],
+            int,
+        ]
+        | None
+    ):
         for attempt in range(self.max_summarization_retries + 1):
             try:
                 log_event("agent.stream_no_tokens.messages.refreshed")
@@ -1492,7 +1652,10 @@ class LettaAgent(BaseAgent):
     ) -> list[Message]:
         if isinstance(e, ContextWindowExceededError):
             return await self._rebuild_context_window(
-                in_context_messages=in_context_messages, new_letta_messages=new_letta_messages, llm_config=llm_config, force=force
+                in_context_messages=in_context_messages,
+                new_letta_messages=new_letta_messages,
+                llm_config=llm_config,
+                force=force,
             )
         else:
             raise llm_client.handle_llm_error(e)
@@ -1546,7 +1709,9 @@ class LettaAgent(BaseAgent):
             in_context_messages=in_context_messages, new_letta_messages=[], force=True
         )
         return await self.agent_manager.update_message_ids_async(
-            agent_id=self.agent_id, message_ids=[m.id for m in new_in_context_messages], actor=self.actor
+            agent_id=self.agent_id,
+            message_ids=[m.id for m in new_in_context_messages],
+            actor=self.actor,
         )
 
     @trace_method
@@ -1614,7 +1779,10 @@ class LettaAgent(BaseAgent):
         # Extract terminal tool names from tool rules
         terminal_tool_names = {rule.tool_name for rule in tool_rules_solver.terminal_tool_rules}
         allowed_tools = runtime_override_tool_json_schema(
-            tool_list=allowed_tools, response_format=agent_state.response_format, request_heartbeat=True, terminal_tools=terminal_tool_names
+            tool_list=allowed_tools,
+            response_format=agent_state.response_format,
+            request_heartbeat=True,
+            terminal_tools=terminal_tool_names,
         )
 
         return (
@@ -1635,7 +1803,7 @@ class LettaAgent(BaseAgent):
         agent_state: AgentState,
         tool_rules_solver: ToolRulesSolver,
         usage: UsageStatistics,
-        reasoning_content: list[TextContent | ReasoningContent | RedactedReasoningContent | OmittedReasoningContent] | None = None,
+        reasoning_content: (list[TextContent | ReasoningContent | RedactedReasoningContent | OmittedReasoningContent] | None) = None,
         pre_computed_assistant_message_id: str | None = None,
         step_id: str | None = None,
         initial_messages: list[Message] | None = None,
@@ -1676,7 +1844,10 @@ class LettaAgent(BaseAgent):
             )
             messages_to_persist = (initial_messages or []) + tool_call_messages
             persisted_messages = await self.message_manager.create_many_messages_async(
-                messages_to_persist, actor=self.actor, project_id=agent_state.project_id, template_id=agent_state.template_id
+                messages_to_persist,
+                actor=self.actor,
+                project_id=agent_state.project_id,
+                template_id=agent_state.template_id,
             )
             return persisted_messages, continue_stepping, stop_reason
 
@@ -1739,7 +1910,11 @@ class LettaAgent(BaseAgent):
             )
 
             # 3.  Prepare the function-response payload
-            truncate = tool_call_name not in {"conversation_search", "conversation_search_date", "archival_memory_search"}
+            truncate = tool_call_name not in {
+                "conversation_search",
+                "conversation_search_date",
+                "archival_memory_search",
+            }
             return_char_limit = next(
                 (t.return_char_limit for t in agent_state.tools if t.name == tool_call_name),
                 None,
@@ -1787,7 +1962,10 @@ class LettaAgent(BaseAgent):
             messages_to_persist = (initial_messages or []) + tool_call_messages
 
         persisted_messages = await self.message_manager.create_many_messages_async(
-            messages_to_persist, actor=self.actor, project_id=agent_state.project_id, template_id=agent_state.template_id
+            messages_to_persist,
+            actor=self.actor,
+            project_id=agent_state.project_id,
+            template_id=agent_state.template_id,
         )
 
         if run_id:
@@ -1905,7 +2083,10 @@ class LettaAgent(BaseAgent):
                     "tool_id": target_tool.id,
                 },
             )
-        log_event(name=f"finish_{tool_name}_execution", attributes=tool_execution_result.model_dump())
+        log_event(
+            name=f"finish_{tool_name}_execution",
+            attributes=tool_execution_result.model_dump(),
+        )
         return tool_execution_result
 
     @trace_method

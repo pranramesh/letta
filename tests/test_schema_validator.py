@@ -193,7 +193,11 @@ def test_fastmcp_tool_schema_now_strict():
     schema = {
         "properties": {
             "a": {"title": "A", "type": "integer"},
-            "b": {"anyOf": [{"type": "integer"}, {"type": "null"}], "default": None, "title": "B"},
+            "b": {
+                "anyOf": [{"type": "integer"}, {"type": "null"}],
+                "default": None,
+                "title": "B",
+            },
         },
         "required": ["a"],  # Only 'a' is required, but we can heal this
         "type": "object",
@@ -263,7 +267,11 @@ def test_healed_nested_schema():
                     "port": {"type": ["integer", "null"]},  # Healed optional field
                     "timeout": {"type": ["number", "null"]},  # Healed optional field
                 },
-                "required": ["host", "port", "timeout"],  # All fields required after healing
+                "required": [
+                    "host",
+                    "port",
+                    "timeout",
+                ],  # All fields required after healing
                 "additionalProperties": False,
             }
         },

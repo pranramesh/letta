@@ -31,8 +31,18 @@ def upgrade() -> None:
         sa.Column("file_id", sa.String(), nullable=False),
         sa.Column("text", sa.Text(), nullable=False),
         sa.Column("id", sa.String(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
         sa.Column("is_deleted", sa.Boolean(), server_default=sa.text("FALSE"), nullable=False),
         sa.Column("_created_by_id", sa.String(), nullable=True),
         sa.Column("_last_updated_by_id", sa.String(), nullable=True),
@@ -54,7 +64,12 @@ def upgrade() -> None:
 
     # now make it NOT NULL
     op.alter_column("files_agents", "file_name", nullable=False)
-    op.create_index("ix_files_agents_agent_file_name", "files_agents", ["agent_id", "file_name"], unique=False)
+    op.create_index(
+        "ix_files_agents_agent_file_name",
+        "files_agents",
+        ["agent_id", "file_name"],
+        unique=False,
+    )
     op.create_unique_constraint("uq_files_agents_agent_file_name", "files_agents", ["agent_id", "file_name"])
     # ### end Alembic commands ###
 

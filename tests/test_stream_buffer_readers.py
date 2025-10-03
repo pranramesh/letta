@@ -35,40 +35,88 @@ def test_inner_thoughts_in_args_simple(wait_for_first_key):
         # If we're waiting for the first key, then the first opening brace should be buffered/held back
         # until after the inner thoughts are finished
         expected_updates1 = [
-            {"main_json_update": "", "inner_thoughts_update": ""},  # Fragment 1 (NOTE: different)
-            {"main_json_update": "", "inner_thoughts_update": "Chad's x2 tradition"},  # Fragment 2
-            {"main_json_update": "", "inner_thoughts_update": " is going strong! 😂 I love the enthusiasm!"},  # Fragment 3
-            {"main_json_update": "", "inner_thoughts_update": " Time to delve into something imaginative:"},  # Fragment 4
+            {
+                "main_json_update": "",
+                "inner_thoughts_update": "",
+            },  # Fragment 1 (NOTE: different)
+            {
+                "main_json_update": "",
+                "inner_thoughts_update": "Chad's x2 tradition",
+            },  # Fragment 2
+            {
+                "main_json_update": "",
+                "inner_thoughts_update": " is going strong! 😂 I love the enthusiasm!",
+            },  # Fragment 3
+            {
+                "main_json_update": "",
+                "inner_thoughts_update": " Time to delve into something imaginative:",
+            },  # Fragment 4
             {
                 "main_json_update": "",
                 "inner_thoughts_update": " If you could swap lives with any fictional character for a day, who would it be?",
             },  # Fragment 5
-            {"main_json_update": "", "inner_thoughts_update": ""},  # Fragment 6 (comma after inner_thoughts)
+            {
+                "main_json_update": "",
+                "inner_thoughts_update": "",
+            },  # Fragment 6 (comma after inner_thoughts)
             {
                 "main_json_update": '{"message":"Here we are again, with \'x2\'!',
                 "inner_thoughts_update": "",
             },  # Fragment 7  (NOTE: the brace is included here, instead of at the beginning)
-            {"main_json_update": " 🎉 Let's take this chance: If you could swap", "inner_thoughts_update": ""},  # Fragment 8
-            {"main_json_update": " lives with any fictional character for a day,", "inner_thoughts_update": ""},  # Fragment 9
-            {"main_json_update": ' who would it be?"', "inner_thoughts_update": ""},  # Fragment 10
+            {
+                "main_json_update": " 🎉 Let's take this chance: If you could swap",
+                "inner_thoughts_update": "",
+            },  # Fragment 8
+            {
+                "main_json_update": " lives with any fictional character for a day,",
+                "inner_thoughts_update": "",
+            },  # Fragment 9
+            {
+                "main_json_update": ' who would it be?"',
+                "inner_thoughts_update": "",
+            },  # Fragment 10
             {"main_json_update": "}", "inner_thoughts_update": ""},  # Fragment 11
         ]
     else:
         # If we're not waiting for the first key, then the first opening brace should be written immediately
         expected_updates1 = [
             {"main_json_update": "{", "inner_thoughts_update": ""},  # Fragment 1
-            {"main_json_update": "", "inner_thoughts_update": "Chad's x2 tradition"},  # Fragment 2
-            {"main_json_update": "", "inner_thoughts_update": " is going strong! 😂 I love the enthusiasm!"},  # Fragment 3
-            {"main_json_update": "", "inner_thoughts_update": " Time to delve into something imaginative:"},  # Fragment 4
+            {
+                "main_json_update": "",
+                "inner_thoughts_update": "Chad's x2 tradition",
+            },  # Fragment 2
+            {
+                "main_json_update": "",
+                "inner_thoughts_update": " is going strong! 😂 I love the enthusiasm!",
+            },  # Fragment 3
+            {
+                "main_json_update": "",
+                "inner_thoughts_update": " Time to delve into something imaginative:",
+            },  # Fragment 4
             {
                 "main_json_update": "",
                 "inner_thoughts_update": " If you could swap lives with any fictional character for a day, who would it be?",
             },  # Fragment 5
-            {"main_json_update": "", "inner_thoughts_update": ""},  # Fragment 6 (comma after inner_thoughts)
-            {"main_json_update": '"message":"Here we are again, with \'x2\'!', "inner_thoughts_update": ""},  # Fragment 7
-            {"main_json_update": " 🎉 Let's take this chance: If you could swap", "inner_thoughts_update": ""},  # Fragment 8
-            {"main_json_update": " lives with any fictional character for a day,", "inner_thoughts_update": ""},  # Fragment 9
-            {"main_json_update": ' who would it be?"', "inner_thoughts_update": ""},  # Fragment 10
+            {
+                "main_json_update": "",
+                "inner_thoughts_update": "",
+            },  # Fragment 6 (comma after inner_thoughts)
+            {
+                "main_json_update": '"message":"Here we are again, with \'x2\'!',
+                "inner_thoughts_update": "",
+            },  # Fragment 7
+            {
+                "main_json_update": " 🎉 Let's take this chance: If you could swap",
+                "inner_thoughts_update": "",
+            },  # Fragment 8
+            {
+                "main_json_update": " lives with any fictional character for a day,",
+                "inner_thoughts_update": "",
+            },  # Fragment 9
+            {
+                "main_json_update": ' who would it be?"',
+                "inner_thoughts_update": "",
+            },  # Fragment 10
             {"main_json_update": "}", "inner_thoughts_update": ""},  # Fragment 11
         ]
 
@@ -114,7 +162,10 @@ def test_inner_thoughts_in_args_trailing_quote(wait_for_first_key):
         # If we're waiting for the first key, then the first opening brace should be buffered/held back
         # until after the inner thoughts are finished
         expected_updates1 = [
-            {"main_json_update": "", "inner_thoughts_update": ""},  # Fragment 1 (NOTE: different)
+            {
+                "main_json_update": "",
+                "inner_thoughts_update": "",
+            },  # Fragment 1 (NOTE: different)
             {
                 "main_json_update": "",
                 "inner_thoughts_update": "User wants to add 'banana' again for a fourth time; I'll track another addition.",
@@ -147,7 +198,10 @@ def test_inner_thoughts_in_args_trailing_quote(wait_for_first_key):
         pass
         # If we're not waiting for the first key, then the first opening brace should be written immediately
         expected_updates1 = [
-            {"main_json_update": "{", "inner_thoughts_update": ""},  # Fragment 1 (NOTE: different)
+            {
+                "main_json_update": "{",
+                "inner_thoughts_update": "",
+            },  # Fragment 1 (NOTE: different)
             {
                 "main_json_update": "",
                 "inner_thoughts_update": "User wants to add 'banana' again for a fourth time; I'll track another addition.",
@@ -217,10 +271,22 @@ def test_inner_thoughts_not_in_args():
 
     expected_updates2 = [
         {"main_json_update": "{", "inner_thoughts_update": ""},  # Fragment 1
-        {"main_json_update": '"message":"Here we are again, with \'x2\'!', "inner_thoughts_update": ""},  # Fragment 2
-        {"main_json_update": " 🎉 Let's take this chance: If you could swap", "inner_thoughts_update": ""},  # Fragment 3
-        {"main_json_update": " lives with any fictional character for a day,", "inner_thoughts_update": ""},  # Fragment 4
-        {"main_json_update": ' who would it be?"', "inner_thoughts_update": ""},  # Fragment 5
+        {
+            "main_json_update": '"message":"Here we are again, with \'x2\'!',
+            "inner_thoughts_update": "",
+        },  # Fragment 2
+        {
+            "main_json_update": " 🎉 Let's take this chance: If you could swap",
+            "inner_thoughts_update": "",
+        },  # Fragment 3
+        {
+            "main_json_update": " lives with any fictional character for a day,",
+            "inner_thoughts_update": "",
+        },  # Fragment 4
+        {
+            "main_json_update": ' who would it be?"',
+            "inner_thoughts_update": "",
+        },  # Fragment 5
         {"main_json_update": "}", "inner_thoughts_update": ""},  # Fragment 6
     ]
 

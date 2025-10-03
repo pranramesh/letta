@@ -37,8 +37,18 @@ def upgrade() -> None:
         sa.Column("tag", sa.String(), nullable=False),
         sa.Column("passage_id", sa.String(), nullable=False),
         sa.Column("archive_id", sa.String(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=timestamp_default, nullable=True),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=timestamp_default, nullable=True),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=timestamp_default,
+            nullable=True,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=timestamp_default,
+            nullable=True,
+        ),
         sa.Column("is_deleted", sa.Boolean(), server_default=sa.text("FALSE"), nullable=False),
         sa.Column("_created_by_id", sa.String(), nullable=True),
         sa.Column("_last_updated_by_id", sa.String(), nullable=True),
@@ -53,8 +63,18 @@ def upgrade() -> None:
         sa.UniqueConstraint("passage_id", "tag", name="uq_passage_tag"),
     )
     op.create_index("ix_passage_tags_archive_id", "passage_tags", ["archive_id"], unique=False)
-    op.create_index("ix_passage_tags_archive_tag", "passage_tags", ["archive_id", "tag"], unique=False)
-    op.create_index("ix_passage_tags_org_archive", "passage_tags", ["organization_id", "archive_id"], unique=False)
+    op.create_index(
+        "ix_passage_tags_archive_tag",
+        "passage_tags",
+        ["archive_id", "tag"],
+        unique=False,
+    )
+    op.create_index(
+        "ix_passage_tags_org_archive",
+        "passage_tags",
+        ["organization_id", "archive_id"],
+        unique=False,
+    )
     op.create_index("ix_passage_tags_tag", "passage_tags", ["tag"], unique=False)
     op.add_column("archival_passages", sa.Column("tags", sa.JSON(), nullable=True))
     op.add_column("source_passages", sa.Column("tags", sa.JSON(), nullable=True))

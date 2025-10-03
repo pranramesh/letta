@@ -32,7 +32,14 @@ def upgrade() -> None:
     op.drop_index("ix_job_usage_statistics_job_id", table_name="job_usage_statistics")
 
     # Add foreign key constraint for message_id
-    op.create_foreign_key("fk_job_messages_message_id", "job_messages", "messages", ["message_id"], ["id"], ondelete="CASCADE")
+    op.create_foreign_key(
+        "fk_job_messages_message_id",
+        "job_messages",
+        "messages",
+        ["message_id"],
+        ["id"],
+        ondelete="CASCADE",
+    )
 
 
 def downgrade() -> None:

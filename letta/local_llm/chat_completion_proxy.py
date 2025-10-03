@@ -10,20 +10,34 @@ from letta.helpers.datetime_helpers import get_utc_time_int
 from letta.helpers.json_helpers import json_dumps
 from letta.local_llm.constants import DEFAULT_WRAPPER
 from letta.local_llm.function_parser import patch_function
-from letta.local_llm.grammars.gbnf_grammar_generator import create_dynamic_model_from_function, generate_gbnf_grammar_and_documentation
+from letta.local_llm.grammars.gbnf_grammar_generator import (
+    create_dynamic_model_from_function,
+    generate_gbnf_grammar_and_documentation,
+)
 from letta.local_llm.koboldcpp.api import get_koboldcpp_completion
 from letta.local_llm.llamacpp.api import get_llamacpp_completion
 from letta.local_llm.llm_chat_completion_wrappers import simple_summary_wrapper
-from letta.local_llm.lmstudio.api import get_lmstudio_completion, get_lmstudio_completion_chatcompletions
+from letta.local_llm.lmstudio.api import (
+    get_lmstudio_completion,
+    get_lmstudio_completion_chatcompletions,
+)
 from letta.local_llm.ollama.api import get_ollama_completion
 from letta.local_llm.utils import count_tokens, get_available_wrappers
 from letta.local_llm.vllm.api import get_vllm_completion
 from letta.local_llm.webui.api import get_webui_completion
-from letta.local_llm.webui.legacy_api import get_webui_completion as get_webui_completion_legacy
+from letta.local_llm.webui.legacy_api import (
+    get_webui_completion as get_webui_completion_legacy,
+)
 from letta.otel.tracing import log_event
 from letta.prompts.gpt_summarize import SYSTEM as SUMMARIZE_SYSTEM_MESSAGE
 from letta.schemas.message import Message as PydanticMessage
-from letta.schemas.openai.chat_completion_response import ChatCompletionResponse, Choice, Message, ToolCall, UsageStatistics
+from letta.schemas.openai.chat_completion_response import (
+    ChatCompletionResponse,
+    Choice,
+    Message,
+    ToolCall,
+    UsageStatistics,
+)
 from letta.utils import get_tool_call_id
 
 has_shown_warning = False
@@ -131,10 +145,17 @@ def get_chat_completion(
         # if hasattr(llm_wrapper, "supports_first_message"):
         if hasattr(llm_wrapper, "supports_first_message") and llm_wrapper.supports_first_message:
             prompt = llm_wrapper.chat_completion_to_prompt(
-                messages=messages, functions=functions, first_message=first_message, function_documentation=documentation
+                messages=messages,
+                functions=functions,
+                first_message=first_message,
+                function_documentation=documentation,
             )
         else:
-            prompt = llm_wrapper.chat_completion_to_prompt(messages=messages, functions=functions, function_documentation=documentation)
+            prompt = llm_wrapper.chat_completion_to_prompt(
+                messages=messages,
+                functions=functions,
+                function_documentation=documentation,
+            )
 
         printd(prompt)
     except Exception as e:
@@ -233,9 +254,15 @@ def get_chat_completion(
                 index=0,
                 message=Message(
                     role=chat_completion_result["role"],
-                    content=result_reasoning if result_reasoning is not None else chat_completion_result["content"],
+                    content=(result_reasoning if result_reasoning is not None else chat_completion_result["content"]),
                     tool_calls=(
-                        [ToolCall(id=get_tool_call_id(), type="function", function=chat_completion_result["function_call"])]
+                        [
+                            ToolCall(
+                                id=get_tool_call_id(),
+                                type="function",
+                                function=chat_completion_result["function_call"],
+                            )
+                        ]
                         if "function_call" in chat_completion_result
                         else []
                     ),

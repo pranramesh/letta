@@ -34,7 +34,8 @@ class AzureProvider(Provider):
     # set manually, see: https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation
     latest_api_version: str = "2025-04-01-preview"
     base_url: str = Field(
-        ..., description="Base URL for the Azure API endpoint. This should be specific to your org, e.g. `https://letta.openai.azure.com`."
+        ...,
+        description="Base URL for the Azure API endpoint. This should be specific to your org, e.g. `https://letta.openai.azure.com`.",
     )
     api_key: str = Field(..., description="API key for the Azure API.")
     api_version: str = Field(default=LATEST_API_VERSION, description="API version for the Azure API")
@@ -60,7 +61,11 @@ class AzureProvider(Provider):
     def azure_openai_get_deployed_model_list(self) -> list:
         """https://learn.microsoft.com/en-us/rest/api/azureopenai/models/list?view=rest-azureopenai-2023-05-15&tabs=HTTP"""
 
-        client = AzureOpenAI(api_key=self.api_key, api_version=self.api_version, azure_endpoint=self.base_url)
+        client = AzureOpenAI(
+            api_key=self.api_key,
+            api_version=self.api_version,
+            azure_endpoint=self.base_url,
+        )
 
         try:
             models_list = client.models.list()
@@ -171,4 +176,7 @@ class AzureProvider(Provider):
         try:
             await self.list_llm_models_async()
         except Exception as e:
-            raise LLMAuthenticationError(message=f"Failed to authenticate with Azure: {e}", code=ErrorCode.UNAUTHENTICATED)
+            raise LLMAuthenticationError(
+                message=f"Failed to authenticate with Azure: {e}",
+                code=ErrorCode.UNAUTHENTICATED,
+            )

@@ -93,7 +93,10 @@ async def test_google_vertex():
     assert embedding_models[0].handle == f"{provider.name}/{embedding_models[0].embedding_model}"
 
 
-@pytest.mark.skipif(model_settings.deepseek_api_key is None, reason="Only run if DEEPSEEK_API_KEY is set.")
+@pytest.mark.skipif(
+    model_settings.deepseek_api_key is None,
+    reason="Only run if DEEPSEEK_API_KEY is set.",
+)
 @pytest.mark.asyncio
 async def test_deepseek():
     provider = DeepSeekProvider(name="deepseek", api_key=model_settings.deepseek_api_key)
@@ -132,7 +135,10 @@ async def test_azure():
     assert embedding_models[0].handle == f"{provider.name}/{embedding_models[0].embedding_model}"
 
 
-@pytest.mark.skipif(model_settings.together_api_key is None, reason="Only run if TOGETHER_API_KEY is set.")
+@pytest.mark.skipif(
+    model_settings.together_api_key is None,
+    reason="Only run if TOGETHER_API_KEY is set.",
+)
 @pytest.mark.asyncio
 async def test_together():
     provider = TogetherProvider(

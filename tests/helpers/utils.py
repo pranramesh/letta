@@ -174,7 +174,9 @@ def comprehensive_agent_checks(agent: AgentState, request: Union[CreateAgent, Up
 
 
 def validate_context_window_overview(
-    agent_state: AgentState, overview: ContextWindowOverview, attached_file: Optional[FileAgent] = None
+    agent_state: AgentState,
+    overview: ContextWindowOverview,
+    attached_file: Optional[FileAgent] = None,
 ) -> None:
     """Validate common sense assertions for ContextWindowOverview"""
 
@@ -294,7 +296,12 @@ def upload_file_and_wait(
     """Helper function to upload a file and wait for processing to complete"""
     with open(file_path, "rb") as f:
         if duplicate_handling:
-            file_metadata = client.sources.files.upload(source_id=source_id, file=f, duplicate_handling=duplicate_handling, name=name)
+            file_metadata = client.sources.files.upload(
+                source_id=source_id,
+                file=f,
+                duplicate_handling=duplicate_handling,
+                name=name,
+            )
         else:
             file_metadata = client.sources.files.upload(source_id=source_id, file=f, name=name)
 
@@ -305,7 +312,10 @@ def upload_file_and_wait(
             raise TimeoutError(f"File processing timed out after {max_wait} seconds")
         time.sleep(1)
         file_metadata = client.sources.get_file_metadata(source_id=source_id, file_id=file_metadata.id)
-        print("Waiting for file processing to complete...", file_metadata.processing_status)
+        print(
+            "Waiting for file processing to complete...",
+            file_metadata.processing_status,
+        )
 
     if file_metadata.processing_status == "error":
         raise RuntimeError(f"File processing failed: {file_metadata.error_message}")
@@ -324,7 +334,12 @@ def upload_file_and_wait_list_files(
     """Helper function to upload a file and wait for processing using list_files instead of get_file_metadata"""
     with open(file_path, "rb") as f:
         if duplicate_handling:
-            file_metadata = client.sources.files.upload(source_id=source_id, file=f, duplicate_handling=duplicate_handling, name=name)
+            file_metadata = client.sources.files.upload(
+                source_id=source_id,
+                file=f,
+                duplicate_handling=duplicate_handling,
+                name=name,
+            )
         else:
             file_metadata = client.sources.files.upload(source_id=source_id, file=f, name=name)
 
@@ -345,7 +360,10 @@ def upload_file_and_wait_list_files(
         else:
             raise RuntimeError(f"File {file_metadata.id} not found in source files list")
 
-        print("Waiting for file processing to complete (via list_files)...", file_metadata.processing_status)
+        print(
+            "Waiting for file processing to complete (via list_files)...",
+            file_metadata.processing_status,
+        )
 
     if file_metadata.processing_status == "error":
         raise RuntimeError(f"File processing failed: {file_metadata.error_message}")

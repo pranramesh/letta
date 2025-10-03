@@ -6,7 +6,11 @@ from fastapi.responses import StreamingResponse
 
 from letta.agents.voice_agent import VoiceAgent
 from letta.log import get_logger
-from letta.server.rest_api.dependencies import HeaderParams, get_headers, get_letta_server
+from letta.server.rest_api.dependencies import (
+    HeaderParams,
+    get_headers,
+    get_letta_server,
+)
 from letta.server.rest_api.utils import get_user_message_from_chat_completions_request
 from letta.settings import model_settings
 
@@ -59,5 +63,6 @@ async def create_voice_chat_completions(
 
     # Return the streaming generator
     return StreamingResponse(
-        agent.step_stream(input_messages=get_user_message_from_chat_completions_request(completion_request)), media_type="text/event-stream"
+        agent.step_stream(input_messages=get_user_message_from_chat_completions_request(completion_request)),
+        media_type="text/event-stream",
     )

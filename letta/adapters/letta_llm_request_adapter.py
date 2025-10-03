@@ -4,7 +4,11 @@ from typing import AsyncGenerator
 from letta.adapters.letta_llm_adapter import LettaLLMAdapter
 from letta.helpers.datetime_helpers import get_utc_timestamp_ns
 from letta.schemas.letta_message import LettaMessage
-from letta.schemas.letta_message_content import OmittedReasoningContent, ReasoningContent, TextContent
+from letta.schemas.letta_message_content import (
+    OmittedReasoningContent,
+    ReasoningContent,
+    TextContent,
+)
 from letta.schemas.provider_trace import ProviderTraceCreate
 from letta.schemas.user import User
 from letta.settings import settings

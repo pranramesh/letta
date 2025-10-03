@@ -15,7 +15,11 @@ class BlocksAgents(Base):
             name="unique_label_per_agent",
         ),
         ForeignKeyConstraint(
-            ["block_id", "block_label"], ["block.id", "block.label"], name="fk_block_id_label", deferrable=True, initially="DEFERRED"
+            ["block_id", "block_label"],
+            ["block.id", "block.label"],
+            name="fk_block_id_label",
+            deferrable=True,
+            initially="DEFERRED",
         ),
         UniqueConstraint("agent_id", "block_id", name="unique_agent_block"),
         Index("ix_blocks_agents_block_label_agent_id", "block_label", "agent_id"),

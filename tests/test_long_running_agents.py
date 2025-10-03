@@ -95,7 +95,10 @@ async def test_deep_research_agent(client: Letta, server_url, disable_e2b_api_ke
             if chunk.message_type is not None:
                 print(chunk)
     except httpx.ReadTimeout as e:
-        print("Timeout on create_stream. Consider enabling pings in create_stream if you have long running agents. ", e)
+        print(
+            "Timeout on create_stream. Consider enabling pings in create_stream if you have long running agents. ",
+            e,
+        )
         assert False
     finally:
         client.agents.delete(agent_id=agent_id)
@@ -126,7 +129,10 @@ async def test_kylie_agent(client: Letta, server_url, disable_e2b_api_key):
             if chunk.message_type is not None:
                 print(chunk)
     except httpx.ReadTimeout as e:
-        print("Timeout on create_stream. Consider enabling pings in create_stream if you have long running agents. ", e)
+        print(
+            "Timeout on create_stream. Consider enabling pings in create_stream if you have long running agents. ",
+            e,
+        )
         assert False
     finally:
         client.agents.delete(agent_id=agent_id)

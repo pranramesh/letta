@@ -273,10 +273,17 @@ def _parse_function_from_source(source_code: str, desired_name: Optional[str] = 
                 # Can't evaluate the default, use Parameter.empty
                 default_value = inspect.Parameter.empty
             param = inspect.Parameter(
-                param_name, inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=param_annotation, default=default_value
+                param_name,
+                inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                annotation=param_annotation,
+                default=default_value,
             )
         else:
-            param = inspect.Parameter(param_name, inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=param_annotation)
+            param = inspect.Parameter(
+                param_name,
+                inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                annotation=param_annotation,
+            )
         parameters.append(param)
 
     signature = inspect.Signature(parameters)

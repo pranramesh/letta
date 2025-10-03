@@ -101,7 +101,12 @@ async def test_insert_archival_memories_concurrent(client):
 
     # 4) Generate improved plots
     # Helper: concurrency over time
-    events = np.concatenate([np.column_stack([starts, np.ones_like(starts)]), np.column_stack([starts + durs, -np.ones_like(durs)])])
+    events = np.concatenate(
+        [
+            np.column_stack([starts, np.ones_like(starts)]),
+            np.column_stack([starts + durs, -np.ones_like(durs)]),
+        ]
+    )
     events = events[events[:, 0].argsort()]
     concurrency_t = np.cumsum(events[:, 1])
     concurrency_x = events[:, 0] - starts.min()
@@ -155,7 +160,16 @@ async def test_insert_archival_memories_concurrent(client):
         f"max   = {durs.max():.3f} s\n"
         f"stdev = {durs.std():.3f} s"
     )
-    axs[5].text(0.02, 0.98, summary_text, va="top", ha="left", fontsize=11, family="monospace", transform=axs[5].transAxes)
+    axs[5].text(
+        0.02,
+        0.98,
+        summary_text,
+        va="top",
+        ha="left",
+        fontsize=11,
+        family="monospace",
+        transform=axs[5].transAxes,
+    )
 
     plt.tight_layout()
     plt.savefig("latency_diagnostics.png", dpi=150)

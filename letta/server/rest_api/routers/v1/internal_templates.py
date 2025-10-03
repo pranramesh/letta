@@ -6,7 +6,11 @@ from pydantic import BaseModel
 from letta.schemas.agent import AgentState, InternalTemplateAgentCreate
 from letta.schemas.block import Block, InternalTemplateBlockCreate
 from letta.schemas.group import Group, InternalTemplateGroupCreate
-from letta.server.rest_api.dependencies import HeaderParams, get_headers, get_letta_server
+from letta.server.rest_api.dependencies import (
+    HeaderParams,
+    get_headers,
+    get_letta_server,
+)
 from letta.server.server import SyncServer
 
 router = APIRouter(prefix="/_internal_templates", tags=["_internal_templates"])
@@ -90,7 +94,11 @@ class DeleteDeploymentResponse(BaseModel):
     message: str
 
 
-@router.get("/deployment/{deployment_id}", response_model=ListDeploymentEntitiesResponse, operation_id="list_deployment_entities")
+@router.get(
+    "/deployment/{deployment_id}",
+    response_model=ListDeploymentEntitiesResponse,
+    operation_id="list_deployment_entities",
+)
 async def list_deployment_entities(
     deployment_id: str,
     server: "SyncServer" = Depends(get_letta_server),
@@ -130,7 +138,8 @@ async def list_deployment_entities(
 
             async with db_registry.async_session() as session:
                 block_query = select(BlockModel).where(
-                    BlockModel.deployment_id == deployment_id, BlockModel.organization_id == actor.organization_id
+                    BlockModel.deployment_id == deployment_id,
+                    BlockModel.organization_id == actor.organization_id,
                 )
                 result = await session.execute(block_query)
                 blocks = result.scalars().all()
@@ -153,7 +162,8 @@ async def list_deployment_entities(
 
             async with db_registry.async_session() as session:
                 agent_query = select(AgentModel).where(
-                    AgentModel.deployment_id == deployment_id, AgentModel.organization_id == actor.organization_id
+                    AgentModel.deployment_id == deployment_id,
+                    AgentModel.organization_id == actor.organization_id,
                 )
                 result = await session.execute(agent_query)
                 agents = result.scalars().all()
@@ -176,7 +186,8 @@ async def list_deployment_entities(
 
             async with db_registry.async_session() as session:
                 group_query = select(GroupModel).where(
-                    GroupModel.deployment_id == deployment_id, GroupModel.organization_id == actor.organization_id
+                    GroupModel.deployment_id == deployment_id,
+                    GroupModel.organization_id == actor.organization_id,
                 )
                 result = await session.execute(group_query)
                 groups = result.scalars().all()
@@ -197,12 +208,21 @@ async def list_deployment_entities(
         if entity_types:
             message += f" (filtered by types: {', '.join(types_to_include)})"
 
-        return ListDeploymentEntitiesResponse(entities=entities, total_count=len(entities), deployment_id=deployment_id, message=message)
+        return ListDeploymentEntitiesResponse(
+            entities=entities,
+            total_count=len(entities),
+            deployment_id=deployment_id,
+            message=message,
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/deployment/{deployment_id}", response_model=DeleteDeploymentResponse, operation_id="delete_deployment")
+@router.delete(
+    "/deployment/{deployment_id}",
+    response_model=DeleteDeploymentResponse,
+    operation_id="delete_deployment",
+)
 async def delete_deployment(
     deployment_id: str,
     server: "SyncServer" = Depends(get_letta_server),
@@ -228,7 +248,8 @@ async def delete_deployment(
         async with db_registry.async_session() as session:
             # Get all blocks with the deployment_id
             block_query = select(BlockModel).where(
-                BlockModel.deployment_id == deployment_id, BlockModel.organization_id == actor.organization_id
+                BlockModel.deployment_id == deployment_id,
+                BlockModel.organization_id == actor.organization_id,
             )
             result = await session.execute(block_query)
             blocks = result.scalars().all()
@@ -247,7 +268,8 @@ async def delete_deployment(
         async with db_registry.async_session() as session:
             # Get all agents with the deployment_id
             agent_query = select(AgentModel).where(
-                AgentModel.deployment_id == deployment_id, AgentModel.organization_id == actor.organization_id
+                AgentModel.deployment_id == deployment_id,
+                AgentModel.organization_id == actor.organization_id,
             )
             result = await session.execute(agent_query)
             agents = result.scalars().all()
@@ -266,7 +288,8 @@ async def delete_deployment(
         async with db_registry.async_session() as session:
             # Get all groups with the deployment_id
             group_query = select(GroupModel).where(
-                GroupModel.deployment_id == deployment_id, GroupModel.organization_id == actor.organization_id
+                GroupModel.deployment_id == deployment_id,
+                GroupModel.organization_id == actor.organization_id,
             )
             result = await session.execute(group_query)
             groups = result.scalars().all()
@@ -283,7 +306,10 @@ async def delete_deployment(
         message = f"Successfully deleted {total_deleted} entities from deployment {deployment_id}"
 
         return DeleteDeploymentResponse(
-            deleted_blocks=deleted_blocks, deleted_agents=deleted_agents, deleted_groups=deleted_groups, message=message
+            deleted_blocks=deleted_blocks,
+            deleted_agents=deleted_agents,
+            deleted_groups=deleted_groups,
+            message=message,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

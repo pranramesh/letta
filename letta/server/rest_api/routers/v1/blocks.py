@@ -5,7 +5,11 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from letta.orm.errors import NoResultFound
 from letta.schemas.agent import AgentState
 from letta.schemas.block import Block, BlockUpdate, CreateBlock
-from letta.server.rest_api.dependencies import HeaderParams, get_headers, get_letta_server
+from letta.server.rest_api.dependencies import (
+    HeaderParams,
+    get_headers,
+    get_letta_server,
+)
 from letta.server.server import SyncServer
 
 if TYPE_CHECKING:
@@ -33,7 +37,8 @@ async def list_blocks(
         description="Block ID cursor for pagination. Returns blocks that come after this block ID in the specified sort order",
     ),
     order: Literal["asc", "desc"] = Query(
-        "asc", description="Sort order for blocks by creation time. 'asc' for oldest first, 'desc' for newest first"
+        "asc",
+        description="Sort order for blocks by creation time. 'asc' for oldest first, 'desc' for newest first",
     ),
     order_by: Literal["created_at"] = Query("created_at", description="Field to sort by"),
     label_search: Optional[str] = Query(
@@ -163,7 +168,11 @@ async def retrieve_block(
         raise HTTPException(status_code=404, detail="Block not found")
 
 
-@router.get("/{block_id}/agents", response_model=List[AgentState], operation_id="list_agents_for_block")
+@router.get(
+    "/{block_id}/agents",
+    response_model=List[AgentState],
+    operation_id="list_agents_for_block",
+)
 async def list_agents_for_block(
     block_id: str,
     before: Optional[str] = Query(
@@ -176,7 +185,8 @@ async def list_agents_for_block(
     ),
     limit: Optional[int] = Query(50, description="Maximum number of agents to return"),
     order: Literal["asc", "desc"] = Query(
-        "desc", description="Sort order for agents by creation time. 'asc' for oldest first, 'desc' for newest first"
+        "desc",
+        description="Sort order for agents by creation time. 'asc' for oldest first, 'desc' for newest first",
     ),
     order_by: Literal["created_at"] = Query("created_at", description="Field to sort by"),
     include_relationships: list[str] | None = Query(

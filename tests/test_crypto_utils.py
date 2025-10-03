@@ -172,7 +172,10 @@ class TestCryptoUtils:
         json_data = {
             "user": "test_user",
             "token": "secret_token_123",
-            "nested": {"api_key": "sk-1234567890", "headers": {"Authorization": "Bearer token"}},
+            "nested": {
+                "api_key": "sk-1234567890",
+                "headers": {"Authorization": "Bearer token"},
+            },
         }
 
         json_str = json.dumps(json_data)

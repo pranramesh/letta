@@ -23,7 +23,10 @@ class FileMetadataBase(LettaBase):
     __id_prefix__ = "file"
 
     # Core file metadata fields
-    source_id: str = Field(..., description="The unique identifier of the source associated with the document.")
+    source_id: str = Field(
+        ...,
+        description="The unique identifier of the source associated with the document.",
+    )
     file_name: Optional[str] = Field(None, description="The name of the file.")
     original_file_name: Optional[str] = Field(None, description="The original name of the file as uploaded.")
     file_path: Optional[str] = Field(None, description="The path to the file.")
@@ -35,23 +38,33 @@ class FileMetadataBase(LettaBase):
         default=FileProcessingStatus.PENDING,
         description="The current processing status of the file (e.g. pending, parsing, embedding, completed, error).",
     )
-    error_message: Optional[str] = Field(default=None, description="Optional error message if the file failed processing.")
+    error_message: Optional[str] = Field(
+        default=None,
+        description="Optional error message if the file failed processing.",
+    )
     total_chunks: Optional[int] = Field(default=None, description="Total number of chunks for the file.")
     chunks_embedded: Optional[int] = Field(default=None, description="Number of chunks that have been embedded.")
     content: Optional[str] = Field(
-        default=None, description="Optional full-text content of the file; only populated on demand due to its size."
+        default=None,
+        description="Optional full-text content of the file; only populated on demand due to its size.",
     )
 
     def is_processing_terminal(self) -> bool:
         """Check if the file processing status is in a terminal state (completed or error)."""
-        return self.processing_status in (FileProcessingStatus.COMPLETED, FileProcessingStatus.ERROR)
+        return self.processing_status in (
+            FileProcessingStatus.COMPLETED,
+            FileProcessingStatus.ERROR,
+        )
 
 
 class FileMetadata(FileMetadataBase):
     """Representation of a single FileMetadata"""
 
     id: str = FileMetadataBase.generate_id_field()
-    organization_id: Optional[str] = Field(None, description="The unique identifier of the organization associated with the document.")
+    organization_id: Optional[str] = Field(
+        None,
+        description="The unique identifier of the organization associated with the document.",
+    )
 
     # orm metadata, optional fields
     created_at: Optional[datetime] = Field(default_factory=datetime.utcnow, description="The creation date of the file.")
@@ -77,8 +90,14 @@ class FileAgentBase(LettaBase):
         default_factory=datetime.utcnow,
         description="UTC timestamp of the agent's most recent access to this file.",
     )
-    start_line: Optional[int] = Field(None, description="Starting line number (1-indexed) when file was opened with line range.")
-    end_line: Optional[int] = Field(None, description="Ending line number (exclusive) when file was opened with line range.")
+    start_line: Optional[int] = Field(
+        None,
+        description="Starting line number (1-indexed) when file was opened with line range.",
+    )
+    end_line: Optional[int] = Field(
+        None,
+        description="Ending line number (exclusive) when file was opened with line range.",
+    )
 
 
 class FileAgent(FileAgentBase):
@@ -129,5 +148,8 @@ class PaginatedAgentFiles(LettaBase):
     """Paginated response for agent files"""
 
     files: List[AgentFileAttachment] = Field(..., description="List of file attachments for the agent")
-    next_cursor: Optional[str] = Field(None, description="Cursor for fetching the next page (file-agent relationship ID)")
+    next_cursor: Optional[str] = Field(
+        None,
+        description="Cursor for fetching the next page (file-agent relationship ID)",
+    )
     has_more: bool = Field(..., description="Whether more results exist after this page")

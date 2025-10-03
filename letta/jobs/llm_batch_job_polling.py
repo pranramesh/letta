@@ -3,7 +3,10 @@ import datetime
 from typing import List
 
 from letta.agents.letta_agent_batch import LettaAgentBatch
-from letta.jobs.helpers import map_anthropic_batch_job_status_to_job_status, map_anthropic_individual_batch_item_status_to_job_status
+from letta.jobs.helpers import (
+    map_anthropic_batch_job_status_to_job_status,
+    map_anthropic_individual_batch_item_status_to_job_status,
+)
 from letta.jobs.types import BatchPollingResult, ItemUpdateInfo
 from letta.log import get_logger
 from letta.otel.tracing import trace_method
@@ -119,7 +122,9 @@ async def poll_batch_updates(server: SyncServer, batch_jobs: List[LLMBatchJob], 
 
 @trace_method
 async def process_completed_batches(
-    server: SyncServer, batch_results: List[BatchPollingResult], metrics: BatchPollingMetrics
+    server: SyncServer,
+    batch_results: List[BatchPollingResult],
+    metrics: BatchPollingMetrics,
 ) -> List[ItemUpdateInfo]:
     """
     Process batches that have completed and fetch their item results.
@@ -188,7 +193,8 @@ async def poll_running_llm_batches(server: "SyncServer") -> List[LettaBatchRespo
     try:
         # 1. Retrieve running batch jobs
         batches = await server.batch_manager.list_running_llm_batches_async(
-            weeks=max(settings.batch_job_polling_lookback_weeks, 1), batch_size=settings.batch_job_polling_batch_size
+            weeks=max(settings.batch_job_polling_lookback_weeks, 1),
+            batch_size=settings.batch_job_polling_batch_size,
         )
         metrics.total_batches = len(batches)
 

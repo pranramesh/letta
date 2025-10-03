@@ -60,7 +60,11 @@ class LettaMultiAgentToolExecutor(ToolExecutor):
         return str(await self._process_agent(agent_state=other_agent_state, message=augmented_message))
 
     async def send_message_to_agents_matching_tags_async(
-        self, agent_state: AgentState, message: str, match_all: List[str], match_some: List[str]
+        self,
+        agent_state: AgentState,
+        message: str,
+        match_all: List[str],
+        match_some: List[str],
     ) -> str:
         # Find matching agents
         matching_agents = await self.agent_manager.list_agents_matching_tags_async(
@@ -78,7 +82,8 @@ class LettaMultiAgentToolExecutor(ToolExecutor):
 
         tasks = [
             safe_create_task(
-                self._process_agent(agent_state=agent_state, message=augmented_message), label=f"process_agent_{agent_state.id}"
+                self._process_agent(agent_state=agent_state, message=augmented_message),
+                label=f"process_agent_{agent_state.id}",
             )
             for agent_state in matching_agents
         ]
@@ -101,7 +106,7 @@ class LettaMultiAgentToolExecutor(ToolExecutor):
 
             return {
                 "agent_id": agent_state.id,
-                "response": send_message_content if send_message_content else ["<no response>"],
+                "response": (send_message_content if send_message_content else ["<no response>"]),
             }
 
         except Exception as e:
@@ -125,7 +130,8 @@ class LettaMultiAgentToolExecutor(ToolExecutor):
 
         other_agent_state = await self.agent_manager.get_agent_by_id_async(agent_id=other_agent_id, actor=self.actor)
         task = safe_create_task(
-            self._process_agent(agent_state=other_agent_state, message=prefixed), label=f"send_message_to_{other_agent_id}"
+            self._process_agent(agent_state=other_agent_state, message=prefixed),
+            label=f"send_message_to_{other_agent_id}",
         )
 
         task.add_done_callback(lambda t: (logger.error(f"Async send_message task failed: {t.exception()}") if t.exception() else None))

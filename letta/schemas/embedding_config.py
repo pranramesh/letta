@@ -33,7 +33,10 @@ class EmbeddingConfig(BaseModel):
     embedding_model: str = Field(..., description="The model for the embedding.")
     embedding_dim: int = Field(..., description="The dimension of the embedding.")
     embedding_chunk_size: Optional[int] = Field(300, description="The chunk size of the embedding.")
-    handle: Optional[str] = Field(None, description="The handle for this config, in the format provider/model-name.")
+    handle: Optional[str] = Field(
+        None,
+        description="The handle for this config, in the format provider/model-name.",
+    )
     batch_size: int = Field(32, description="The maximum batch size for processing embeddings.")
 
     # azure only

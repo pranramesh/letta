@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 from typing import List
+
 from letta.schemas.agent import AgentState
 from letta.schemas.letta_stop_reason import StopReasonType
 from letta.schemas.message import Message, MessageCreate
 from letta.schemas.usage import LettaUsageStatistics
 from letta.schemas.user import User
+
 
 @dataclass
 class WorkflowInputParams:
@@ -12,6 +14,7 @@ class WorkflowInputParams:
     messages: list[MessageCreate]
     actor: User
     max_steps: int = 50
+
 
 @dataclass
 class PreparedMessages:

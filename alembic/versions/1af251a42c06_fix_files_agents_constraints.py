@@ -45,10 +45,28 @@ def downgrade() -> None:
     op.drop_constraint("uq_agent_filename", "files_agents", type_="unique")
     op.drop_index("ix_file_agent", table_name="files_agents")
     op.drop_index("ix_agent_filename", table_name="files_agents")
-    op.create_unique_constraint("uq_files_agents_file_agent", "files_agents", ["file_id", "agent_id"], postgresql_nulls_not_distinct=False)
     op.create_unique_constraint(
-        "uq_files_agents_agent_file_name", "files_agents", ["agent_id", "file_name"], postgresql_nulls_not_distinct=False
+        "uq_files_agents_file_agent",
+        "files_agents",
+        ["file_id", "agent_id"],
+        postgresql_nulls_not_distinct=False,
     )
-    op.create_index("ix_files_agents_file_id_agent_id", "files_agents", ["file_id", "agent_id"], unique=False)
-    op.create_index("ix_files_agents_agent_file_name", "files_agents", ["agent_id", "file_name"], unique=False)
+    op.create_unique_constraint(
+        "uq_files_agents_agent_file_name",
+        "files_agents",
+        ["agent_id", "file_name"],
+        postgresql_nulls_not_distinct=False,
+    )
+    op.create_index(
+        "ix_files_agents_file_id_agent_id",
+        "files_agents",
+        ["file_id", "agent_id"],
+        unique=False,
+    )
+    op.create_index(
+        "ix_files_agents_agent_file_name",
+        "files_agents",
+        ["agent_id", "file_name"],
+        unique=False,
+    )
     # ### end Alembic commands ###

@@ -6,15 +6,28 @@ from fastapi.responses import StreamingResponse
 from openai.types.chat.completion_create_params import CompletionCreateParams
 
 from letta.agent import Agent
-from letta.constants import DEFAULT_MESSAGE_TOOL, DEFAULT_MESSAGE_TOOL_KWARG, LETTA_MODEL_ENDPOINT
+from letta.constants import (
+    DEFAULT_MESSAGE_TOOL,
+    DEFAULT_MESSAGE_TOOL_KWARG,
+    LETTA_MODEL_ENDPOINT,
+)
 from letta.log import get_logger
 from letta.schemas.message import Message, MessageCreate
 from letta.schemas.user import User
-from letta.server.rest_api.chat_completions_interface import ChatCompletionsStreamingInterface
-from letta.server.rest_api.dependencies import HeaderParams, get_headers, get_letta_server
+from letta.server.rest_api.chat_completions_interface import (
+    ChatCompletionsStreamingInterface,
+)
+from letta.server.rest_api.dependencies import (
+    HeaderParams,
+    get_headers,
+    get_letta_server,
+)
 
 # TODO this belongs in a controller!
-from letta.server.rest_api.utils import get_user_message_from_chat_completions_request, sse_async_generator
+from letta.server.rest_api.utils import (
+    get_user_message_from_chat_completions_request,
+    sse_async_generator,
+)
 from letta.utils import safe_create_task
 
 if TYPE_CHECKING:
@@ -44,7 +57,10 @@ async def create_chat_completions(
 ):
     # Validate and process fields
     if not completion_request["stream"]:
-        raise HTTPException(status_code=400, detail="Must be streaming request: `stream` was set to `False` in the request.")
+        raise HTTPException(
+            status_code=400,
+            detail="Must be streaming request: `stream` was set to `False` in the request.",
+        )
 
     actor = server.user_manager.get_user_or_default(user_id=headers.actor_id)
 

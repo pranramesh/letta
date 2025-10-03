@@ -34,7 +34,14 @@ class AsyncToolSandboxE2B(AsyncToolSandboxBase):
         sandbox_config: Optional[SandboxConfig] = None,
         sandbox_env_vars: Optional[Dict[str, Any]] = None,
     ):
-        super().__init__(tool_name, args, user, tool_object, sandbox_config=sandbox_config, sandbox_env_vars=sandbox_env_vars)
+        super().__init__(
+            tool_name,
+            args,
+            user,
+            tool_object,
+            sandbox_config=sandbox_config,
+            sandbox_env_vars=sandbox_env_vars,
+        )
         self.force_recreate = force_recreate
 
     @trace_method
@@ -67,7 +74,12 @@ class AsyncToolSandboxE2B(AsyncToolSandboxBase):
         try:
             log_event(
                 "e2b_execution_started",
-                {"tool": self.tool_name, "sandbox_id": e2b_sandbox.sandbox_id, "code": code, "env_vars": envs},
+                {
+                    "tool": self.tool_name,
+                    "sandbox_id": e2b_sandbox.sandbox_id,
+                    "code": code,
+                    "env_vars": envs,
+                },
             )
             execution = await e2b_sandbox.run_code(code, envs=envs)
 
@@ -87,7 +99,9 @@ class AsyncToolSandboxE2B(AsyncToolSandboxBase):
                 logger.debug(f"Tool {self.tool_name} raised a {execution.error.name}: {execution.error.value}")
                 logger.debug(f"Traceback from e2b sandbox: \n{execution.error.traceback}")
                 func_return = get_friendly_error_msg(
-                    function_name=self.tool_name, exception_name=execution.error.name, exception_message=execution.error.value
+                    function_name=self.tool_name,
+                    exception_name=execution.error.name,
+                    exception_message=execution.error.value,
                 )
                 execution.logs.stderr.append(execution.error.traceback)
                 log_event(
@@ -143,10 +157,14 @@ class AsyncToolSandboxE2B(AsyncToolSandboxBase):
         )
 
         if e2b_config.template:
-            sbx = await AsyncSandbox.create(sandbox_config.get_e2b_config().template, metadata={self.METADATA_CONFIG_STATE_KEY: state_hash})
+            sbx = await AsyncSandbox.create(
+                sandbox_config.get_e2b_config().template,
+                metadata={self.METADATA_CONFIG_STATE_KEY: state_hash},
+            )
         else:
             sbx = await AsyncSandbox.create(
-                metadata={self.METADATA_CONFIG_STATE_KEY: state_hash}, **e2b_config.model_dump(exclude={"pip_requirements"})
+                metadata={self.METADATA_CONFIG_STATE_KEY: state_hash},
+                **e2b_config.model_dump(exclude={"pip_requirements"}),
             )
 
         log_event(

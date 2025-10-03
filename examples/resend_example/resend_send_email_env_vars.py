@@ -23,10 +23,15 @@ def send_email(self, description: str):
     if RESEND_API_KEY is None:
         raise Exception("User did not set the environment variable RESEND_API_KEY")
     if RESEND_TARGET_EMAIL_ADDRESS is None:
-        raise Exception("User did not set the environment variable RESEND_TARGET_EMAIL_ADDRESS")
+        raise Exception(
+            "User did not set the environment variable RESEND_TARGET_EMAIL_ADDRESS"
+        )
 
     url = "https://api.resend.com/emails"
-    headers = {"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"}
+    headers = {
+        "Authorization": f"Bearer {RESEND_API_KEY}",
+        "Content-Type": "application/json",
+    }
     data = {
         "from": "onboarding@resend.dev",
         "to": RESEND_TARGET_EMAIL_ADDRESS,

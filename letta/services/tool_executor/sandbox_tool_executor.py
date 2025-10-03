@@ -1,7 +1,10 @@
 import traceback
 from typing import Any, Dict, Optional
 
-from letta.functions.ast_parsers import coerce_dict_args_by_annotations, get_function_annotations_from_source
+from letta.functions.ast_parsers import (
+    coerce_dict_args_by_annotations,
+    get_function_annotations_from_source,
+)
 from letta.log import get_logger
 from letta.otel.tracing import trace_method
 from letta.schemas.agent import AgentState
@@ -51,11 +54,19 @@ class SandboxToolExecutor(ToolExecutor):
                 from letta.services.tool_sandbox.e2b_sandbox import AsyncToolSandboxE2B
 
                 sandbox = AsyncToolSandboxE2B(
-                    function_name, function_args, actor, tool_object=tool, sandbox_config=sandbox_config, sandbox_env_vars=sandbox_env_vars
+                    function_name,
+                    function_args,
+                    actor,
+                    tool_object=tool,
+                    sandbox_config=sandbox_config,
+                    sandbox_env_vars=sandbox_env_vars,
                 )
             # TODO (cliandy): this is just for testing right now, separate this out into it's own subclass and handling logic
             elif tool_settings.sandbox_type == SandboxType.MODAL:
-                from letta.services.tool_sandbox.modal_sandbox import AsyncToolSandboxModal, TypescriptToolSandboxModal
+                from letta.services.tool_sandbox.modal_sandbox import (
+                    AsyncToolSandboxModal,
+                    TypescriptToolSandboxModal,
+                )
 
                 if tool.source_type == ToolSourceType.typescript:
                     sandbox = TypescriptToolSandboxModal(
@@ -79,7 +90,12 @@ class SandboxToolExecutor(ToolExecutor):
                     raise ValueError(f"Tool source type was {tool.source_type} but is required to be python or typescript to run in Modal.")
             else:
                 sandbox = AsyncToolSandboxLocal(
-                    function_name, function_args, actor, tool_object=tool, sandbox_config=sandbox_config, sandbox_env_vars=sandbox_env_vars
+                    function_name,
+                    function_args,
+                    actor,
+                    tool_object=tool,
+                    sandbox_config=sandbox_config,
+                    sandbox_env_vars=sandbox_env_vars,
                 )
 
             tool_execution_result = await sandbox.run(agent_state=agent_state_copy)
@@ -131,7 +147,9 @@ class SandboxToolExecutor(ToolExecutor):
     ) -> ToolExecutionResult:
         """Handle tool execution errors."""
         error_message = get_friendly_error_msg(
-            function_name=function_name, exception_name=type(exception).__name__, exception_message=str(exception)
+            function_name=function_name,
+            exception_name=type(exception).__name__,
+            exception_message=str(exception),
         )
         return ToolExecutionResult(
             status="error",

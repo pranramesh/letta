@@ -14,9 +14,14 @@ class ArchiveBase(OrmMetadataBase):
     description: Optional[str] = Field(None, description="A description of the archive")
     organization_id: str = Field(..., description="The organization this archive belongs to")
     vector_db_provider: VectorDBProvider = Field(
-        default=VectorDBProvider.NATIVE, description="The vector database provider used for this archive's passages"
+        default=VectorDBProvider.NATIVE,
+        description="The vector database provider used for this archive's passages",
     )
-    metadata: Optional[Dict] = Field(default_factory=dict, validation_alias="metadata_", description="Additional metadata")
+    metadata: Optional[Dict] = Field(
+        default_factory=dict,
+        validation_alias="metadata_",
+        description="Additional metadata",
+    )
 
 
 class Archive(ArchiveBase):

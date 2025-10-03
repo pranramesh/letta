@@ -3,7 +3,11 @@ import base64
 import pickle
 from typing import Any, Union
 
-from letta.constants import REQUEST_HEARTBEAT_DESCRIPTION, REQUEST_HEARTBEAT_PARAM, SEND_MESSAGE_TOOL_NAME
+from letta.constants import (
+    REQUEST_HEARTBEAT_DESCRIPTION,
+    REQUEST_HEARTBEAT_PARAM,
+    SEND_MESSAGE_TOOL_NAME,
+)
 from letta.schemas.agent import AgentState
 from letta.schemas.response_format import ResponseFormatType, ResponseFormatUnion
 from letta.types import JsonDict, JsonValue
@@ -54,7 +58,10 @@ def convert_param_to_str_value(param_type: str, raw_value: JsonValue) -> str:
             return str(raw_value)
         if isinstance(raw_value, int) and raw_value in (0, 1):
             return str(bool(raw_value))
-        if isinstance(raw_value, str) and raw_value.strip().lower() in ("true", "false"):
+        if isinstance(raw_value, str) and raw_value.strip().lower() in (
+            "true",
+            "false",
+        ):
             return raw_value.strip().lower().capitalize()
         raise ValueError(f"Invalid boolean value: {raw_value}")
     if param_type == "array":

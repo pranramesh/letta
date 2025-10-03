@@ -21,7 +21,10 @@ class BaseServerConfig(BaseModel):
 
 class SSEServerConfig(BaseServerConfig):
     type: MCPServerType = MCPServerType.SSE
-    server_url: str = Field(..., description="The URL of the server (MCP SSE client will connect to this URL)")
+    server_url: str = Field(
+        ...,
+        description="The URL of the server (MCP SSE client will connect to this URL)",
+    )
 
     def to_dict(self) -> dict:
         values = {

@@ -10,7 +10,13 @@ from opentelemetry.trace import Status, StatusCode
 from sqlalchemy import Engine, event
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.loading import load_on_ident, load_on_pk_identity
-from sqlalchemy.orm.strategies import ImmediateLoader, JoinedLoader, LazyLoader, SelectInLoader, SubqueryLoader
+from sqlalchemy.orm.strategies import (
+    ImmediateLoader,
+    JoinedLoader,
+    LazyLoader,
+    SelectInLoader,
+    SubqueryLoader,
+)
 
 _config = {
     "enabled": True,
@@ -476,7 +482,13 @@ def teardown_sqlalchemy_sync_instrumentation() -> None:
                     # Restore class method
                     class_name = module_or_class_name
                     # Find the class
-                    for cls in [SelectInLoader, JoinedLoader, LazyLoader, SubqueryLoader, ImmediateLoader]:
+                    for cls in [
+                        SelectInLoader,
+                        JoinedLoader,
+                        LazyLoader,
+                        SubqueryLoader,
+                        ImmediateLoader,
+                    ]:
                         if cls.__name__ == class_name:
                             setattr(cls, method_name, original_method)
                             break

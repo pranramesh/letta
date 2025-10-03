@@ -25,16 +25,28 @@ from letta.schemas.passage import Passage
 from letta.schemas.source import Source, SourceCreate, SourceUpdate
 from letta.schemas.source_metadata import OrganizationSourcesStats
 from letta.schemas.user import User
-from letta.server.rest_api.dependencies import HeaderParams, get_headers, get_letta_server
+from letta.server.rest_api.dependencies import (
+    HeaderParams,
+    get_headers,
+    get_letta_server,
+)
 from letta.server.server import SyncServer
 from letta.services.file_processor.embedder.openai_embedder import OpenAIEmbedder
 from letta.services.file_processor.embedder.pinecone_embedder import PineconeEmbedder
 from letta.services.file_processor.file_processor import FileProcessor
-from letta.services.file_processor.file_types import get_allowed_media_types, get_extension_to_mime_type_map, register_mime_types
+from letta.services.file_processor.file_types import (
+    get_allowed_media_types,
+    get_extension_to_mime_type_map,
+    register_mime_types,
+)
 from letta.services.file_processor.parser.markitdown_parser import MarkitdownFileParser
 from letta.services.file_processor.parser.mistral_parser import MistralFileParser
 from letta.settings import settings
-from letta.utils import safe_create_file_processing_task, safe_create_task, sanitize_filename
+from letta.utils import (
+    safe_create_file_processing_task,
+    safe_create_task,
+    sanitize_filename,
+)
 
 logger = get_logger(__name__)
 
@@ -56,7 +68,12 @@ async def count_sources(
     return await server.source_manager.size_async(actor=actor)
 
 
-@router.get("/{source_id}", response_model=Source, operation_id="retrieve_source", deprecated=True)
+@router.get(
+    "/{source_id}",
+    response_model=Source,
+    operation_id="retrieve_source",
+    deprecated=True,
+)
 async def retrieve_source(
     source_id: str,
     server: "SyncServer" = Depends(get_letta_server),
@@ -73,7 +90,12 @@ async def retrieve_source(
     return source
 
 
-@router.get("/name/{source_name}", response_model=str, operation_id="get_source_id_by_name", deprecated=True)
+@router.get(
+    "/name/{source_name}",
+    response_model=str,
+    operation_id="get_source_id_by_name",
+    deprecated=True,
+)
 async def get_source_id_by_name(
     source_name: str,
     server: "SyncServer" = Depends(get_letta_server),
@@ -90,7 +112,12 @@ async def get_source_id_by_name(
     return source.id
 
 
-@router.get("/metadata", response_model=OrganizationSourcesStats, operation_id="get_sources_metadata", deprecated=True)
+@router.get(
+    "/metadata",
+    response_model=OrganizationSourcesStats,
+    operation_id="get_sources_metadata",
+    deprecated=True,
+)
 async def get_sources_metadata(
     server: "SyncServer" = Depends(get_letta_server),
     headers: HeaderParams = Depends(get_headers),
@@ -107,7 +134,8 @@ async def get_sources_metadata(
     """
     actor = await server.user_manager.get_actor_or_default_async(actor_id=headers.actor_id)
     return await server.file_manager.get_organization_sources_metadata(
-        actor=actor, include_detailed_per_source_metadata=include_detailed_per_source_metadata
+        actor=actor,
+        include_detailed_per_source_metadata=include_detailed_per_source_metadata,
     )
 
 
@@ -211,7 +239,12 @@ async def delete_source(
     await server.delete_source(source_id=source_id, actor=actor)
 
 
-@router.post("/{source_id}/upload", response_model=FileMetadata, operation_id="upload_file_to_source", deprecated=True)
+@router.post(
+    "/{source_id}/upload",
+    response_model=FileMetadata,
+    operation_id="upload_file_to_source",
+    deprecated=True,
+)
 async def upload_file_to_source(
     file: UploadFile,
     source_id: str,
@@ -259,7 +292,10 @@ async def upload_file_to_source(
 
     source = await server.source_manager.get_source_by_id(source_id=source_id, actor=actor)
     if source is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Source with id={source_id} not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Source with id={source_id} not found.",
+        )
 
     content = await file.read()
 
@@ -279,12 +315,15 @@ async def upload_file_to_source(
         # Duplicate found, handle based on strategy
         if duplicate_handling == DuplicateFileHandling.ERROR:
             raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail=f"File '{original_filename}' already exists in source '{source.name}'"
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"File '{original_filename}' already exists in source '{source.name}'",
             )
         elif duplicate_handling == DuplicateFileHandling.SKIP:
             # Return existing file metadata with custom header to indicate it was skipped
             response = Response(
-                content=existing_file.model_dump_json(), media_type="application/json", headers={"X-Upload-Result": "skipped"}
+                content=existing_file.model_dump_json(),
+                media_type="application/json",
+                headers={"X-Upload-Result": "skipped"},
             )
             return response
         elif duplicate_handling == DuplicateFileHandling.REPLACE:
@@ -296,7 +335,9 @@ async def upload_file_to_source(
         # For SUFFIX, continue to generate unique filename
         # Generate unique filename (adds suffix if needed)
         unique_filename = await server.file_manager.generate_unique_filename(
-            original_filename=original_filename, source=source, organization_id=actor.organization_id
+            original_filename=original_filename,
+            source=source,
+            organization_id=actor.organization_id,
         )
 
     # create file metadata
@@ -317,19 +358,35 @@ async def upload_file_to_source(
     # Use cloud processing for all files (simple files always, complex files with Mistral key)
     logger.info("Running experimental cloud based file processing...")
     safe_create_file_processing_task(
-        load_file_to_source_cloud(server, agent_states, content, source_id, actor, source.embedding_config, file_metadata),
+        load_file_to_source_cloud(
+            server,
+            agent_states,
+            content,
+            source_id,
+            actor,
+            source.embedding_config,
+            file_metadata,
+        ),
         file_metadata=file_metadata,
         server=server,
         actor=actor,
         logger=logger,
         label="file_processor.process",
     )
-    safe_create_task(sleeptime_document_ingest_async(server, source_id, actor), label="sleeptime_document_ingest_async")
+    safe_create_task(
+        sleeptime_document_ingest_async(server, source_id, actor),
+        label="sleeptime_document_ingest_async",
+    )
 
     return file_metadata
 
 
-@router.get("/{source_id}/agents", response_model=List[str], operation_id="get_agents_for_source", deprecated=True)
+@router.get(
+    "/{source_id}/agents",
+    response_model=List[str],
+    operation_id="get_agents_for_source",
+    deprecated=True,
+)
 async def get_agents_for_source(
     source_id: str,
     server: SyncServer = Depends(get_letta_server),
@@ -342,7 +399,12 @@ async def get_agents_for_source(
     return await server.source_manager.get_agents_for_source_id(source_id=source_id, actor=actor)
 
 
-@router.get("/{source_id}/passages", response_model=List[Passage], operation_id="list_source_passages", deprecated=True)
+@router.get(
+    "/{source_id}/passages",
+    response_model=List[Passage],
+    operation_id="list_source_passages",
+    deprecated=True,
+)
 async def list_source_passages(
     source_id: str,
     after: Optional[str] = Query(None, description="Message after which to retrieve the returned messages."),
@@ -364,7 +426,12 @@ async def list_source_passages(
     )
 
 
-@router.get("/{source_id}/files", response_model=List[FileMetadata], operation_id="list_source_files", deprecated=True)
+@router.get(
+    "/{source_id}/files",
+    response_model=List[FileMetadata],
+    operation_id="list_source_files",
+    deprecated=True,
+)
 async def list_source_files(
     source_id: str,
     limit: int = Query(1000, description="Number of files to return"),
@@ -392,7 +459,12 @@ async def list_source_files(
     )
 
 
-@router.get("/{source_id}/files/{file_id}", response_model=FileMetadata, operation_id="get_file_metadata", deprecated=True)
+@router.get(
+    "/{source_id}/files/{file_id}",
+    response_model=FileMetadata,
+    operation_id="get_file_metadata",
+    deprecated=True,
+)
 async def get_file_metadata(
     source_id: str,
     file_id: str,
@@ -407,7 +479,10 @@ async def get_file_metadata(
 
     # Get file metadata using the file manager
     file_metadata = await server.file_manager.get_file_by_id(
-        file_id=file_id, actor=actor, include_content=include_content, strip_directory_prefix=True
+        file_id=file_id,
+        actor=actor,
+        include_content=include_content,
+        strip_directory_prefix=True,
     )
 
     if not file_metadata:
@@ -415,7 +490,10 @@ async def get_file_metadata(
 
     # Verify the file belongs to the specified source
     if file_metadata.source_id != source_id:
-        raise HTTPException(status_code=404, detail=f"File with id={file_id} not found in source {source_id}.")
+        raise HTTPException(
+            status_code=404,
+            detail=f"File with id={file_id} not found in source {source_id}.",
+        )
 
     # Check and update file status (timeout check and pinecone embedding sync)
     file_metadata = await server.file_manager.check_and_update_file_status(file_metadata, actor)
@@ -425,7 +503,12 @@ async def get_file_metadata(
 
 # it's redundant to include /delete in the URL path. The HTTP verb DELETE already implies that action.
 # it's still good practice to return a status indicating the success or failure of the deletion
-@router.delete("/{source_id}/{file_id}", status_code=204, operation_id="delete_file_from_source", deprecated=True)
+@router.delete(
+    "/{source_id}/{file_id}",
+    status_code=204,
+    operation_id="delete_file_from_source",
+    deprecated=True,
+)
 async def delete_file_from_source(
     source_id: str,
     file_id: str,
@@ -451,12 +534,22 @@ async def delete_file_from_source(
         logger.info(f"Deleting file {file_id} from pinecone index")
         await delete_file_records_from_pinecone_index(file_id=file_id, actor=actor)
 
-    safe_create_task(sleeptime_document_ingest_async(server, source_id, actor, clear_history=True), label="document_ingest_after_delete")
+    safe_create_task(
+        sleeptime_document_ingest_async(server, source_id, actor, clear_history=True),
+        label="document_ingest_after_delete",
+    )
     if deleted_file is None:
         raise HTTPException(status_code=404, detail=f"File with id={file_id} not found.")
 
 
-async def load_file_to_source_async(server: SyncServer, source_id: str, job_id: str, filename: str, bytes: bytes, actor: User):
+async def load_file_to_source_async(
+    server: SyncServer,
+    source_id: str,
+    job_id: str,
+    filename: str,
+    bytes: bytes,
+    actor: User,
+):
     # Create a temporary directory (deleted after the context manager exits)
     with tempfile.TemporaryDirectory() as tmpdirname:
         file_path = os.path.join(tmpdirname, filename)
@@ -495,7 +588,9 @@ async def load_file_to_source_cloud(
 
     # determine which embedder to use - turbopuffer takes precedence
     if should_use_tpuf():
-        from letta.services.file_processor.embedder.turbopuffer_embedder import TurbopufferEmbedder
+        from letta.services.file_processor.embedder.turbopuffer_embedder import (
+            TurbopufferEmbedder,
+        )
 
         embedder = TurbopufferEmbedder(embedding_config=embedding_config)
     elif should_use_pinecone():
@@ -504,4 +599,9 @@ async def load_file_to_source_cloud(
         embedder = OpenAIEmbedder(embedding_config=embedding_config)
 
     file_processor = FileProcessor(file_parser=file_parser, embedder=embedder, actor=actor)
-    await file_processor.process(agent_states=agent_states, source_id=source_id, content=content, file_metadata=file_metadata)
+    await file_processor.process(
+        agent_states=agent_states,
+        source_id=source_id,
+        content=content,
+        file_metadata=file_metadata,
+    )

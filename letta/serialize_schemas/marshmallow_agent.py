@@ -8,10 +8,16 @@ import letta
 from letta.orm import Agent, Message as MessageModel
 from letta.schemas.agent import AgentState as PydanticAgentState
 from letta.schemas.user import User
-from letta.serialize_schemas.marshmallow_agent_environment_variable import SerializedAgentEnvironmentVariableSchema
+from letta.serialize_schemas.marshmallow_agent_environment_variable import (
+    SerializedAgentEnvironmentVariableSchema,
+)
 from letta.serialize_schemas.marshmallow_base import BaseSchema
 from letta.serialize_schemas.marshmallow_block import SerializedBlockSchema
-from letta.serialize_schemas.marshmallow_custom_fields import EmbeddingConfigField, LLMConfigField, ToolRulesField
+from letta.serialize_schemas.marshmallow_custom_fields import (
+    EmbeddingConfigField,
+    LLMConfigField,
+    ToolRulesField,
+)
 from letta.serialize_schemas.marshmallow_message import SerializedMessageSchema
 from letta.serialize_schemas.marshmallow_tag import SerializedAgentTagSchema
 from letta.serialize_schemas.marshmallow_tool import SerializedToolSchema
@@ -43,7 +49,14 @@ class MarshmallowAgentSchema(BaseSchema):
     secrets = fields.List(fields.Nested(SerializedAgentEnvironmentVariableSchema))
     tags = fields.List(fields.Nested(SerializedAgentTagSchema))
 
-    def __init__(self, *args, session: sessionmaker, actor: User, max_steps: Optional[int] = None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        session: sessionmaker,
+        actor: User,
+        max_steps: Optional[int] = None,
+        **kwargs,
+    ):
         super().__init__(*args, actor=actor, **kwargs)
         self.session = session
         self.max_steps = max_steps

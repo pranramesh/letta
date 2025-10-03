@@ -333,7 +333,7 @@ Once you attach a folder to an agent, the agent will be able to use filesystem t
 
 <details>
 <summary>View code snippets</summary>
-  
+
 ### Python
 ```python
 # get an available embedding_config
@@ -445,7 +445,7 @@ When agents need to execute multiple tool calls or perform complex operations (l
 
 <details>
 <summary>View code snippets</summary>
-  
+
 ### Python
 ```python
 stream = client.agents.messages.create_stream(
@@ -530,7 +530,7 @@ Letta is an open source project built by over a hundred contributors. There are 
 
 * [**Join the Discord**](https://discord.gg/letta): Chat with the Letta devs and other AI developers.
 * [**Chat on our forum**](https://forum.letta.com/): If you're not into Discord, check out our developer forum.
-* **Follow our socials**: [Twitter/X](https://twitter.com/Letta_AI), [LinkedIn](https://www.linkedin.com/in/letta), [YouTube](https://www.youtube.com/@letta-ai) 
+* **Follow our socials**: [Twitter/X](https://twitter.com/Letta_AI), [LinkedIn](https://www.linkedin.com/in/letta), [YouTube](https://www.youtube.com/@letta-ai)
 
 ---
 

@@ -14,7 +14,11 @@ from letta.schemas.letta_stop_reason import StopReasonType
 from letta.schemas.openai.chat_completion_response import UsageStatistics
 from letta.schemas.run import Run
 from letta.schemas.step import Step
-from letta.server.rest_api.dependencies import HeaderParams, get_headers, get_letta_server
+from letta.server.rest_api.dependencies import (
+    HeaderParams,
+    get_headers,
+    get_letta_server,
+)
 from letta.server.rest_api.redis_stream_manager import redis_sse_stream_generator
 from letta.server.rest_api.streaming_response import (
     StreamingResponseWithStatusCode,
@@ -31,7 +35,10 @@ router = APIRouter(prefix="/runs", tags=["runs"])
 def list_runs(
     server: "SyncServer" = Depends(get_letta_server),
     agent_ids: Optional[List[str]] = Query(None, description="The unique identifier of the agent associated with the run."),
-    background: Optional[bool] = Query(None, description="If True, filters for runs that were created in background mode."),
+    background: Optional[bool] = Query(
+        None,
+        description="If True, filters for runs that were created in background mode.",
+    ),
     stop_reason: Optional[StopReasonType] = Query(None, description="Filter runs by stop reason."),
     after: Optional[str] = Query(None, description="Cursor for pagination"),
     before: Optional[str] = Query(None, description="Cursor for pagination"),
@@ -71,11 +78,19 @@ def list_runs(
     return runs
 
 
-@router.get("/active", response_model=List[Run], operation_id="list_active_runs", deprecated=True)
+@router.get(
+    "/active",
+    response_model=List[Run],
+    operation_id="list_active_runs",
+    deprecated=True,
+)
 def list_active_runs(
     server: "SyncServer" = Depends(get_letta_server),
     agent_ids: Optional[List[str]] = Query(None, description="The unique identifier of the agent associated with the run."),
-    background: Optional[bool] = Query(None, description="If True, filters for runs that were created in background mode."),
+    background: Optional[bool] = Query(
+        None,
+        description="If True, filters for runs that were created in background mode.",
+    ),
     headers: HeaderParams = Depends(get_headers),
 ):
     """
@@ -83,7 +98,11 @@ def list_active_runs(
     """
     actor = server.user_manager.get_user_or_default(user_id=headers.actor_id)
 
-    active_runs = server.job_manager.list_jobs(actor=actor, statuses=[JobStatus.created, JobStatus.running], job_type=JobType.RUN)
+    active_runs = server.job_manager.list_jobs(
+        actor=actor,
+        statuses=[JobStatus.created, JobStatus.running],
+        job_type=JobType.RUN,
+    )
     active_runs = [Run.from_job(job) for job in active_runs]
 
     if agent_ids:
@@ -114,7 +133,13 @@ def retrieve_run(
 
 
 RunMessagesResponse = Annotated[
-    List[LettaMessageUnion], Field(json_schema_extra={"type": "array", "items": {"$ref": "#/components/schemas/LettaMessageUnion"}})
+    List[LettaMessageUnion],
+    Field(
+        json_schema_extra={
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/LettaMessageUnion"},
+        }
+    ),
 ]
 
 
@@ -128,14 +153,17 @@ async def list_run_messages(
     server: "SyncServer" = Depends(get_letta_server),
     headers: HeaderParams = Depends(get_headers),
     before: Optional[str] = Query(
-        None, description="Message ID cursor for pagination. Returns messages that come before this message ID in the specified sort order"
+        None,
+        description="Message ID cursor for pagination. Returns messages that come before this message ID in the specified sort order",
     ),
     after: Optional[str] = Query(
-        None, description="Message ID cursor for pagination. Returns messages that come after this message ID in the specified sort order"
+        None,
+        description="Message ID cursor for pagination. Returns messages that come after this message ID in the specified sort order",
     ),
     limit: Optional[int] = Query(100, description="Maximum number of messages to return"),
     order: Literal["asc", "desc"] = Query(
-        "asc", description="Sort order for messages by creation time. 'asc' for oldest first, 'desc' for newest first"
+        "asc",
+        description="Sort order for messages by creation time. 'asc' for oldest first, 'desc' for newest first",
     ),
 ):
     """Get response messages associated with a run."""
@@ -186,7 +214,8 @@ async def list_run_steps(
     after: Optional[str] = Query(None, description="Cursor for pagination"),
     limit: Optional[int] = Query(100, description="Maximum number of messages to return"),
     order: str = Query(
-        "desc", description="Sort order by the created_at timestamp of the objects. asc for ascending order and desc for descending order."
+        "desc",
+        description="Sort order by the created_at timestamp of the objects. asc for ascending order and desc for descending order.",
     ),
 ):
     """
@@ -286,10 +315,16 @@ async def retrieve_stream(
     run = Run.from_job(job)
 
     if "background" not in run.metadata or not run.metadata["background"]:
-        raise HTTPException(status_code=400, detail="Run was not created in background mode, so it cannot be retrieved.")
+        raise HTTPException(
+            status_code=400,
+            detail="Run was not created in background mode, so it cannot be retrieved.",
+        )
 
     if run.created_at < get_utc_time() - timedelta(hours=3):
-        raise HTTPException(status_code=410, detail="Run was created more than 3 hours ago, and is now expired.")
+        raise HTTPException(
+            status_code=410,
+            detail="Run was created more than 3 hours ago, and is now expired.",
+        )
 
     redis_client = await get_redis_client()
 

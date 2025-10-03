@@ -11,7 +11,10 @@ from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 from letta.schemas.embedding_config import EmbeddingConfig
 from letta.schemas.enums import MessageStreamStatus
 from letta.schemas.llm_config import LLMConfig
-from letta.schemas.openai.chat_completion_request import ChatCompletionRequest, UserMessage as OpenAIUserMessage
+from letta.schemas.openai.chat_completion_request import (
+    ChatCompletionRequest,
+    UserMessage as OpenAIUserMessage,
+)
 from letta.schemas.tool import ToolCreate
 from letta.schemas.usage import LettaUsageStatistics
 from letta.services.tool_manager import ToolManager
@@ -158,7 +161,10 @@ def _assert_valid_chunk(chunk, idx, chunks):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("message", ["Tell me something interesting about bananas.", "What's the weather in SF?"])
+@pytest.mark.parametrize(
+    "message",
+    ["Tell me something interesting about bananas.", "What's the weather in SF?"],
+)
 @pytest.mark.parametrize("endpoint", ["openai/v1"])
 async def test_chat_completions_streaming_openai_client(disable_e2b_api_key, client, agent, message, endpoint):
     """Tests chat completion streaming using the Async OpenAI client."""

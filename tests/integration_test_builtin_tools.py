@@ -192,7 +192,10 @@ def test_web_search(
             published_date="2023-01-01",
             author="UC Berkeley",
             text=None,  # include_text=False by default
-            highlights=["Charles Packer completed his PhD at UC Berkeley", "Research in artificial intelligence and machine learning"],
+            highlights=[
+                "Charles Packer completed his PhD at UC Berkeley",
+                "Research in artificial intelligence and machine learning",
+            ],
             summary="Charles Packer is the CEO of Letta who earned his PhD in Computer Science from UC Berkeley, specializing in AI research.",
         ),
         MagicMock(
@@ -258,7 +261,17 @@ def test_web_search(
                 result_text += " " + highlight.lower()
 
         # Look for education keywords
-        if any(keyword in result_text for keyword in ["berkeley", "university", "phd", "ph.d", "education", "student"]):
+        if any(
+            keyword in result_text
+            for keyword in [
+                "berkeley",
+                "university",
+                "phd",
+                "ph.d",
+                "education",
+                "student",
+            ]
+        ):
             found_education_info = True
 
     assert found_education_info, "Should have found education-related information about Charles Packer"
@@ -308,7 +321,12 @@ async def test_web_search_uses_exa():
             actor=MagicMock(),
         )
 
-        result = await executor.web_search(agent_state=mock_agent_state, query="test query", num_results=3, include_text=True)
+        result = await executor.web_search(
+            agent_state=mock_agent_state,
+            query="test query",
+            num_results=3,
+            include_text=True,
+        )
 
         # Verify Exa was called correctly
         mock_exa_class.assert_called_once_with(api_key="test-exa-key")

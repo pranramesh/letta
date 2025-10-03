@@ -100,7 +100,11 @@ class LettaResponse(BaseModel):
                 formatted = re.sub(r'(".*?"):', r'<span class="json-key">\1</span>:', formatted)
                 formatted = re.sub(r': (".*?")', r': <span class="json-string">\1</span>', formatted)
                 formatted = re.sub(r": (\d+)", r': <span class="json-number">\1</span>', formatted)
-                formatted = re.sub(r": (true|false)", r': <span class="json-boolean">\1</span>', formatted)
+                formatted = re.sub(
+                    r": (true|false)",
+                    r': <span class="json-boolean">\1</span>',
+                    formatted,
+                )
                 return formatted
             except json.JSONDecodeError:
                 return html.escape(json_str)
@@ -176,7 +180,10 @@ LettaStreamingResponse = Union[LettaMessage, MessageStreamStatus, LettaStopReaso
 
 class LettaBatchResponse(BaseModel):
     letta_batch_id: str = Field(..., description="A unique identifier for the Letta batch request.")
-    last_llm_batch_id: str = Field(..., description="A unique identifier for the most recent model provider batch request.")
+    last_llm_batch_id: str = Field(
+        ...,
+        description="A unique identifier for the most recent model provider batch request.",
+    )
     status: JobStatus = Field(..., description="The current status of the batch request.")
     agent_count: int = Field(..., description="The number of agents in the batch request.")
     last_polled_at: datetime = Field(..., description="The timestamp when the batch was last polled for updates.")

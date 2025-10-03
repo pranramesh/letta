@@ -1,7 +1,10 @@
 import pytest
 
 from letta.constants import MAX_FILENAME_LENGTH
-from letta.functions.ast_parsers import coerce_dict_args_by_annotations, get_function_annotations_from_source
+from letta.functions.ast_parsers import (
+    coerce_dict_args_by_annotations,
+    get_function_annotations_from_source,
+)
 from letta.schemas.file import FileMetadata
 from letta.services.file_processor.chunker.line_chunker import LineChunker
 from letta.services.helpers.agent_manager_helper import safe_format
@@ -101,7 +104,13 @@ def test_coerce_dict_args_success():
       int, float, str, list, dict.
     """
     annotations = {"a": "int", "b": "float", "c": "str", "d": "list", "e": "dict"}
-    function_args = {"a": "42", "b": "3.14", "c": 123, "d": "[1, 2, 3]", "e": '{"key": "value"}'}
+    function_args = {
+        "a": "42",
+        "b": "3.14",
+        "c": 123,
+        "d": "[1, 2, 3]",
+        "e": '{"key": "value"}',
+    }
 
     coerced_args = coerce_dict_args_by_annotations(function_args, annotations)
     assert coerced_args["a"] == 42
@@ -176,7 +185,10 @@ def test_coerce_dict_args_unsupported_custom_class():
     """
     annotations = {"f": "CustomClass"}  # We can't resolve this
     function_args = {"f": {"x": 1}}
-    with pytest.raises(ValueError, match="Failed to coerce argument 'f' to CustomClass: Unsupported annotation: CustomClass"):
+    with pytest.raises(
+        ValueError,
+        match="Failed to coerce argument 'f' to CustomClass: Unsupported annotation: CustomClass",
+    ):
         coerce_dict_args_by_annotations(function_args, annotations)
 
 
@@ -186,7 +198,10 @@ def test_coerce_dict_args_with_complex_types():
     when given as strings.
     """
     annotations = {"big_list": "list", "nested_dict": "dict"}
-    function_args = {"big_list": "[1, 2, [3, 4], {'five': 5}]", "nested_dict": '{"alpha": [10, 20], "beta": {"x": 1, "y": 2}}'}
+    function_args = {
+        "big_list": "[1, 2, [3, 4], {'five': 5}]",
+        "nested_dict": '{"alpha": [10, 20], "beta": {"x": 1, "y": 2}}',
+    }
 
     coerced_args = coerce_dict_args_by_annotations(function_args, annotations)
     assert coerced_args["big_list"] == [1, 2, [3, 4], {"five": 5}]
@@ -215,7 +230,10 @@ def test_coerce_dict_args_non_parseable_list_or_dict():
     Test passing incorrectly formatted JSON for a 'list' or 'dict' annotation.
     """
     annotations = {"bad_list": "list", "bad_dict": "dict"}
-    function_args = {"bad_list": "[1, 2, 3", "bad_dict": '{"key": "value"'}  # missing brackets
+    function_args = {
+        "bad_list": "[1, 2, 3",
+        "bad_dict": '{"key": "value"',
+    }  # missing brackets
 
     with pytest.raises(ValueError, match="Failed to coerce argument 'bad_list' to list"):
         coerce_dict_args_by_annotations(function_args, annotations)
@@ -252,7 +270,8 @@ def test_coerce_dict_args_unsupported_complex_annotation():
     function_args = {"f": "CustomClass(42)"}
 
     with pytest.raises(
-        ValueError, match=r"Failed to coerce argument 'f' to CustomClass\[int\]: Unsupported annotation: CustomClass\[int\]"
+        ValueError,
+        match=r"Failed to coerce argument 'f' to CustomClass\[int\]: Unsupported annotation: CustomClass\[int\]",
     ):
         coerce_dict_args_by_annotations(function_args, annotations)
 
@@ -415,7 +434,11 @@ def test_formatter():
 
 def test_line_chunker_valid_range():
     """Test that LineChunker works correctly with valid ranges"""
-    file = FileMetadata(file_name="test.py", source_id="test_source", content="line1\nline2\nline3\nline4")
+    file = FileMetadata(
+        file_name="test.py",
+        source_id="test_source",
+        content="line1\nline2\nline3\nline4",
+    )
     chunker = LineChunker()
 
     # Test valid range with validation
@@ -428,7 +451,11 @@ def test_line_chunker_valid_range():
 
 def test_line_chunker_valid_range_no_validation():
     """Test that LineChunker works the same without validation for valid ranges"""
-    file = FileMetadata(file_name="test.py", source_id="test_source", content="line1\nline2\nline3\nline4")
+    file = FileMetadata(
+        file_name="test.py",
+        source_id="test_source",
+        content="line1\nline2\nline3\nline4",
+    )
     chunker = LineChunker()
 
     # Test same range without validation
@@ -444,7 +471,10 @@ def test_line_chunker_out_of_range_start():
     chunker = LineChunker()
 
     # Test with start beyond file length - should raise ValueError
-    with pytest.raises(ValueError, match="File test.py has only 3 lines, but requested offset 6 is out of range"):
+    with pytest.raises(
+        ValueError,
+        match="File test.py has only 3 lines, but requested offset 6 is out of range",
+    ):
         chunker.chunk_text(file, start=5, end=6, validate_range=True)
 
 
@@ -482,7 +512,10 @@ def test_line_chunker_edge_case_single_line():
     assert "1: only line" in result[1]
 
     # Test out of range for single line file - should raise error
-    with pytest.raises(ValueError, match="File single.py has only 1 lines, but requested offset 2 is out of range"):
+    with pytest.raises(
+        ValueError,
+        match="File single.py has only 1 lines, but requested offset 2 is out of range",
+    ):
         chunker.chunk_text(file, start=1, end=2, validate_range=True)
 
 
@@ -492,7 +525,10 @@ def test_line_chunker_validation_disabled_allows_out_of_range():
     chunker = LineChunker()
 
     # Test 1: Out of bounds start should always raise error, even with validation disabled
-    with pytest.raises(ValueError, match="File test.py has only 3 lines, but requested offset 6 is out of range"):
+    with pytest.raises(
+        ValueError,
+        match="File test.py has only 3 lines, but requested offset 6 is out of range",
+    ):
         chunker.chunk_text(file, start=5, end=10, validate_range=False)
 
     # Test 2: With validation disabled, start >= end should be allowed (but gives empty result)
@@ -513,7 +549,10 @@ def test_line_chunker_only_start_parameter():
     assert "3: line3" in result[2]
 
     # Test start at end of file - should raise error
-    with pytest.raises(ValueError, match="File test.py has only 3 lines, but requested offset 4 is out of range"):
+    with pytest.raises(
+        ValueError,
+        match="File test.py has only 3 lines, but requested offset 4 is out of range",
+    ):
         chunker.chunk_text(file, start=3, validate_range=True)
 
 
@@ -641,7 +680,12 @@ def test_validate_function_response_exact_limit():
 
 def test_validate_function_response_complex_dict():
     """Test with complex nested dictionary"""
-    complex_dict = {"nested": {"key": "value"}, "list": [1, 2, {"inner": "dict"}], "null": None, "bool": True}
+    complex_dict = {
+        "nested": {"key": "value"},
+        "list": [1, 2, {"inner": "dict"}],
+        "null": None,
+        "bool": True,
+    }
     response = validate_function_response(complex_dict, return_char_limit=1000)
     # Should be valid JSON
     import json

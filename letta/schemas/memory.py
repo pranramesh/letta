@@ -7,7 +7,10 @@ from typing import TYPE_CHECKING, List, Optional, Union
 from openai.types.beta.function_tool import FunctionTool as OpenAITool
 from pydantic import BaseModel, Field, field_validator
 
-from letta.constants import CORE_MEMORY_BLOCK_CHAR_LIMIT, CORE_MEMORY_LINE_NUMBER_WARNING
+from letta.constants import (
+    CORE_MEMORY_BLOCK_CHAR_LIMIT,
+    CORE_MEMORY_LINE_NUMBER_WARNING,
+)
 from letta.otel.tracing import trace_method
 from letta.schemas.block import Block, FileBlock
 from letta.schemas.enums import AgentType
@@ -27,10 +30,12 @@ class ContextWindowOverview(BaseModel):
     num_archival_memory: int = Field(..., description="The number of messages in the archival memory.")
     num_recall_memory: int = Field(..., description="The number of messages in the recall memory.")
     num_tokens_external_memory_summary: int = Field(
-        ..., description="The number of tokens in the external memory summary (archival + recall metadata)."
+        ...,
+        description="The number of tokens in the external memory summary (archival + recall metadata).",
     )
     external_memory_summary: str = Field(
-        ..., description="The metadata summary of the external memory sources (archival + recall metadata)."
+        ...,
+        description="The metadata summary of the external memory sources (archival + recall metadata).",
     )
 
     num_tokens_system: int = Field(..., description="The number of tokens in the system prompt.")
@@ -59,7 +64,8 @@ class Memory(BaseModel, validate_assignment=True):
     agent_type: Optional[Union["AgentType", str]] = Field(None, description="Agent type controlling prompt rendering.")
     blocks: List[Block] = Field(..., description="Memory blocks contained in the agent's in-context memory")
     file_blocks: List[FileBlock] = Field(
-        default_factory=list, description="Special blocks representing the agent's in-context memory of an attached file"
+        default_factory=list,
+        description="Special blocks representing the agent's in-context memory of an attached file",
     )
 
     @field_validator("file_blocks")
@@ -311,8 +317,16 @@ class Memory(BaseModel, validate_assignment=True):
         """Deprecated: use compile() instead."""
         import warnings
 
-        warnings.warn("compile_in_thread_async is deprecated; use compile()", DeprecationWarning, stacklevel=2)
-        return self.compile(tool_usage_rules=tool_usage_rules, sources=sources, max_files_open=max_files_open)
+        warnings.warn(
+            "compile_in_thread_async is deprecated; use compile()",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.compile(
+            tool_usage_rules=tool_usage_rules,
+            sources=sources,
+            max_files_open=max_files_open,
+        )
 
     def list_block_labels(self) -> List[str]:
         """Return a list of the block names held inside the memory object"""
@@ -422,7 +436,12 @@ class ChatMemory(BasicBlockMemory):
             human (str): The starter value for the human block.
             limit (int): The character limit for each block.
         """
-        super().__init__(blocks=[Block(value=persona, limit=limit, label="persona"), Block(value=human, limit=limit, label="human")])
+        super().__init__(
+            blocks=[
+                Block(value=persona, limit=limit, label="persona"),
+                Block(value=human, limit=limit, label="human"),
+            ]
+        )
 
 
 class UpdateMemory(BaseModel):
@@ -440,11 +459,17 @@ class RecallMemorySummary(BaseModel):
 class CreateArchivalMemory(BaseModel):
     text: str = Field(..., description="Text to write to archival memory.")
     tags: Optional[List[str]] = Field(None, description="Optional list of tags to attach to the memory.")
-    created_at: Optional[datetime] = Field(None, description="Optional timestamp for the memory (defaults to current UTC time).")
+    created_at: Optional[datetime] = Field(
+        None,
+        description="Optional timestamp for the memory (defaults to current UTC time).",
+    )
 
 
 class ArchivalMemorySearchResult(BaseModel):
-    timestamp: str = Field(..., description="Timestamp of when the memory was created, formatted in agent's timezone")
+    timestamp: str = Field(
+        ...,
+        description="Timestamp of when the memory was created, formatted in agent's timezone",
+    )
     content: str = Field(..., description="Text content of the archival memory passage")
     tags: List[str] = Field(default_factory=list, description="List of tags associated with this memory")
 

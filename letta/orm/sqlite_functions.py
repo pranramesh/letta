@@ -70,7 +70,9 @@ def verify_embedding_dimension(embedding: np.ndarray, expected_dim: int = MAX_EM
 
 
 def validate_and_transform_embedding(
-    embedding: Union[bytes, sqlite3.Binary, list, np.ndarray], expected_dim: int = MAX_EMBEDDING_DIM, dtype: np.dtype = np.float32
+    embedding: Union[bytes, sqlite3.Binary, list, np.ndarray],
+    expected_dim: int = MAX_EMBEDDING_DIM,
+    dtype: np.dtype = np.float32,
 ) -> Optional[np.ndarray]:
     """
     Validates and transforms embeddings to ensure correct dimensionality.
@@ -180,7 +182,10 @@ def register_functions(dbapi_connection, connection_record):
         except Exception as e:
             raise RuntimeError(f"Failed to register cosine_distance function: {e}")
     else:
-        logger.debug("Warning: Not a SQLite connection, but instead %s skipping function registration", type(dbapi_connection))
+        logger.debug(
+            "Warning: Not a SQLite connection, but instead %s skipping function registration",
+            type(dbapi_connection),
+        )
 
 
 # Register adapters and converters for numpy arrays

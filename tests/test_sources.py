@@ -8,7 +8,12 @@ from datetime import datetime, timedelta
 
 import pytest
 from dotenv import load_dotenv
-from letta_client import CreateBlock, Letta as LettaSDKClient, LettaRequest, MessageCreate as ClientMessageCreate
+from letta_client import (
+    CreateBlock,
+    Letta as LettaSDKClient,
+    LettaRequest,
+    MessageCreate as ClientMessageCreate,
+)
 from letta_client.types import AgentState
 
 from letta.constants import DEFAULT_ORG_ID, FILES_TOOLS
@@ -156,14 +161,34 @@ def test_auto_attach_detach_files_tools(disable_pinecone, disable_turbopuffer, c
     [
         ("tests/data/test.txt", "test", r"test_source/test\.txt"),
         ("tests/data/memgpt_paper.pdf", "MemGPT", r"test_source/memgpt_paper\.pdf"),
-        ("tests/data/toy_chat_fine_tuning.jsonl", '{"messages"', r"test_source/toy_chat_fine_tuning\.jsonl"),
+        (
+            "tests/data/toy_chat_fine_tuning.jsonl",
+            '{"messages"',
+            r"test_source/toy_chat_fine_tuning\.jsonl",
+        ),
         ("tests/data/test.md", "h2 Heading", r"test_source/test\.md"),
         ("tests/data/test.json", "glossary", r"test_source/test\.json"),
-        ("tests/data/react_component.jsx", "UserProfile", r"test_source/react_component\.jsx"),
-        ("tests/data/task_manager.java", "TaskManager", r"test_source/task_manager\.java"),
-        ("tests/data/data_structures.cpp", "BinarySearchTree", r"test_source/data_structures\.cpp"),
+        (
+            "tests/data/react_component.jsx",
+            "UserProfile",
+            r"test_source/react_component\.jsx",
+        ),
+        (
+            "tests/data/task_manager.java",
+            "TaskManager",
+            r"test_source/task_manager\.java",
+        ),
+        (
+            "tests/data/data_structures.cpp",
+            "BinarySearchTree",
+            r"test_source/data_structures\.cpp",
+        ),
         ("tests/data/api_server.go", "UserService", r"test_source/api_server\.go"),
-        ("tests/data/data_analysis.py", "StatisticalAnalyzer", r"test_source/data_analysis\.py"),
+        (
+            "tests/data/data_analysis.py",
+            "StatisticalAnalyzer",
+            r"test_source/data_analysis\.py",
+        ),
         ("tests/data/test.csv", "Smart Fridge Plus", r"test_source/test\.csv"),
     ],
 )
@@ -240,7 +265,10 @@ def test_file_upload_creates_source_blocks_correctly(
 
 
 def test_attach_existing_files_creates_source_blocks_correctly(
-    disable_pinecone, disable_turbopuffer, client: LettaSDKClient, agent_state: AgentState
+    disable_pinecone,
+    disable_turbopuffer,
+    client: LettaSDKClient,
+    agent_state: AgentState,
 ):
     # Create a new source
     source = client.sources.create(name="test_source", embedding="openai/text-embedding-3-small")
@@ -307,7 +335,10 @@ def test_attach_existing_files_creates_source_blocks_correctly(
 
 
 def test_delete_source_removes_source_blocks_correctly(
-    disable_pinecone, disable_turbopuffer, client: LettaSDKClient, agent_state: AgentState
+    disable_pinecone,
+    disable_turbopuffer,
+    client: LettaSDKClient,
+    agent_state: AgentState,
 ):
     # Create a new source
     source = client.sources.create(name="test_source", embedding="openai/text-embedding-3-small")
@@ -366,7 +397,12 @@ def test_delete_source_removes_source_blocks_correctly(
     assert not any("test" in b.value for b in blocks)
 
 
-def test_agent_uses_open_close_file_correctly(disable_pinecone, disable_turbopuffer, client: LettaSDKClient, agent_state: AgentState):
+def test_agent_uses_open_close_file_correctly(
+    disable_pinecone,
+    disable_turbopuffer,
+    client: LettaSDKClient,
+    agent_state: AgentState,
+):
     # Create a new source
     source = client.sources.create(name="test_source", embedding="openai/text-embedding-3-small")
 
@@ -469,7 +505,12 @@ def test_agent_uses_open_close_file_correctly(disable_pinecone, disable_turbopuf
     print("✓ File successfully opened with different range - content differs as expected")
 
 
-def test_agent_uses_search_files_correctly(disable_pinecone, disable_turbopuffer, client: LettaSDKClient, agent_state: AgentState):
+def test_agent_uses_search_files_correctly(
+    disable_pinecone,
+    disable_turbopuffer,
+    client: LettaSDKClient,
+    agent_state: AgentState,
+):
     # Create a new source
     source = client.sources.create(name="test_source", embedding="openai/text-embedding-3-small")
 
@@ -497,7 +538,8 @@ def test_agent_uses_search_files_correctly(disable_pinecone, disable_turbopuffer
         agent_id=agent_state.id,
         messages=[
             MessageCreate(
-                role="user", content="Use ONLY the semantic_search_files tool to search for details regarding the electoral history."
+                role="user",
+                content="Use ONLY the semantic_search_files tool to search for details regarding the electoral history.",
             )
         ],
     )
@@ -515,7 +557,12 @@ def test_agent_uses_search_files_correctly(disable_pinecone, disable_turbopuffer
     assert all(tr.status == "success" for tr in tool_returns), f"Tool call failed {tr}"
 
 
-def test_agent_uses_grep_correctly_basic(disable_pinecone, disable_turbopuffer, client: LettaSDKClient, agent_state: AgentState):
+def test_agent_uses_grep_correctly_basic(
+    disable_pinecone,
+    disable_turbopuffer,
+    client: LettaSDKClient,
+    agent_state: AgentState,
+):
     # Create a new source
     source = client.sources.create(name="test_source", embedding="openai/text-embedding-3-small")
 
@@ -541,7 +588,12 @@ def test_agent_uses_grep_correctly_basic(disable_pinecone, disable_turbopuffer, 
     # Ask agent to use the semantic_search_files tool
     search_files_response = client.agents.messages.create(
         agent_id=agent_state.id,
-        messages=[MessageCreate(role="user", content="Use ONLY the grep_files tool to search for `Nunzia De Girolamo`.")],
+        messages=[
+            MessageCreate(
+                role="user",
+                content="Use ONLY the grep_files tool to search for `Nunzia De Girolamo`.",
+            )
+        ],
     )
     print(f"Grep request sent, got {len(search_files_response.messages)} message(s) in response")
     print(search_files_response.messages)
@@ -557,7 +609,12 @@ def test_agent_uses_grep_correctly_basic(disable_pinecone, disable_turbopuffer, 
     assert all(tr.status == "success" for tr in tool_returns), "Tool call failed"
 
 
-def test_agent_uses_grep_correctly_advanced(disable_pinecone, disable_turbopuffer, client: LettaSDKClient, agent_state: AgentState):
+def test_agent_uses_grep_correctly_advanced(
+    disable_pinecone,
+    disable_turbopuffer,
+    client: LettaSDKClient,
+    agent_state: AgentState,
+):
     # Create a new source
     source = client.sources.create(name="test_source", embedding="openai/text-embedding-3-small")
 
@@ -584,13 +641,19 @@ def test_agent_uses_grep_correctly_advanced(disable_pinecone, disable_turbopuffe
     search_files_response = client.agents.messages.create(
         agent_id=agent_state.id,
         messages=[
-            MessageCreate(role="user", content="Use ONLY the grep_files tool to search for `tool-f5b80b08-5a45-4a0a-b2cd-dd8a0177b7ef`.")
+            MessageCreate(
+                role="user",
+                content="Use ONLY the grep_files tool to search for `tool-f5b80b08-5a45-4a0a-b2cd-dd8a0177b7ef`.",
+            )
         ],
     )
     print(f"Grep request sent, got {len(search_files_response.messages)} message(s) in response")
     print(search_files_response.messages)
 
-    tool_return_message = next((m for m in search_files_response.messages if m.message_type == "tool_return_message"), None)
+    tool_return_message = next(
+        (m for m in search_files_response.messages if m.message_type == "tool_return_message"),
+        None,
+    )
     assert tool_return_message is not None, "No ToolReturnMessage found in messages"
 
     # Basic structural integrity checks
@@ -648,7 +711,12 @@ def test_create_agent_with_source_ids_creates_source_blocks_correctly(disable_pi
     assert file_tools == set(FILES_TOOLS)
 
 
-def test_view_ranges_have_metadata(disable_pinecone, disable_turbopuffer, client: LettaSDKClient, agent_state: AgentState):
+def test_view_ranges_have_metadata(
+    disable_pinecone,
+    disable_turbopuffer,
+    client: LettaSDKClient,
+    agent_state: AgentState,
+):
     # Create a new source
     source = client.sources.create(name="test_source", embedding="openai/text-embedding-3-small")
 
@@ -796,9 +864,16 @@ def test_duplicate_file_handling_replace(disable_pinecone, disable_turbopuffer, 
             f.write(replacement_content)
 
         # Upload replacement file with REPLACE duplicate handling
-        from letta.schemas.enums import DuplicateFileHandling  # TODO: Temporary pre-client compliation, good to remove
+        from letta.schemas.enums import (
+            DuplicateFileHandling,
+        )  # TODO: Temporary pre-client compliation, good to remove
 
-        replacement_file = upload_file_and_wait(client, source.id, temp_file_path, duplicate_handling=DuplicateFileHandling.REPLACE)
+        replacement_file = upload_file_and_wait(
+            client,
+            source.id,
+            temp_file_path,
+            duplicate_handling=DuplicateFileHandling.REPLACE,
+        )
 
         # Verify we still have only 1 file (replacement, not addition)
         files_after_replace = client.sources.files.list(source_id=source.id, limit=10)
@@ -891,7 +966,13 @@ def test_upload_file_with_custom_name(disable_pinecone, disable_turbopuffer, cli
         from letta.schemas.enums import DuplicateFileHandling
 
         with pytest.raises(Exception) as exc_info:
-            upload_file_and_wait(client, source.id, temp_file_path, name=custom_name, duplicate_handling=DuplicateFileHandling.ERROR)
+            upload_file_and_wait(
+                client,
+                source.id,
+                temp_file_path,
+                name=custom_name,
+                duplicate_handling=DuplicateFileHandling.ERROR,
+            )
         assert "already exists" in str(exc_info.value).lower()
 
         # Upload same file with different custom name should succeed
@@ -1082,7 +1163,12 @@ def test_grep_files_schema_descriptions(disable_pinecone, disable_turbopuffer, c
     assert "Navigation hint for next page if more matches exist" in description
 
 
-def test_agent_open_file(disable_pinecone, disable_turbopuffer, client: LettaSDKClient, agent_state: AgentState):
+def test_agent_open_file(
+    disable_pinecone,
+    disable_turbopuffer,
+    client: LettaSDKClient,
+    agent_state: AgentState,
+):
     """Test client.agents.open_file() function"""
     # Create a new source
     source = client.sources.create(name="test_source", embedding="openai/text-embedding-3-small")
@@ -1103,7 +1189,12 @@ def test_agent_open_file(disable_pinecone, disable_turbopuffer, client: LettaSDK
     assert "[Viewing file start (out of 1 lines)]" in system
 
 
-def test_agent_close_file(disable_pinecone, disable_turbopuffer, client: LettaSDKClient, agent_state: AgentState):
+def test_agent_close_file(
+    disable_pinecone,
+    disable_turbopuffer,
+    client: LettaSDKClient,
+    agent_state: AgentState,
+):
     """Test client.agents.close_file() function"""
     # Create a new source
     source = client.sources.create(name="test_source", embedding="openai/text-embedding-3-small")
@@ -1125,7 +1216,12 @@ def test_agent_close_file(disable_pinecone, disable_turbopuffer, client: LettaSD
     assert '<file status="closed" name="test_source/test.txt">' in system
 
 
-def test_agent_close_all_open_files(disable_pinecone, disable_turbopuffer, client: LettaSDKClient, agent_state: AgentState):
+def test_agent_close_all_open_files(
+    disable_pinecone,
+    disable_turbopuffer,
+    client: LettaSDKClient,
+    agent_state: AgentState,
+):
     """Test client.agents.close_all_open_files() function"""
     # Create a new source
     source = client.sources.create(name="test_source", embedding="openai/text-embedding-3-small")
@@ -1186,12 +1282,19 @@ def test_file_processing_timeout(disable_pinecone, disable_turbopuffer, client: 
     if status_enum.is_terminal_state():
         # This is the expected behavior - files that completed processing shouldn't timeout
         print(f"File {file_id} is in terminal state: {current_file.processing_status}")
-        assert status_enum in [FileProcessingStatus.COMPLETED, FileProcessingStatus.ERROR]
+        assert status_enum in [
+            FileProcessingStatus.COMPLETED,
+            FileProcessingStatus.ERROR,
+        ]
     else:
         # If file is still processing, it should eventually complete or timeout
         # In a real scenario, we'd wait and check, but for unit tests we just verify the logic exists
         print(f"File {file_id} is still processing: {current_file.processing_status}")
-        assert status_enum in [FileProcessingStatus.PENDING, FileProcessingStatus.PARSING, FileProcessingStatus.EMBEDDING]
+        assert status_enum in [
+            FileProcessingStatus.PENDING,
+            FileProcessingStatus.PARSING,
+            FileProcessingStatus.EMBEDDING,
+        ]
 
 
 @pytest.mark.unit
@@ -1279,7 +1382,12 @@ def test_pinecone_search_files_tool(disable_turbopuffer, client: LettaSDKClient)
     # Test semantic search using Pinecone
     search_response = client.agents.messages.create(
         agent_id=agent.id,
-        messages=[MessageCreate(role="user", content="Use the semantic_search_files tool to search for 'electoral history' in the files.")],
+        messages=[
+            MessageCreate(
+                role="user",
+                content="Use the semantic_search_files tool to search for 'electoral history' in the files.",
+            )
+        ],
     )
 
     # Verify tool was called successfully
@@ -1337,7 +1445,10 @@ def test_pinecone_list_files_status(disable_turbopuffer, client: LettaSDKClient)
 
 def test_pinecone_lifecycle_file_and_source_deletion(disable_turbopuffer, client: LettaSDKClient):
     """Test that file and source deletion removes records from Pinecone"""
-    from letta.helpers.pinecone_utils import list_pinecone_index_for_files, should_use_pinecone
+    from letta.helpers.pinecone_utils import (
+        list_pinecone_index_for_files,
+        should_use_pinecone,
+    )
 
     if not should_use_pinecone():
         pytest.skip("Pinecone not configured (missing API key or disabled), skipping Pinecone-specific tests")
@@ -1429,7 +1540,12 @@ def test_turbopuffer_search_files_tool(disable_pinecone, client: LettaSDKClient)
 
     search_response = client.agents.messages.create(
         agent_id=agent.id,
-        messages=[MessageCreate(role="user", content="Use the semantic_search_files tool to search for 'electoral history' in the files.")],
+        messages=[
+            MessageCreate(
+                role="user",
+                content="Use the semantic_search_files tool to search for 'electoral history' in the files.",
+            )
+        ],
     )
 
     tool_calls = [msg for msg in search_response.messages if msg.message_type == "tool_call_message"]
@@ -1497,7 +1613,11 @@ def test_turbopuffer_lifecycle_file_and_source_deletion(disable_pinecone, client
 
         passages_before = asyncio.run(
             tpuf_client.query_file_passages(
-                source_ids=[source.id], organization_id=user.organization_id, actor=user, file_id=file_to_delete.id, top_k=100
+                source_ids=[source.id],
+                organization_id=user.organization_id,
+                actor=user,
+                file_id=file_to_delete.id,
+                top_k=100,
             )
         )
         print(f"Found {len(passages_before)} passages for file before deletion")
@@ -1509,7 +1629,11 @@ def test_turbopuffer_lifecycle_file_and_source_deletion(disable_pinecone, client
 
         passages_after = asyncio.run(
             tpuf_client.query_file_passages(
-                source_ids=[source.id], organization_id=user.organization_id, actor=user, file_id=file_to_delete.id, top_k=100
+                source_ids=[source.id],
+                organization_id=user.organization_id,
+                actor=user,
+                file_id=file_to_delete.id,
+                top_k=100,
             )
         )
         print(f"Found {len(passages_after)} passages for file after deletion")
@@ -1520,7 +1644,11 @@ def test_turbopuffer_lifecycle_file_and_source_deletion(disable_pinecone, client
     for file_metadata in uploaded_files[1:]:
         passages = asyncio.run(
             tpuf_client.query_file_passages(
-                source_ids=[source.id], organization_id=user.organization_id, actor=user, file_id=file_metadata.id, top_k=100
+                source_ids=[source.id],
+                organization_id=user.organization_id,
+                actor=user,
+                file_id=file_metadata.id,
+                top_k=100,
             )
         )
         remaining_passages_before.extend(passages)
@@ -1537,7 +1665,11 @@ def test_turbopuffer_lifecycle_file_and_source_deletion(disable_pinecone, client
         try:
             passages = asyncio.run(
                 tpuf_client.query_file_passages(
-                    source_ids=[source.id], organization_id=user.organization_id, actor=user, file_id=file_metadata.id, top_k=100
+                    source_ids=[source.id],
+                    organization_id=user.organization_id,
+                    actor=user,
+                    file_id=file_metadata.id,
+                    top_k=100,
                 )
             )
             remaining_passages_after.extend(passages)
@@ -1562,11 +1694,21 @@ def test_turbopuffer_multiple_sources(disable_pinecone, client: LettaSDKClient):
     tpuf_client = TurbopufferClient()
 
     source1_passages = asyncio.run(
-        tpuf_client.query_file_passages(source_ids=[source1.id], organization_id=user.organization_id, actor=user, top_k=100)
+        tpuf_client.query_file_passages(
+            source_ids=[source1.id],
+            organization_id=user.organization_id,
+            actor=user,
+            top_k=100,
+        )
     )
 
     source2_passages = asyncio.run(
-        tpuf_client.query_file_passages(source_ids=[source2.id], organization_id=user.organization_id, actor=user, top_k=100)
+        tpuf_client.query_file_passages(
+            source_ids=[source2.id],
+            organization_id=user.organization_id,
+            actor=user,
+            top_k=100,
+        )
     )
 
     print(f"Source1 has {len(source1_passages)} passages")
@@ -1588,7 +1730,12 @@ def test_turbopuffer_multiple_sources(disable_pinecone, client: LettaSDKClient):
     time.sleep(2)
 
     source2_passages_after = asyncio.run(
-        tpuf_client.query_file_passages(source_ids=[source2.id], organization_id=user.organization_id, actor=user, top_k=100)
+        tpuf_client.query_file_passages(
+            source_ids=[source2.id],
+            organization_id=user.organization_id,
+            actor=user,
+            top_k=100,
+        )
     )
 
     assert len(source2_passages_after) == len(source2_passages), (

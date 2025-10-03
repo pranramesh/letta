@@ -9,4 +9,3 @@
     },
     "include": ["entrypoint.ts", "server.ts", "user-function.ts"]
 }
-  

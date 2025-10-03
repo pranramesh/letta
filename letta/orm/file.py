@@ -26,9 +26,17 @@ class FileContent(SqlalchemyBase):
     # TODO: We want to migrate all the ORM models to do this, so we will need to move this to the SqlalchemyBase
     # TODO: Some still rely on the Pydantic object to do this
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: f"file_content-{uuid.uuid4()}")
-    file_id: Mapped[str] = mapped_column(ForeignKey("files.id", ondelete="CASCADE"), nullable=False, doc="Foreign key to files table.")
+    file_id: Mapped[str] = mapped_column(
+        ForeignKey("files.id", ondelete="CASCADE"),
+        nullable=False,
+        doc="Foreign key to files table.",
+    )
 
-    text: Mapped[str] = mapped_column(Text, nullable=False, doc="Full plain-text content of the file (e.g., extracted from a PDF).")
+    text: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        doc="Full plain-text content of the file (e.g., extracted from a PDF).",
+    )
 
     # back-reference to FileMetadata
     file: Mapped["FileMetadata"] = relationship(back_populates="content", lazy="selectin")
@@ -53,7 +61,10 @@ class FileMetadata(SqlalchemyBase, OrganizationMixin, SourceMixin, AsyncAttrs):
     file_creation_date: Mapped[Optional[str]] = mapped_column(String, nullable=True, doc="The creation date of the file.")
     file_last_modified_date: Mapped[Optional[str]] = mapped_column(String, nullable=True, doc="The last modified date of the file.")
     processing_status: Mapped[FileProcessingStatus] = mapped_column(
-        String, default=FileProcessingStatus.PENDING, nullable=False, doc="The current processing status of the file."
+        String,
+        default=FileProcessingStatus.PENDING,
+        nullable=False,
+        doc="The current processing status of the file.",
     )
 
     error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True, doc="Any error message encountered during processing.")

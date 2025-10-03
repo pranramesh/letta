@@ -95,7 +95,11 @@ class LettaConfig:
         pass
 
     @classmethod
-    def load(cls, llm_config: Optional[LLMConfig] = None, embedding_config: Optional[EmbeddingConfig] = None) -> "LettaConfig":
+    def load(
+        cls,
+        llm_config: Optional[LLMConfig] = None,
+        embedding_config: Optional[EmbeddingConfig] = None,
+    ) -> "LettaConfig":
         # avoid circular import
         from letta.utils import printd
 

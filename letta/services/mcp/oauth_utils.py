@@ -66,7 +66,7 @@ class DatabaseTokenStorage(TokenStorage):
         return OAuthClientInformationFull(
             client_id=oauth_session.client_id,
             client_secret=oauth_session.client_secret,
-            redirect_uris=[oauth_session.redirect_uri] if oauth_session.redirect_uri else [],
+            redirect_uris=([oauth_session.redirect_uri] if oauth_session.redirect_uri else []),
         )
 
     async def set_client_info(self, client_info: OAuthClientInformationFull) -> None:
@@ -74,7 +74,7 @@ class DatabaseTokenStorage(TokenStorage):
         session_update = MCPOAuthSessionUpdate(
             client_id=client_info.client_id,
             client_secret=client_info.client_secret,
-            redirect_uri=str(client_info.redirect_uris[0]) if client_info.redirect_uris else None,
+            redirect_uri=(str(client_info.redirect_uris[0]) if client_info.redirect_uris else None),
         )
         await self.mcp_manager.update_oauth_session(self.session_id, session_update, self.actor)
 
@@ -82,7 +82,13 @@ class DatabaseTokenStorage(TokenStorage):
 class MCPOAuthSession:
     """Legacy OAuth session class - deprecated, use mcp_manager directly."""
 
-    def __init__(self, server_url: str, server_name: str, user_id: Optional[str], organization_id: str):
+    def __init__(
+        self,
+        server_url: str,
+        server_name: str,
+        user_id: Optional[str],
+        organization_id: str,
+    ):
         self.server_url = server_url
         self.server_name = server_name
         self.user_id = user_id

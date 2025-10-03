@@ -51,7 +51,10 @@ class BaseAgent(ABC):
 
     @abstractmethod
     async def step(
-        self, input_messages: List[MessageCreate], max_steps: int = DEFAULT_MAX_STEPS, run_id: Optional[str] = None
+        self,
+        input_messages: List[MessageCreate],
+        max_steps: int = DEFAULT_MAX_STEPS,
+        run_id: Optional[str] = None,
     ) -> LettaResponse:
         """
         Main execution loop for the agent.
@@ -140,7 +143,9 @@ class BaseAgent(ABC):
 
             # generate just the memory string with current state for comparison
             curr_memory_str = agent_state.memory.compile(
-                tool_usage_rules=tool_constraint_block, sources=agent_state.sources, max_files_open=agent_state.max_files_open
+                tool_usage_rules=tool_constraint_block,
+                sources=agent_state.sources,
+                max_files_open=agent_state.max_files_open,
             )
             new_dynamic_section = extract_dynamic_section(curr_memory_str)
 

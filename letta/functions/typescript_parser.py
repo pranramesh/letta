@@ -54,7 +54,11 @@ def derive_typescript_json_schema(source_code: str, name: Optional[str] = None) 
         schema = {
             "name": schema_name,
             "description": description,
-            "parameters": {"type": "object", "properties": parameters["properties"], "required": parameters["required"]},
+            "parameters": {
+                "type": "object",
+                "properties": parameters["properties"],
+                "required": parameters["required"],
+            },
         }
 
         return schema
@@ -190,7 +194,10 @@ def typescript_to_json_schema_type(ts_type: str) -> Dict[str, Any]:
     # Handle Record<K, V> and similar generic types
     record_match = re.match(r"Record<(.+),\s*(.+)>", ts_type)
     if record_match:
-        return {"type": "object", "additionalProperties": typescript_to_json_schema_type(record_match.group(2))}
+        return {
+            "type": "object",
+            "additionalProperties": typescript_to_json_schema_type(record_match.group(2)),
+        }
 
     # Default case - treat unknown types as objects
     return {"type": "object"}

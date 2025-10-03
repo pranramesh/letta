@@ -2,7 +2,17 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from letta.orm.mixins import OrganizationMixin
@@ -68,7 +78,12 @@ class FileAgent(SqlalchemyBase, OrganizationMixin):
         doc="Denormalized copy of files.file_name; unique per agent",
     )
 
-    is_open: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, doc="True if the agent currently has the file open.")
+    is_open: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=True,
+        doc="True if the agent currently has the file open.",
+    )
     visible_content: Mapped[Optional[str]] = mapped_column(Text, nullable=True, doc="Portion of the file the agent is focused on.")
     last_accessed_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -78,10 +93,14 @@ class FileAgent(SqlalchemyBase, OrganizationMixin):
         doc="UTC timestamp when this agent last accessed the file.",
     )
     start_line: Mapped[Optional[int]] = mapped_column(
-        Integer, nullable=True, doc="Starting line number (1-indexed) when file was opened with line range."
+        Integer,
+        nullable=True,
+        doc="Starting line number (1-indexed) when file was opened with line range.",
     )
     end_line: Mapped[Optional[int]] = mapped_column(
-        Integer, nullable=True, doc="Ending line number (exclusive) when file was opened with line range."
+        Integer,
+        nullable=True,
+        doc="Ending line number (exclusive) when file was opened with line range.",
     )
 
     # relationships

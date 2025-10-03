@@ -136,7 +136,12 @@ class RedisSSEStreamWriter:
 
             async with client.pipeline(transaction=False) as pipe:
                 for chunk in chunks:
-                    await pipe.xadd(stream_key, chunk, maxlen=self.max_stream_length, approximate=True)
+                    await pipe.xadd(
+                        stream_key,
+                        chunk,
+                        maxlen=self.max_stream_length,
+                        approximate=True,
+                    )
 
                 await pipe.expire(stream_key, self.stream_ttl)
 
@@ -237,11 +242,18 @@ async def create_background_stream_processor(
         # Mark run_id terminal state
         if job_manager and actor:
             await job_manager.safe_update_job_status_async(
-                job_id=run_id, new_status=JobStatus.failed, actor=actor, metadata={"error": str(e)}
+                job_id=run_id,
+                new_status=JobStatus.failed,
+                actor=actor,
+                metadata={"error": str(e)},
             )
 
         error_chunk = {"error": str(e), "code": "INTERNAL_SERVER_ERROR"}
-        await writer.write_chunk(run_id=run_id, data=f"event: error\ndata: {json.dumps(error_chunk)}\n\n", is_complete=True)
+        await writer.write_chunk(
+            run_id=run_id,
+            data=f"event: error\ndata: {json.dumps(error_chunk)}\n\n",
+            is_complete=True,
+        )
     finally:
         if should_stop_writer:
             await writer.stop()

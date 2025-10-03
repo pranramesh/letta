@@ -5,7 +5,12 @@ import httpx
 
 from letta import system
 from letta.schemas.enums import MessageRole
-from letta.schemas.letta_message_content import Base64Image, ImageContent, ImageSourceType, TextContent
+from letta.schemas.letta_message_content import (
+    Base64Image,
+    ImageContent,
+    ImageSourceType,
+    TextContent,
+)
 from letta.schemas.message import Message, MessageCreate
 
 
@@ -47,7 +52,10 @@ def _convert_message_create_to_message(
     else:
         raise ValueError("Message content is empty or invalid")
 
-    assert message_create.role in {MessageRole.user, MessageRole.system}, f"Invalid message role: {message_create.role}"
+    assert message_create.role in {
+        MessageRole.user,
+        MessageRole.system,
+    }, f"Invalid message role: {message_create.role}"
     for content in message_content:
         if isinstance(content, TextContent):
             # Apply wrapping if needed

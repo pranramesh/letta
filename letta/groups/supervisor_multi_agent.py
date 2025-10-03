@@ -2,7 +2,9 @@ from typing import List, Optional
 
 from letta.agent import Agent, AgentState
 from letta.constants import DEFAULT_MESSAGE_TOOL
-from letta.functions.function_sets.multi_agent import send_message_to_all_agents_in_group
+from letta.functions.function_sets.multi_agent import (
+    send_message_to_all_agents_in_group,
+)
 from letta.functions.functions import parse_source_code
 from letta.functions.schema_generator import generate_schema
 from letta.interface import AgentInterface
@@ -63,7 +65,11 @@ class SupervisorMultiAgent(Agent):
                 pydantic_tool=multi_agent_tool,
                 actor=self.user,
             )
-            self.agent_state = self.agent_manager.attach_tool(agent_id=self.agent_state.id, tool_id=multi_agent_tool.id, actor=self.user)
+            self.agent_state = self.agent_manager.attach_tool(
+                agent_id=self.agent_state.id,
+                tool_id=multi_agent_tool.id,
+                actor=self.user,
+            )
 
         old_tool_rules = self.agent_state.tool_rules
         self.agent_state.tool_rules = [

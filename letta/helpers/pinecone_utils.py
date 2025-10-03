@@ -159,7 +159,11 @@ async def upsert_pinecone_indices():
                     name=index_name,
                     cloud=PINECONE_CLOUD,
                     region=PINECONE_REGION,
-                    embed=IndexEmbed(model=PINECONE_EMBEDDING_MODEL, field_map={"text": PINECONE_TEXT_FIELD_NAME}, metric=PINECONE_METRIC),
+                    embed=IndexEmbed(
+                        model=PINECONE_EMBEDDING_MODEL,
+                        field_map={"text": PINECONE_TEXT_FIELD_NAME},
+                        metric=PINECONE_METRIC,
+                    ),
                 )
                 logger.info(f"[Pinecone] Successfully created index {index_name}")
             else:
@@ -291,7 +295,11 @@ async def search_pinecone_index(query: str, limit: int, filter: Dict[str, Any], 
                         "inputs": {"text": query},
                         "filter": filter,
                     },
-                    rerank={"model": "bge-reranker-v2-m3", "top_n": limit, "rank_fields": [PINECONE_TEXT_FIELD_NAME]},
+                    rerank={
+                        "model": "bge-reranker-v2-m3",
+                        "top_n": limit,
+                        "rank_fields": [PINECONE_TEXT_FIELD_NAME],
+                    },
                 )
 
                 result_count = len(search_results.get("matches", []))

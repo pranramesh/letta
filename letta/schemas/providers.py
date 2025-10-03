@@ -6,8 +6,16 @@ import aiohttp
 import requests
 from pydantic import BaseModel, Field, model_validator
 
-from letta.constants import DEFAULT_EMBEDDING_CHUNK_SIZE, LETTA_MODEL_ENDPOINT, LLM_MAX_TOKENS, MIN_CONTEXT_WINDOW
-from letta.llm_api.azure_openai import get_azure_chat_completions_endpoint, get_azure_embeddings_endpoint
+from letta.constants import (
+    DEFAULT_EMBEDDING_CHUNK_SIZE,
+    LETTA_MODEL_ENDPOINT,
+    LLM_MAX_TOKENS,
+    MIN_CONTEXT_WINDOW,
+)
+from letta.llm_api.azure_openai import (
+    get_azure_chat_completions_endpoint,
+    get_azure_embeddings_endpoint,
+)
 from letta.llm_api.azure_openai_constants import AZURE_MODEL_TO_CONTEXT_LENGTH
 from letta.schemas.embedding_config import EmbeddingConfig
 from letta.schemas.embedding_config_overrides import EMBEDDING_HANDLE_OVERRIDES
@@ -23,7 +31,10 @@ class ProviderBase(LettaBase):
 
 
 class Provider(ProviderBase):
-    id: Optional[str] = Field(None, description="The id of the provider, lazily created by the database manager.")
+    id: Optional[str] = Field(
+        None,
+        description="The id of the provider, lazily created by the database manager.",
+    )
     name: str = Field(..., description="The name of the provider")
     provider_type: ProviderType = Field(..., description="The type of the provider")
     provider_category: ProviderCategory = Field(..., description="The category of the provider (base or byok)")
@@ -70,7 +81,12 @@ class Provider(ProviderBase):
         """String representation of the provider for display purposes"""
         raise NotImplementedError
 
-    def get_handle(self, model_name: str, is_embedding: bool = False, base_name: Optional[str] = None) -> str:
+    def get_handle(
+        self,
+        model_name: str,
+        is_embedding: bool = False,
+        base_name: Optional[str] = None,
+    ) -> str:
         """
         Get the handle for a model, with support for custom overrides.
 
@@ -304,7 +320,17 @@ class OpenAIProvider(Provider):
                 # NOTE: o1-mini and o1-preview do not support tool calling
                 # NOTE: o1-mini does not support system messages
                 # NOTE: o1-pro is only available in Responses API
-                disallowed_types = ["transcribe", "search", "realtime", "tts", "audio", "computer", "o1-mini", "o1-preview", "o1-pro"]
+                disallowed_types = [
+                    "transcribe",
+                    "search",
+                    "realtime",
+                    "tts",
+                    "audio",
+                    "computer",
+                    "o1-mini",
+                    "o1-preview",
+                    "o1-pro",
+                ]
                 skip = True
                 for model_type in allowed_types:
                     if model_name.startswith(model_type):
@@ -890,7 +916,8 @@ class OllamaProvider(OpenAIProvider):
     base_url: str = Field(..., description="Base URL for the Ollama API.")
     api_key: Optional[str] = Field(None, description="API key for the Ollama API (default: `None`).")
     default_prompt_formatter: str = Field(
-        ..., description="Default prompt formatter (aka model wrapper) to use on a /completions style API."
+        ...,
+        description="Default prompt formatter (aka model wrapper) to use on a /completions style API.",
     )
 
     async def list_llm_models_async(self) -> List[LLMConfig]:
@@ -1100,7 +1127,10 @@ class TogetherProvider(OpenAIProvider):
     provider_category: ProviderCategory = Field(ProviderCategory.base, description="The category of the provider (base or byok)")
     base_url: str = "https://api.together.ai/v1"
     api_key: str = Field(..., description="API key for the TogetherAI API.")
-    default_prompt_formatter: str = Field(..., description="Default prompt formatter (aka model wrapper) to use on vLLM /completions API.")
+    default_prompt_formatter: str = Field(
+        ...,
+        description="Default prompt formatter (aka model wrapper) to use on vLLM /completions API.",
+    )
 
     def list_llm_models(self) -> List[LLMConfig]:
         from letta.llm_api.openai import openai_get_model_list
@@ -1329,7 +1359,9 @@ class GoogleAIProvider(Provider):
             return google_ai_get_model_context_window(self.base_url, self.api_key, model_name)
 
     async def get_model_context_window_async(self, model_name: str) -> Optional[int]:
-        from letta.llm_api.google_ai_client import google_ai_get_model_context_window_async
+        from letta.llm_api.google_ai_client import (
+            google_ai_get_model_context_window_async,
+        )
 
         if model_name in LLM_MAX_TOKENS:
             return LLM_MAX_TOKENS[model_name]
@@ -1386,7 +1418,8 @@ class AzureProvider(Provider):
     provider_category: ProviderCategory = Field(ProviderCategory.base, description="The category of the provider (base or byok)")
     latest_api_version: str = "2024-09-01-preview"  # https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation
     base_url: str = Field(
-        ..., description="Base URL for the Azure API endpoint. This should be specific to your org, e.g. `https://letta.openai.azure.com`."
+        ...,
+        description="Base URL for the Azure API endpoint. This should be specific to your org, e.g. `https://letta.openai.azure.com`.",
     )
     api_key: str = Field(..., description="API key for the Azure API.")
     api_version: str = Field(latest_api_version, description="API version for the Azure API")
@@ -1401,7 +1434,9 @@ class AzureProvider(Provider):
         return values
 
     def list_llm_models(self) -> List[LLMConfig]:
-        from letta.llm_api.azure_openai import azure_openai_get_chat_completion_model_list
+        from letta.llm_api.azure_openai import (
+            azure_openai_get_chat_completion_model_list,
+        )
 
         model_options = azure_openai_get_chat_completion_model_list(self.base_url, api_key=self.api_key, api_version=self.api_version)
         configs = []
@@ -1426,7 +1461,10 @@ class AzureProvider(Provider):
         from letta.llm_api.azure_openai import azure_openai_get_embeddings_model_list
 
         model_options = azure_openai_get_embeddings_model_list(
-            self.base_url, api_key=self.api_key, api_version=self.api_version, require_embedding_in_name=True
+            self.base_url,
+            api_key=self.api_key,
+            api_version=self.api_version,
+            require_embedding_in_name=True,
         )
         configs = []
         for model_option in model_options:
@@ -1497,7 +1535,10 @@ class VLLMCompletionsProvider(Provider):
     provider_type: Literal[ProviderType.vllm] = Field(ProviderType.vllm, description="The type of the provider.")
     provider_category: ProviderCategory = Field(ProviderCategory.base, description="The category of the provider (base or byok)")
     base_url: str = Field(..., description="Base URL for the vLLM API.")
-    default_prompt_formatter: str = Field(..., description="Default prompt formatter (aka model wrapper) to use on vLLM /completions API.")
+    default_prompt_formatter: str = Field(
+        ...,
+        description="Default prompt formatter (aka model wrapper) to use on vLLM /completions API.",
+    )
 
     def list_llm_models(self) -> List[LLMConfig]:
         # not supported with vLLM
@@ -1611,7 +1652,12 @@ class BedrockProvider(Provider):
 
         return bedrock_get_model_context_window(model_name)
 
-    def get_handle(self, model_name: str, is_embedding: bool = False, base_name: Optional[str] = None) -> str:
+    def get_handle(
+        self,
+        model_name: str,
+        is_embedding: bool = False,
+        base_name: Optional[str] = None,
+    ) -> str:
         print(model_name)
         model = model_name.split(".")[-1]
         return f"{self.name}/{model}"

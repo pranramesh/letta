@@ -131,7 +131,12 @@ def roll_dice_tool(client):
     description = "test_description"
     tags = ["test"]
 
-    tool = Tool(description=description, tags=tags, source_code=source_code, source_type=source_type)
+    tool = Tool(
+        description=description,
+        tags=tags,
+        source_code=source_code,
+        source_type=source_type,
+    )
     derived_json_schema = derive_openai_json_schema(source_code=tool.source_code, name=tool.name)
 
     derived_name = derived_json_schema["name"]

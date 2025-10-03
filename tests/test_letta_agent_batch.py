@@ -146,7 +146,10 @@ def batch_requests(agents):
         List[LettaBatchRequest]: Batch requests for each agent
     """
     return [
-        LettaBatchRequest(agent_id=agent.id, messages=[MessageCreate(role="user", content=[TextContent(text=f"Hi {agent.name}")])])
+        LettaBatchRequest(
+            agent_id=agent.id,
+            messages=[MessageCreate(role="user", content=[TextContent(text=f"Hi {agent.name}")])],
+        )
         for agent in agents
     ]
 
@@ -201,7 +204,10 @@ def create_get_weather_tool_response(custom_id: str, model: str, request_heartbe
                 type="message",
                 model=model,
                 content=[
-                    {"type": "text", "text": "Let me check the current weather in San Francisco for you."},
+                    {
+                        "type": "text",
+                        "text": "Let me check the current weather in San Francisco for you.",
+                    },
                     {
                         "type": "tool_use",
                         "id": "tu_01234567890123456789012345",
@@ -221,7 +227,11 @@ def create_get_weather_tool_response(custom_id: str, model: str, request_heartbe
 
 
 def create_rethink_tool_response(
-    custom_id: str, model: str, request_heartbeat: bool, new_memory: str, target_block_label: str
+    custom_id: str,
+    model: str,
+    request_heartbeat: bool,
+    new_memory: str,
+    target_block_label: str,
 ) -> BetaMessageBatchIndividualResponse:
     """Create a dummy successful batch response with a tool call after user asks about weather."""
     return BetaMessageBatchIndividualResponse(
@@ -259,7 +269,10 @@ def create_failed_response(custom_id: str) -> BetaMessageBatchIndividualResponse
         custom_id=custom_id,
         result=BetaMessageBatchErroredResult(
             type="errored",
-            error=BetaErrorResponse(type="error", error=BetaRateLimitError(type="rate_limit_error", message="Rate limit hit.")),
+            error=BetaErrorResponse(
+                type="error",
+                error=BetaRateLimitError(type="rate_limit_error", message="Rate limit hit."),
+            ),
         ),
     )
 
@@ -379,7 +392,10 @@ async def test_rethink_tool_modify_agent_state(disable_e2b_api_key, server, defa
     )
     agents = [agent]
     batch_requests = [
-        LettaBatchRequest(agent_id=agent.id, messages=[MessageCreate(role="user", content=[TextContent(text="Rethink memory.")])])
+        LettaBatchRequest(
+            agent_id=agent.id,
+            messages=[MessageCreate(role="user", content=[TextContent(text="Rethink memory.")])],
+        )
         for agent in agents
     ]
 
@@ -389,7 +405,10 @@ async def test_rethink_tool_modify_agent_state(disable_e2b_api_key, server, defa
     )
 
     # 1. Invoke `step_until_request`
-    with patch("letta.llm_api.anthropic_client.AnthropicClient.send_llm_batch_request_async", return_value=dummy_batch_response):
+    with patch(
+        "letta.llm_api.anthropic_client.AnthropicClient.send_llm_batch_request_async",
+        return_value=dummy_batch_response,
+    ):
         # Create batch runner
         batch_runner = LettaAgentBatch(
             message_manager=server.message_manager,
@@ -431,7 +450,10 @@ async def test_rethink_tool_modify_agent_state(disable_e2b_api_key, server, defa
         mock_results.return_value = MockAsyncIterable(mock_items.copy())
 
         with patch.object(server.anthropic_async_client.beta.messages.batches, "results", mock_results):
-            with patch("letta.llm_api.anthropic_client.AnthropicClient.send_llm_batch_request_async", return_value=dummy_batch_response):
+            with patch(
+                "letta.llm_api.anthropic_client.AnthropicClient.send_llm_batch_request_async",
+                return_value=dummy_batch_response,
+            ):
                 await poll_running_llm_batches(server)
 
                 # Check that the tool has been executed correctly
@@ -443,7 +465,13 @@ async def test_rethink_tool_modify_agent_state(disable_e2b_api_key, server, defa
 
 @pytest.mark.asyncio
 async def test_partial_error_from_anthropic_batch(
-    disable_e2b_api_key, server, default_user, agents: Tuple[AgentState], batch_requests, step_state_map, batch_job
+    disable_e2b_api_key,
+    server,
+    default_user,
+    agents: Tuple[AgentState],
+    batch_requests,
+    step_state_map,
+    batch_job,
 ):
     anthropic_batch_id = "msgbatch_test_12345"
     dummy_batch_response = create_batch_response(
@@ -451,7 +479,10 @@ async def test_partial_error_from_anthropic_batch(
     )
 
     # 1. Invoke `step_until_request`
-    with patch("letta.llm_api.anthropic_client.AnthropicClient.send_llm_batch_request_async", return_value=dummy_batch_response):
+    with patch(
+        "letta.llm_api.anthropic_client.AnthropicClient.send_llm_batch_request_async",
+        return_value=dummy_batch_response,
+    ):
         # Create batch runner
         batch_runner = LettaAgentBatch(
             message_manager=server.message_manager,
@@ -486,7 +517,11 @@ async def test_partial_error_from_anthropic_batch(
         mock_items = [create_failed_response(custom_id=agent.id) for agent in agents_failed]
         mock_items.extend(
             [
-                create_get_weather_tool_response(custom_id=agent.id, model=agent.llm_config.model, request_heartbeat=True)
+                create_get_weather_tool_response(
+                    custom_id=agent.id,
+                    model=agent.llm_config.model,
+                    request_heartbeat=True,
+                )
                 for agent in agents_continue
             ]
         )
@@ -496,7 +531,10 @@ async def test_partial_error_from_anthropic_batch(
         mock_results.return_value = MockAsyncIterable(mock_items.copy())  # Using copy to preserve the original list
 
         with patch.object(server.anthropic_async_client.beta.messages.batches, "results", mock_results):
-            with patch("letta.llm_api.anthropic_client.AnthropicClient.send_llm_batch_request_async", return_value=dummy_batch_response):
+            with patch(
+                "letta.llm_api.anthropic_client.AnthropicClient.send_llm_batch_request_async",
+                return_value=dummy_batch_response,
+            ):
                 sizes = await asyncio.gather(
                     *[server.message_manager.size_async(actor=default_user, agent_id=agent.id) for agent in agents]
                 )
@@ -532,7 +570,8 @@ async def test_partial_error_from_anthropic_batch(
 
                 # New batch‑items should exist, initialised in (created, paused) state
                 new_items = await server.batch_manager.list_llm_batch_items_async(
-                    llm_batch_id=post_resume_response.last_llm_batch_id, actor=default_user
+                    llm_batch_id=post_resume_response.last_llm_batch_id,
+                    actor=default_user,
                 )
                 assert len(new_items) == 2, f"Expected 2 new batch item, got {len(new_items)}"
                 # Assert that the continuing agent is in the only item
@@ -553,7 +592,8 @@ async def test_partial_error_from_anthropic_batch(
                 # Old items must have been flipped to completed / finished earlier
                 #     (sanity – we already asserted this above, but we keep it close for clarity)
                 old_items = await server.batch_manager.list_llm_batch_items_async(
-                    llm_batch_id=pre_resume_response.last_llm_batch_id, actor=default_user
+                    llm_batch_id=pre_resume_response.last_llm_batch_id,
+                    actor=default_user,
                 )
                 for item in old_items:
                     if item.agent_id == agents_failed[0].id:
@@ -589,7 +629,9 @@ async def test_partial_error_from_anthropic_batch(
 
                 # Check the total list of messages
                 messages = await server.batch_manager.get_messages_for_letta_batch_async(
-                    letta_batch_job_id=pre_resume_response.letta_batch_id, limit=200, actor=default_user
+                    letta_batch_job_id=pre_resume_response.letta_batch_id,
+                    limit=200,
+                    actor=default_user,
                 )
                 assert len(messages) == (len(agents) - 1) * 4 + 1
                 _assert_descending_order(messages)
@@ -610,7 +652,13 @@ async def test_partial_error_from_anthropic_batch(
 
 @pytest.mark.asyncio
 async def test_resume_step_some_stop(
-    disable_e2b_api_key, server, default_user, agents: Tuple[AgentState], batch_requests, step_state_map, batch_job
+    disable_e2b_api_key,
+    server,
+    default_user,
+    agents: Tuple[AgentState],
+    batch_requests,
+    step_state_map,
+    batch_job,
 ):
     anthropic_batch_id = "msgbatch_test_12345"
     dummy_batch_response = create_batch_response(
@@ -618,7 +666,10 @@ async def test_resume_step_some_stop(
     )
 
     # 1. Invoke `step_until_request`
-    with patch("letta.llm_api.anthropic_client.AnthropicClient.send_llm_batch_request_async", return_value=dummy_batch_response):
+    with patch(
+        "letta.llm_api.anthropic_client.AnthropicClient.send_llm_batch_request_async",
+        return_value=dummy_batch_response,
+    ):
         # Create batch runner
         batch_runner = LettaAgentBatch(
             message_manager=server.message_manager,
@@ -655,7 +706,11 @@ async def test_resume_step_some_stop(
         ]
         mock_items.extend(
             [
-                create_get_weather_tool_response(custom_id=agent.id, model=agent.llm_config.model, request_heartbeat=False)
+                create_get_weather_tool_response(
+                    custom_id=agent.id,
+                    model=agent.llm_config.model,
+                    request_heartbeat=False,
+                )
                 for agent in agents_finish
             ]
         )
@@ -665,7 +720,10 @@ async def test_resume_step_some_stop(
         mock_results.return_value = MockAsyncIterable(mock_items.copy())  # Using copy to preserve the original list
 
         with patch.object(server.anthropic_async_client.beta.messages.batches, "results", mock_results):
-            with patch("letta.llm_api.anthropic_client.AnthropicClient.send_llm_batch_request_async", return_value=dummy_batch_response):
+            with patch(
+                "letta.llm_api.anthropic_client.AnthropicClient.send_llm_batch_request_async",
+                return_value=dummy_batch_response,
+            ):
                 sizes = await asyncio.gather(
                     *[server.message_manager.size_async(actor=default_user, agent_id=agent.id) for agent in agents]
                 )
@@ -700,7 +758,8 @@ async def test_resume_step_some_stop(
 
                 # New batch‑items should exist, initialised in (created, paused) state
                 new_items = await server.batch_manager.list_llm_batch_items_async(
-                    llm_batch_id=post_resume_response.last_llm_batch_id, actor=default_user
+                    llm_batch_id=post_resume_response.last_llm_batch_id,
+                    actor=default_user,
                 )
                 assert len(new_items) == 1, f"Expected 1 new batch item, got {len(new_items)}"
                 # Assert that the continuing agent is in the only item
@@ -721,7 +780,8 @@ async def test_resume_step_some_stop(
                 # Old items must have been flipped to completed / finished earlier
                 #     (sanity – we already asserted this above, but we keep it close for clarity)
                 old_items = await server.batch_manager.list_llm_batch_items_async(
-                    llm_batch_id=pre_resume_response.last_llm_batch_id, actor=default_user
+                    llm_batch_id=pre_resume_response.last_llm_batch_id,
+                    actor=default_user,
                 )
                 assert {i.request_status for i in old_items} == {JobStatus.completed}
                 assert {i.step_status for i in old_items} == {AgentStepStatus.completed}
@@ -741,7 +801,9 @@ async def test_resume_step_some_stop(
 
                 # Check the total list of messages
                 messages = await server.batch_manager.get_messages_for_letta_batch_async(
-                    letta_batch_job_id=pre_resume_response.letta_batch_id, limit=200, actor=default_user
+                    letta_batch_job_id=pre_resume_response.letta_batch_id,
+                    limit=200,
+                    actor=default_user,
                 )
                 assert len(messages) == len(agents) * 3 + 1
                 _assert_descending_order(messages)
@@ -776,7 +838,13 @@ def _assert_descending_order(messages):
 
 @pytest.mark.asyncio
 async def test_resume_step_after_request_all_continue(
-    disable_e2b_api_key, server, default_user, agents: Tuple[AgentState], batch_requests, step_state_map, batch_job
+    disable_e2b_api_key,
+    server,
+    default_user,
+    agents: Tuple[AgentState],
+    batch_requests,
+    step_state_map,
+    batch_job,
 ):
     anthropic_batch_id = "msgbatch_test_12345"
     dummy_batch_response = create_batch_response(
@@ -784,7 +852,10 @@ async def test_resume_step_after_request_all_continue(
     )
 
     # 1. Invoke `step_until_request`
-    with patch("letta.llm_api.anthropic_client.AnthropicClient.send_llm_batch_request_async", return_value=dummy_batch_response):
+    with patch(
+        "letta.llm_api.anthropic_client.AnthropicClient.send_llm_batch_request_async",
+        return_value=dummy_batch_response,
+    ):
         # Create batch runner
         batch_runner = LettaAgentBatch(
             message_manager=server.message_manager,
@@ -828,7 +899,10 @@ async def test_resume_step_after_request_all_continue(
         mock_results.return_value = MockAsyncIterable(mock_items.copy())  # Using copy to preserve the original list
 
         with patch.object(server.anthropic_async_client.beta.messages.batches, "results", mock_results):
-            with patch("letta.llm_api.anthropic_client.AnthropicClient.send_llm_batch_request_async", return_value=dummy_batch_response):
+            with patch(
+                "letta.llm_api.anthropic_client.AnthropicClient.send_llm_batch_request_async",
+                return_value=dummy_batch_response,
+            ):
                 sizes = await asyncio.gather(
                     *[server.message_manager.size_async(actor=default_user, agent_id=agent.id) for agent in agents]
                 )
@@ -862,7 +936,8 @@ async def test_resume_step_after_request_all_continue(
 
                 # New batch‑items should exist, initialised in (created, paused) state
                 new_items = await server.batch_manager.list_llm_batch_items_async(
-                    llm_batch_id=post_resume_response.last_llm_batch_id, actor=default_user
+                    llm_batch_id=post_resume_response.last_llm_batch_id,
+                    actor=default_user,
                 )
                 assert len(new_items) == 3, f"Expected 3 new batch items, got {len(new_items)}"
                 assert {i.request_status for i in new_items} == {JobStatus.created}
@@ -881,7 +956,8 @@ async def test_resume_step_after_request_all_continue(
                 # Old items must have been flipped to completed / finished earlier
                 #     (sanity – we already asserted this above, but we keep it close for clarity)
                 old_items = await server.batch_manager.list_llm_batch_items_async(
-                    llm_batch_id=pre_resume_response.last_llm_batch_id, actor=default_user
+                    llm_batch_id=pre_resume_response.last_llm_batch_id,
+                    actor=default_user,
                 )
                 assert {i.request_status for i in old_items} == {JobStatus.completed}
                 assert {i.step_status for i in old_items} == {AgentStepStatus.completed}
@@ -901,7 +977,9 @@ async def test_resume_step_after_request_all_continue(
 
                 # Check the total list of messages
                 messages = await server.batch_manager.get_messages_for_letta_batch_async(
-                    letta_batch_job_id=pre_resume_response.letta_batch_id, limit=200, actor=default_user
+                    letta_batch_job_id=pre_resume_response.letta_batch_id,
+                    limit=200,
+                    actor=default_user,
                 )
                 assert len(messages) == len(agents) * 4
                 _assert_descending_order(messages)
@@ -917,7 +995,14 @@ async def test_resume_step_after_request_all_continue(
 
 @pytest.mark.asyncio
 async def test_step_until_request_prepares_and_submits_batch_correctly(
-    disable_e2b_api_key, server, default_user, agents, batch_requests, step_state_map, dummy_batch_response, batch_job
+    disable_e2b_api_key,
+    server,
+    default_user,
+    agents,
+    batch_requests,
+    step_state_map,
+    dummy_batch_response,
+    batch_job,
 ):
     """
     Test that step_until_request correctly:

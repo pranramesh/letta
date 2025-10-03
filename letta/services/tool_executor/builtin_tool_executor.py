@@ -29,7 +29,11 @@ class LettaBuiltinToolExecutor(ToolExecutor):
         sandbox_config: Optional[SandboxConfig] = None,
         sandbox_env_vars: Optional[Dict[str, Any]] = None,
     ) -> ToolExecutionResult:
-        function_map = {"run_code": self.run_code, "web_search": self.web_search, "fetch_webpage": self.fetch_webpage}
+        function_map = {
+            "run_code": self.run_code,
+            "web_search": self.web_search,
+            "fetch_webpage": self.fetch_webpage,
+        }
 
         if function_name not in function_map:
             raise ValueError(f"Unknown function: {function_name}")
@@ -44,7 +48,12 @@ class LettaBuiltinToolExecutor(ToolExecutor):
             agent_state=agent_state,
         )
 
-    async def run_code(self, agent_state: "AgentState", code: str, language: Literal["python", "js", "ts", "r", "java"]) -> str:
+    async def run_code(
+        self,
+        agent_state: "AgentState",
+        code: str,
+        language: Literal["python", "js", "ts", "r", "java"],
+    ) -> str:
         from e2b_code_interpreter import AsyncSandbox
 
         if tool_settings.e2b_api_key is None:
@@ -79,7 +88,17 @@ class LettaBuiltinToolExecutor(ToolExecutor):
         query: str,
         num_results: int = 10,
         category: Optional[
-            Literal["company", "research paper", "news", "pdf", "github", "tweet", "personal site", "linkedin profile", "financial report"]
+            Literal[
+                "company",
+                "research paper",
+                "news",
+                "pdf",
+                "github",
+                "tweet",
+                "personal site",
+                "linkedin profile",
+                "financial report",
+            ]
         ] = None,
         include_text: bool = False,
         include_domains: Optional[List[str]] = None,
@@ -223,7 +242,11 @@ class LettaBuiltinToolExecutor(ToolExecutor):
 
             # single thread pool call for the entire fallback pipeline
             def readability_pipeline():
-                response = requests.get(url, timeout=30, headers={"User-Agent": "Mozilla/5.0 (compatible; LettaBot/1.0)"})
+                response = requests.get(
+                    url,
+                    timeout=30,
+                    headers={"User-Agent": "Mozilla/5.0 (compatible; LettaBot/1.0)"},
+                )
                 response.raise_for_status()
 
                 doc = Document(response.text)

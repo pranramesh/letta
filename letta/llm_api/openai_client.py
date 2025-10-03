@@ -21,9 +21,17 @@ from letta.errors import (
     LLMTimeoutError,
     LLMUnprocessableEntityError,
 )
-from letta.llm_api.helpers import add_inner_thoughts_to_functions, convert_to_structured_output, unpack_all_inner_thoughts_from_kwargs
+from letta.llm_api.helpers import (
+    add_inner_thoughts_to_functions,
+    convert_to_structured_output,
+    unpack_all_inner_thoughts_from_kwargs,
+)
 from letta.llm_api.llm_client_base import LLMClientBase
-from letta.local_llm.constants import INNER_THOUGHTS_KWARG, INNER_THOUGHTS_KWARG_DESCRIPTION, INNER_THOUGHTS_KWARG_DESCRIPTION_GO_FIRST
+from letta.local_llm.constants import (
+    INNER_THOUGHTS_KWARG,
+    INNER_THOUGHTS_KWARG_DESCRIPTION,
+    INNER_THOUGHTS_KWARG_DESCRIPTION_GO_FIRST,
+)
 from letta.log import get_logger
 from letta.otel.tracing import trace_method
 from letta.schemas.embedding_config import EmbeddingConfig
@@ -215,7 +223,10 @@ class OpenAIClient(LLMClientBase):
                 tool_choice = "required"
 
             if force_tool_call is not None:
-                tool_choice = ToolFunctionChoice(type="function", function=ToolFunctionChoiceFunctionCall(name=force_tool_call))
+                tool_choice = ToolFunctionChoice(
+                    type="function",
+                    function=ToolFunctionChoiceFunctionCall(name=force_tool_call),
+                )
 
         if not supports_content_none(llm_config):
             for message in openai_message_list:
@@ -225,12 +236,12 @@ class OpenAIClient(LLMClientBase):
         data = ChatCompletionRequest(
             model=model,
             messages=fill_image_content_in_messages(openai_message_list, messages),
-            tools=[OpenAITool(type="function", function=f) for f in tools] if tools else None,
+            tools=([OpenAITool(type="function", function=f) for f in tools] if tools else None),
             tool_choice=tool_choice,
             user=str(),
             max_completion_tokens=llm_config.max_tokens,
             # NOTE: the reasoners that don't support temperature require 1.0, not None
-            temperature=llm_config.temperature if supports_temperature_param(model) else 1.0,
+            temperature=(llm_config.temperature if supports_temperature_param(model) else 1.0),
         )
 
         # Add verbosity control for GPT-5 models
@@ -312,7 +323,8 @@ class OpenAIClient(LLMClientBase):
         # Unpack inner thoughts if they were embedded in function arguments
         if llm_config.put_inner_thoughts_in_kwargs:
             chat_completion_response = unpack_all_inner_thoughts_from_kwargs(
-                response=chat_completion_response, inner_thoughts_key=INNER_THOUGHTS_KWARG
+                response=chat_completion_response,
+                inner_thoughts_key=INNER_THOUGHTS_KWARG,
             )
 
         # If we used a reasoning model, create a content part for the ommitted reasoning
@@ -445,19 +457,27 @@ class OpenAIClient(LLMClientBase):
         if isinstance(e, openai.AuthenticationError):
             logger.error(f"[OpenAI] Authentication error (401): {str(e)}")  # More severe log level
             return LLMAuthenticationError(
-                message=f"Authentication failed with OpenAI: {str(e)}", code=ErrorCode.UNAUTHENTICATED, details=e.body
+                message=f"Authentication failed with OpenAI: {str(e)}",
+                code=ErrorCode.UNAUTHENTICATED,
+                details=e.body,
             )
 
         if isinstance(e, openai.PermissionDeniedError):
             logger.error(f"[OpenAI] Permission denied (403): {str(e)}")  # More severe log level
             return LLMPermissionDeniedError(
-                message=f"Permission denied by OpenAI: {str(e)}", code=ErrorCode.PERMISSION_DENIED, details=e.body
+                message=f"Permission denied by OpenAI: {str(e)}",
+                code=ErrorCode.PERMISSION_DENIED,
+                details=e.body,
             )
 
         if isinstance(e, openai.NotFoundError):
             logger.warning(f"[OpenAI] Resource not found (404): {str(e)}")
             # Could be invalid model name, etc.
-            return LLMNotFoundError(message=f"Resource not found in OpenAI: {str(e)}", code=ErrorCode.NOT_FOUND, details=e.body)
+            return LLMNotFoundError(
+                message=f"Resource not found in OpenAI: {str(e)}",
+                code=ErrorCode.NOT_FOUND,
+                details=e.body,
+            )
 
         if isinstance(e, openai.UnprocessableEntityError):
             logger.warning(f"[OpenAI] Unprocessable entity (422): {str(e)}")
@@ -503,7 +523,10 @@ def fill_image_content_in_messages(openai_message_list: List[dict], pydantic_mes
 
     new_message_list = []
     for idx in range(len(openai_message_list)):
-        openai_message, pydantic_message = openai_message_list[idx], pydantic_message_list[idx]
+        openai_message, pydantic_message = (
+            openai_message_list[idx],
+            pydantic_message_list[idx],
+        )
         if pydantic_message.role != "user":
             new_message_list.append(openai_message)
             continue

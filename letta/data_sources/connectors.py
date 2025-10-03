@@ -3,7 +3,11 @@ from typing import Dict, Iterator, List, Tuple
 import typer
 
 from letta.constants import EMBEDDING_BATCH_SIZE
-from letta.data_sources.connectors_helper import assert_all_files_exist_locally, extract_metadata_from_files, get_filenames_in_dir
+from letta.data_sources.connectors_helper import (
+    assert_all_files_exist_locally,
+    extract_metadata_from_files,
+    get_filenames_in_dir,
+)
 from letta.schemas.file import FileMetadata
 from letta.schemas.passage import Passage
 from letta.schemas.source import Source
@@ -37,7 +41,13 @@ class DataConnector:
         """
 
 
-async def load_data(connector: DataConnector, source: Source, passage_manager: PassageManager, file_manager: FileManager, actor: "User"):
+async def load_data(
+    connector: DataConnector,
+    source: Source,
+    passage_manager: PassageManager,
+    file_manager: FileManager,
+    actor: "User",
+):
     from letta.llm_api.llm_client import LLMClient
 
     """Load data from a connector (generates file and passages) into a specified source_id, associated with a user_id."""
@@ -143,7 +153,13 @@ async def load_data(connector: DataConnector, source: Source, passage_manager: P
 
 
 class DirectoryConnector(DataConnector):
-    def __init__(self, input_files: List[str] = None, input_directory: str = None, recursive: bool = False, extensions: List[str] = None):
+    def __init__(
+        self,
+        input_files: List[str] = None,
+        input_directory: str = None,
+        recursive: bool = False,
+        extensions: List[str] = None,
+    ):
         """
         Connector for reading text data from a directory of files.
 

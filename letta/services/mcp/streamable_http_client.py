@@ -4,7 +4,10 @@ from mcp import ClientSession
 from mcp.client.auth import OAuthClientProvider
 from mcp.client.streamable_http import streamablehttp_client
 
-from letta.functions.mcp_client.types import BaseServerConfig, StreamableHTTPServerConfig
+from letta.functions.mcp_client.types import (
+    BaseServerConfig,
+    StreamableHTTPServerConfig,
+)
 from letta.log import get_logger
 from letta.services.mcp.base_client import AsyncBaseMCPClient
 
@@ -40,7 +43,9 @@ class AsyncStreamableHTTPMCPClient(AsyncBaseMCPClient):
             # Use OAuth provider if available, otherwise use regular headers
             if self.oauth_provider:
                 streamable_http_cm = streamablehttp_client(
-                    server_config.server_url, headers=headers if headers else None, auth=self.oauth_provider
+                    server_config.server_url,
+                    headers=headers if headers else None,
+                    auth=self.oauth_provider,
                 )
             else:
                 # Use streamablehttp_client context manager with headers if provided

@@ -1,5 +1,7 @@
 from temporalio import activity
-from ..types import WorkflowInputParams, PreparedMessages
+
+from ..types import PreparedMessages, WorkflowInputParams
+
 
 @activity.defn(name="prepare_messages")
 async def prepare_messages(input_: WorkflowInputParams) -> PreparedMessages:

@@ -78,7 +78,10 @@ def add_missing_heartbeat(llm_json):
 
 
 def clean_and_interpret_send_message_json(json_string):
-    from letta.local_llm.constants import INNER_THOUGHTS_KWARG, VALID_INNER_THOUGHTS_KWARGS
+    from letta.local_llm.constants import (
+        INNER_THOUGHTS_KWARG,
+        VALID_INNER_THOUGHTS_KWARGS,
+    )
     from letta.settings import model_settings
 
     kwarg = model_settings.inner_thoughts_kwarg

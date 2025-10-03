@@ -32,16 +32,27 @@ class Identity(SqlalchemyBase, OrganizationMixin, ProjectMixin):
     name: Mapped[str] = mapped_column(nullable=False, doc="The name of the identity.")
     identity_type: Mapped[str] = mapped_column(nullable=False, doc="The type of the identity.")
     properties: Mapped[List["IdentityProperty"]] = mapped_column(
-        JSON, nullable=False, default=list, doc="List of properties associated with the identity"
+        JSON,
+        nullable=False,
+        default=list,
+        doc="List of properties associated with the identity",
     )
 
     # relationships
     organization: Mapped["Organization"] = relationship("Organization", back_populates="identities")
     agents: Mapped[List["Agent"]] = relationship(
-        "Agent", secondary="identities_agents", lazy="selectin", passive_deletes=True, back_populates="identities"
+        "Agent",
+        secondary="identities_agents",
+        lazy="selectin",
+        passive_deletes=True,
+        back_populates="identities",
     )
     blocks: Mapped[List["Block"]] = relationship(
-        "Block", secondary="identities_blocks", lazy="selectin", passive_deletes=True, back_populates="identities"
+        "Block",
+        secondary="identities_blocks",
+        lazy="selectin",
+        passive_deletes=True,
+        back_populates="identities",
     )
 
     @property

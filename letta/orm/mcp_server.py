@@ -28,12 +28,16 @@ class MCPServer(SqlalchemyBase, OrganizationMixin):
 
     server_name: Mapped[str] = mapped_column(doc="The display name of the MCP server")
     server_type: Mapped[MCPServerType] = mapped_column(
-        String, default=MCPServerType.SSE, doc="The type of the MCP server. Only SSE is supported for remote servers."
+        String,
+        default=MCPServerType.SSE,
+        doc="The type of the MCP server. Only SSE is supported for remote servers.",
     )
 
     # sse server
     server_url: Mapped[Optional[str]] = mapped_column(
-        String, nullable=True, doc="The URL of the server (MCP SSE client will connect to this URL)"
+        String,
+        nullable=True,
+        doc="The URL of the server (MCP SSE client will connect to this URL)",
     )
 
     # access token / api key for MCP servers that require authentication
@@ -50,9 +54,13 @@ class MCPServer(SqlalchemyBase, OrganizationMixin):
 
     # stdio server
     stdio_config: Mapped[Optional[StdioServerConfig]] = mapped_column(
-        MCPStdioServerConfigColumn, nullable=True, doc="The configuration for the stdio server"
+        MCPStdioServerConfigColumn,
+        nullable=True,
+        doc="The configuration for the stdio server",
     )
 
     metadata_: Mapped[Optional[dict]] = mapped_column(
-        JSON, default=lambda: {}, doc="A dictionary of additional metadata for the MCP server."
+        JSON,
+        default=lambda: {},
+        doc="A dictionary of additional metadata for the MCP server.",
     )

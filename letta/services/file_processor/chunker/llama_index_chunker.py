@@ -4,7 +4,10 @@ from mistralai import OCRPageObject
 
 from letta.log import get_logger
 from letta.otel.tracing import trace_method
-from letta.services.file_processor.file_types import ChunkingStrategy, file_type_registry
+from letta.services.file_processor.file_types import (
+    ChunkingStrategy,
+    file_type_registry,
+)
 
 logger = get_logger(__name__)
 
@@ -16,7 +19,12 @@ class LlamaIndexChunker:
     DEFAULT_CONSERVATIVE_CHUNK_SIZE = 384
     DEFAULT_CONSERVATIVE_CHUNK_OVERLAP = 25
 
-    def __init__(self, chunk_size: int = 512, chunk_overlap: int = 50, file_type: Optional[str] = None):
+    def __init__(
+        self,
+        chunk_size: int = 512,
+        chunk_overlap: int = 50,
+        file_type: Optional[str] = None,
+    ):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.file_type = file_type
@@ -146,7 +154,12 @@ class LlamaIndexChunker:
                 raise e  # Raise the original error
 
     @trace_method
-    def default_chunk_text(self, content: Union[OCRPageObject, str], chunk_size: int = None, chunk_overlap: int = None) -> List[str]:
+    def default_chunk_text(
+        self,
+        content: Union[OCRPageObject, str],
+        chunk_size: int = None,
+        chunk_overlap: int = None,
+    ) -> List[str]:
         """Chunk text using default SentenceSplitter regardless of file type with conservative defaults"""
         try:
             from llama_index.core.node_parser import SentenceSplitter

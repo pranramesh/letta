@@ -9,7 +9,13 @@ from letta.orm.errors import NoResultFound
 from letta.orm.group import Group as GroupModel
 from letta.orm.message import Message as MessageModel
 from letta.otel.tracing import trace_method
-from letta.schemas.group import Group as PydanticGroup, GroupCreate, GroupUpdate, InternalTemplateGroupCreate, ManagerType
+from letta.schemas.group import (
+    Group as PydanticGroup,
+    GroupCreate,
+    GroupUpdate,
+    InternalTemplateGroupCreate,
+    ManagerType,
+)
 from letta.schemas.letta_message import LettaMessage
 from letta.schemas.message import Message as PydanticMessage
 from letta.schemas.user import User as PydanticUser
@@ -76,7 +82,11 @@ class GroupManager:
 
     @enforce_types
     @trace_method
-    def create_group(self, group: Union[GroupCreate, InternalTemplateGroupCreate], actor: PydanticUser) -> PydanticGroup:
+    def create_group(
+        self,
+        group: Union[GroupCreate, InternalTemplateGroupCreate],
+        actor: PydanticUser,
+    ) -> PydanticGroup:
         with db_registry.session() as session:
             new_group = GroupModel()
             new_group.organization_id = actor.organization_id
@@ -106,7 +116,10 @@ class GroupManager:
                     max_message_buffer_length = group.manager_config.max_message_buffer_length
                     min_message_buffer_length = group.manager_config.min_message_buffer_length
                     # Safety check for buffer length range
-                    self.ensure_buffer_length_range_valid(max_value=max_message_buffer_length, min_value=min_message_buffer_length)
+                    self.ensure_buffer_length_range_valid(
+                        max_value=max_message_buffer_length,
+                        min_value=min_message_buffer_length,
+                    )
                     new_group.max_message_buffer_length = max_message_buffer_length
                     new_group.min_message_buffer_length = min_message_buffer_length
                 case _:
@@ -117,7 +130,12 @@ class GroupManager:
                 new_group.template_id = group.template_id
                 new_group.deployment_id = group.deployment_id
 
-            self._process_agent_relationship(session=session, group=new_group, agent_ids=group.agent_ids, allow_partial=False)
+            self._process_agent_relationship(
+                session=session,
+                group=new_group,
+                agent_ids=group.agent_ids,
+                allow_partial=False,
+            )
 
             if group.shared_block_ids:
                 self._process_shared_block_relationship(session=session, group=new_group, block_ids=group.shared_block_ids)
@@ -126,7 +144,11 @@ class GroupManager:
             return new_group.to_pydantic()
 
     @enforce_types
-    async def create_group_async(self, group: Union[GroupCreate, InternalTemplateGroupCreate], actor: PydanticUser) -> PydanticGroup:
+    async def create_group_async(
+        self,
+        group: Union[GroupCreate, InternalTemplateGroupCreate],
+        actor: PydanticUser,
+    ) -> PydanticGroup:
         async with db_registry.async_session() as session:
             new_group = GroupModel()
             new_group.organization_id = actor.organization_id
@@ -156,7 +178,10 @@ class GroupManager:
                     max_message_buffer_length = group.manager_config.max_message_buffer_length
                     min_message_buffer_length = group.manager_config.min_message_buffer_length
                     # Safety check for buffer length range
-                    self.ensure_buffer_length_range_valid(max_value=max_message_buffer_length, min_value=min_message_buffer_length)
+                    self.ensure_buffer_length_range_valid(
+                        max_value=max_message_buffer_length,
+                        min_value=min_message_buffer_length,
+                    )
                     new_group.max_message_buffer_length = max_message_buffer_length
                     new_group.min_message_buffer_length = min_message_buffer_length
                 case _:
@@ -167,7 +192,12 @@ class GroupManager:
                 new_group.template_id = group.template_id
                 new_group.deployment_id = group.deployment_id
 
-            await self._process_agent_relationship_async(session=session, group=new_group, agent_ids=group.agent_ids, allow_partial=False)
+            await self._process_agent_relationship_async(
+                session=session,
+                group=new_group,
+                agent_ids=group.agent_ids,
+                allow_partial=False,
+            )
 
             if group.shared_block_ids:
                 await self._process_shared_block_relationship_async(session=session, group=new_group, block_ids=group.shared_block_ids)
@@ -232,7 +262,11 @@ class GroupManager:
                 group.description = group_update.description
             if group_update.agent_ids:
                 await self._process_agent_relationship_async(
-                    session=session, group=group, agent_ids=group_update.agent_ids, allow_partial=False, replace=True
+                    session=session,
+                    group=group,
+                    agent_ids=group_update.agent_ids,
+                    allow_partial=False,
+                    replace=True,
                 )
 
             await group.update_async(session, actor=actor)
@@ -336,7 +370,8 @@ class GroupManager:
 
             # Delete all messages in the group
             session.query(MessageModel).filter(
-                MessageModel.organization_id == actor.organization_id, MessageModel.group_id == group_id
+                MessageModel.organization_id == actor.organization_id,
+                MessageModel.group_id == group_id,
             ).delete(synchronize_session=False)
 
             session.commit()
@@ -350,7 +385,8 @@ class GroupManager:
 
             # Delete all messages in the group
             delete_stmt = delete(MessageModel).where(
-                MessageModel.organization_id == actor.organization_id, MessageModel.group_id == group_id
+                MessageModel.organization_id == actor.organization_id,
+                MessageModel.group_id == group_id,
             )
             await session.execute(delete_stmt)
 
@@ -420,7 +456,14 @@ class GroupManager:
         async with db_registry.async_session() as session:
             return await GroupModel.size_async(db_session=session, actor=actor)
 
-    def _process_agent_relationship(self, session: Session, group: GroupModel, agent_ids: List[str], allow_partial=False, replace=True):
+    def _process_agent_relationship(
+        self,
+        session: Session,
+        group: GroupModel,
+        agent_ids: List[str],
+        allow_partial=False,
+        replace=True,
+    ):
         if not agent_ids:
             if replace:
                 setattr(group, "agents", [])
@@ -450,7 +493,14 @@ class GroupManager:
         else:
             raise ValueError("Extend relationship is not supported for groups.")
 
-    async def _process_agent_relationship_async(self, session, group: GroupModel, agent_ids: List[str], allow_partial=False, replace=True):
+    async def _process_agent_relationship_async(
+        self,
+        session,
+        group: GroupModel,
+        agent_ids: List[str],
+        allow_partial=False,
+        replace=True,
+    ):
         if not agent_ids:
             if replace:
                 setattr(group, "agents", [])
@@ -500,14 +550,26 @@ class GroupManager:
             agents = session.query(Agent).filter(Agent.id.in_(group.agent_ids)).all()
             for agent in agents:
                 for block in blocks:
-                    session.add(BlocksAgents(agent_id=agent.id, block_id=block.id, block_label=block.label))
+                    session.add(
+                        BlocksAgents(
+                            agent_id=agent.id,
+                            block_id=block.id,
+                            block_label=block.label,
+                        )
+                    )
 
         # Add blocks to manager agent if exists
         if group.manager_agent_id:
             manager_agent = session.query(Agent).filter(Agent.id == group.manager_agent_id).first()
             if manager_agent:
                 for block in blocks:
-                    session.add(BlocksAgents(agent_id=manager_agent.id, block_id=block.id, block_label=block.label))
+                    session.add(
+                        BlocksAgents(
+                            agent_id=manager_agent.id,
+                            block_id=block.id,
+                            block_label=block.label,
+                        )
+                    )
 
     async def _process_shared_block_relationship_async(
         self,
@@ -531,7 +593,13 @@ class GroupManager:
             agents = result.scalars().all()
             for agent in agents:
                 for block in blocks:
-                    session.add(BlocksAgents(agent_id=agent.id, block_id=block.id, block_label=block.label))
+                    session.add(
+                        BlocksAgents(
+                            agent_id=agent.id,
+                            block_id=block.id,
+                            block_label=block.label,
+                        )
+                    )
 
         # Add blocks to manager agent if exists
         if group.manager_agent_id:
@@ -540,7 +608,13 @@ class GroupManager:
             manager_agent = result.scalar_one_or_none()
             if manager_agent:
                 for block in blocks:
-                    session.add(BlocksAgents(agent_id=manager_agent.id, block_id=block.id, block_label=block.label))
+                    session.add(
+                        BlocksAgents(
+                            agent_id=manager_agent.id,
+                            block_id=block.id,
+                            block_label=block.label,
+                        )
+                    )
 
     @staticmethod
     def ensure_buffer_length_range_valid(
@@ -610,7 +684,15 @@ async def _apply_group_pagination_async(query, before: Optional[str], after: Opt
             # SQLite does not support as granular timestamping, so we need to round the timestamp
             if settings.database_engine is DatabaseChoice.SQLITE and isinstance(after_sort_value, datetime):
                 after_sort_value = after_sort_value.strftime("%Y-%m-%d %H:%M:%S")
-            query = query.where(_cursor_filter(sort_column, GroupModel.id, after_sort_value, after_id, forward=ascending))
+            query = query.where(
+                _cursor_filter(
+                    sort_column,
+                    GroupModel.id,
+                    after_sort_value,
+                    after_id,
+                    forward=ascending,
+                )
+            )
 
     if before:
         result = (await session.execute(select(sort_column, GroupModel.id).where(GroupModel.id == before))).first()
@@ -619,7 +701,15 @@ async def _apply_group_pagination_async(query, before: Optional[str], after: Opt
             # SQLite does not support as granular timestamping, so we need to round the timestamp
             if settings.database_engine is DatabaseChoice.SQLITE and isinstance(before_sort_value, datetime):
                 before_sort_value = before_sort_value.strftime("%Y-%m-%d %H:%M:%S")
-            query = query.where(_cursor_filter(sort_column, GroupModel.id, before_sort_value, before_id, forward=not ascending))
+            query = query.where(
+                _cursor_filter(
+                    sort_column,
+                    GroupModel.id,
+                    before_sort_value,
+                    before_id,
+                    forward=not ascending,
+                )
+            )
 
     # Apply ordering
     order_fn = asc if ascending else desc

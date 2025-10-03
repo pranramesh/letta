@@ -1,8 +1,14 @@
 from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
-from anthropic.types.beta.messages import BetaMessageBatch, BetaMessageBatchIndividualResponse
-from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall as OpenAIToolCall, Function as OpenAIFunction
+from anthropic.types.beta.messages import (
+    BetaMessageBatch,
+    BetaMessageBatchIndividualResponse,
+)
+from openai.types.chat.chat_completion_message_tool_call import (
+    ChatCompletionMessageToolCall as OpenAIToolCall,
+    Function as OpenAIFunction,
+)
 from sqlalchemy import Dialect
 
 from letta.functions.mcp_client.types import StdioServerConfig
@@ -74,7 +80,9 @@ def deserialize_llm_config(data: Optional[Dict]) -> Optional[LLMConfig]:
 # --------------------------
 
 
-def serialize_embedding_config(config: Union[Optional[EmbeddingConfig], Dict]) -> Optional[Dict]:
+def serialize_embedding_config(
+    config: Union[Optional[EmbeddingConfig], Dict],
+) -> Optional[Dict]:
     """Convert an EmbeddingConfig object into a JSON-serializable dictionary."""
     if config and isinstance(config, EmbeddingConfig):
         return config.model_dump(mode="json")
@@ -155,7 +163,9 @@ def deserialize_tool_rule(
 # --------------------------
 
 
-def serialize_tool_calls(tool_calls: Optional[List[Union[OpenAIToolCall, dict]]]) -> List[Dict]:
+def serialize_tool_calls(
+    tool_calls: Optional[List[Union[OpenAIToolCall, dict]]],
+) -> List[Dict]:
     """Convert a list of OpenAI ToolCall objects into JSON-serializable format."""
     if not tool_calls:
         return []
@@ -191,7 +201,9 @@ def deserialize_tool_calls(data: Optional[List[Dict]]) -> List[OpenAIToolCall]:
 # --------------------------
 
 
-def serialize_tool_returns(tool_returns: Optional[List[Union[ToolReturn, dict]]]) -> List[Dict]:
+def serialize_tool_returns(
+    tool_returns: Optional[List[Union[ToolReturn, dict]]],
+) -> List[Dict]:
     """Convert a list of ToolReturn objects into JSON-serializable format."""
     if not tool_returns:
         return []
@@ -226,7 +238,9 @@ def deserialize_tool_returns(data: Optional[List[Dict]]) -> List[ToolReturn]:
 # ----------------------------
 
 
-def serialize_message_content(message_content: Optional[List[Union[MessageContent, dict]]]) -> List[Dict]:
+def serialize_message_content(
+    message_content: Optional[List[Union[MessageContent, dict]]],
+) -> List[Dict]:
     """Convert a list of MessageContent objects into JSON-serializable format."""
     if not message_content:
         return []
@@ -284,7 +298,9 @@ def deserialize_message_content(data: Optional[List[Dict]]) -> List[MessageConte
 # --------------------------
 
 
-def serialize_vector(vector: Optional[Union[List[float], np.ndarray]]) -> Optional[bytes]:
+def serialize_vector(
+    vector: Optional[Union[List[float], np.ndarray]],
+) -> Optional[bytes]:
     """Convert a NumPy array or list into serialized format using sqlite-vec."""
     if vector is None:
         return None
@@ -316,7 +332,9 @@ def deserialize_vector(data: Optional[bytes], dialect: Dialect) -> Optional[np.n
 # --------------------------
 
 
-def serialize_create_batch_response(create_batch_response: Union[BetaMessageBatch]) -> Dict[str, Any]:
+def serialize_create_batch_response(
+    create_batch_response: Union[BetaMessageBatch],
+) -> Dict[str, Any]:
     """Convert a list of ToolRules into a JSON-serializable format."""
     llm_provider_type = None
     if isinstance(create_batch_response, BetaMessageBatch):
@@ -325,7 +343,10 @@ def serialize_create_batch_response(create_batch_response: Union[BetaMessageBatc
     if not llm_provider_type:
         raise ValueError(f"Could not determine llm provider from create batch response object type: {create_batch_response}")
 
-    return {"data": create_batch_response.model_dump(mode="json"), "type": llm_provider_type}
+    return {
+        "data": create_batch_response.model_dump(mode="json"),
+        "type": llm_provider_type,
+    }
 
 
 def deserialize_create_batch_response(data: Dict) -> Union[BetaMessageBatch]:
@@ -339,7 +360,9 @@ def deserialize_create_batch_response(data: Dict) -> Union[BetaMessageBatch]:
 
 # TODO: Note that this is the same as above for Anthropic, but this is not the case for all providers
 # TODO: Some have different types based on the create v.s. poll requests
-def serialize_poll_batch_response(poll_batch_response: Optional[Union[BetaMessageBatch]]) -> Optional[Dict[str, Any]]:
+def serialize_poll_batch_response(
+    poll_batch_response: Optional[Union[BetaMessageBatch]],
+) -> Optional[Dict[str, Any]]:
     """Convert a list of ToolRules into a JSON-serializable format."""
     if not poll_batch_response:
         return None
@@ -351,10 +374,15 @@ def serialize_poll_batch_response(poll_batch_response: Optional[Union[BetaMessag
     if not llm_provider_type:
         raise ValueError(f"Could not determine llm provider from poll batch response object type: {poll_batch_response}")
 
-    return {"data": poll_batch_response.model_dump(mode="json"), "type": llm_provider_type}
+    return {
+        "data": poll_batch_response.model_dump(mode="json"),
+        "type": llm_provider_type,
+    }
 
 
-def deserialize_poll_batch_response(data: Optional[Dict]) -> Optional[Union[BetaMessageBatch]]:
+def deserialize_poll_batch_response(
+    data: Optional[Dict],
+) -> Optional[Union[BetaMessageBatch]]:
     if not data:
         return None
 
@@ -380,10 +408,15 @@ def serialize_batch_request_result(
     if not llm_provider_type:
         raise ValueError(f"Could not determine llm provider from batch result object type: {batch_individual_response}")
 
-    return {"data": batch_individual_response.model_dump(mode="json"), "type": llm_provider_type}
+    return {
+        "data": batch_individual_response.model_dump(mode="json"),
+        "type": llm_provider_type,
+    }
 
 
-def deserialize_batch_request_result(data: Optional[Dict]) -> Optional[Union[BetaMessageBatchIndividualResponse]]:
+def deserialize_batch_request_result(
+    data: Optional[Dict],
+) -> Optional[Union[BetaMessageBatchIndividualResponse]]:
     if not data:
         return None
     provider_type = ProviderType(data.get("type"))
@@ -394,7 +427,9 @@ def deserialize_batch_request_result(data: Optional[Dict]) -> Optional[Union[Bet
     raise ValueError(f"Unknown ProviderType type: {provider_type}")
 
 
-def serialize_agent_step_state(agent_step_state: Optional[AgentStepState]) -> Optional[Dict[str, Any]]:
+def serialize_agent_step_state(
+    agent_step_state: Optional[AgentStepState],
+) -> Optional[Dict[str, Any]]:
     """Convert a list of ToolRules into a JSON-serializable format."""
     if not agent_step_state:
         return None
@@ -432,7 +467,9 @@ def deserialize_agent_step_state(data: Optional[Dict]) -> Optional[AgentStepStat
 # --------------------------
 
 
-def serialize_response_format(response_format: Optional[ResponseFormatUnion]) -> Optional[Dict[str, Any]]:
+def serialize_response_format(
+    response_format: Optional[ResponseFormatUnion],
+) -> Optional[Dict[str, Any]]:
     if not response_format:
         return None
     return response_format.model_dump(mode="json")
@@ -455,7 +492,9 @@ def deserialize_response_format(data: Optional[Dict]) -> Optional[ResponseFormat
 # --------------------------
 
 
-def serialize_mcp_stdio_config(config: Union[Optional[StdioServerConfig], Dict]) -> Optional[Dict]:
+def serialize_mcp_stdio_config(
+    config: Union[Optional[StdioServerConfig], Dict],
+) -> Optional[Dict]:
     """Convert an StdioServerConfig object into a JSON-serializable dictionary."""
     if config and isinstance(config, StdioServerConfig):
         return config.to_dict()

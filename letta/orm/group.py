@@ -30,9 +30,17 @@ class Group(SqlalchemyBase, OrganizationMixin, ProjectMixin, TemplateMixin):
     organization: Mapped["Organization"] = relationship("Organization", back_populates="groups")
     agent_ids: Mapped[List[str]] = mapped_column(JSON, nullable=False, doc="Ordered list of agent IDs in this group")
     agents: Mapped[List["Agent"]] = relationship(
-        "Agent", secondary="groups_agents", lazy="selectin", passive_deletes=True, back_populates="groups"
+        "Agent",
+        secondary="groups_agents",
+        lazy="selectin",
+        passive_deletes=True,
+        back_populates="groups",
     )
     shared_blocks: Mapped[List["Block"]] = relationship(
-        "Block", secondary="groups_blocks", lazy="selectin", passive_deletes=True, back_populates="groups"
+        "Block",
+        secondary="groups_blocks",
+        lazy="selectin",
+        passive_deletes=True,
+        back_populates="groups",
     )
     manager_agent: Mapped["Agent"] = relationship("Agent", lazy="joined", back_populates="multi_agent_group")

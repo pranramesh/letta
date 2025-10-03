@@ -5,7 +5,10 @@ from typing import Dict, List, Optional, Union
 
 import anthropic
 from anthropic import AsyncStream
-from anthropic.types.beta import BetaMessage as AnthropicMessage, BetaRawMessageStreamEvent
+from anthropic.types.beta import (
+    BetaMessage as AnthropicMessage,
+    BetaRawMessageStreamEvent,
+)
 from anthropic.types.beta.message_create_params import MessageCreateParamsNonStreaming
 from anthropic.types.beta.messages import BetaMessageBatch
 from anthropic.types.beta.messages.batch_create_params import Request
@@ -26,9 +29,15 @@ from letta.errors import (
 )
 from letta.helpers.datetime_helpers import get_utc_time_int
 from letta.helpers.decorators import deprecated
-from letta.llm_api.helpers import add_inner_thoughts_to_functions, unpack_all_inner_thoughts_from_kwargs
+from letta.llm_api.helpers import (
+    add_inner_thoughts_to_functions,
+    unpack_all_inner_thoughts_from_kwargs,
+)
 from letta.llm_api.llm_client_base import LLMClientBase
-from letta.local_llm.constants import INNER_THOUGHTS_KWARG, INNER_THOUGHTS_KWARG_DESCRIPTION
+from letta.local_llm.constants import (
+    INNER_THOUGHTS_KWARG,
+    INNER_THOUGHTS_KWARG_DESCRIPTION,
+)
 from letta.log import get_logger
 from letta.otel.tracing import trace_method
 from letta.schemas.llm_config import LLMConfig
@@ -227,7 +236,11 @@ class AnthropicClient(LLMClientBase):
             tool_choice = {"type": "auto", "disable_parallel_tool_use": True}
             tools_for_request = [OpenAITool(function=f) for f in tools]
         elif force_tool_call is not None:
-            tool_choice = {"type": "tool", "name": force_tool_call, "disable_parallel_tool_use": True}
+            tool_choice = {
+                "type": "tool",
+                "name": force_tool_call,
+                "disable_parallel_tool_use": True,
+            }
             tools_for_request = [OpenAITool(function=f) for f in tools if f["name"] == force_tool_call]
 
             # need to have this setting to be able to put inner thoughts in kwargs
@@ -295,7 +308,12 @@ class AnthropicClient(LLMClientBase):
 
         return data
 
-    async def count_tokens(self, messages: List[dict] = None, model: str = None, tools: List[OpenAITool] = None) -> int:
+    async def count_tokens(
+        self,
+        messages: List[dict] = None,
+        model: str = None,
+        tools: List[OpenAITool] = None,
+    ) -> int:
         logging.getLogger("httpx").setLevel(logging.WARNING)
 
         client = anthropic.AsyncAnthropic()
@@ -548,7 +566,8 @@ class AnthropicClient(LLMClientBase):
         )
         if llm_config.put_inner_thoughts_in_kwargs:
             chat_completion_response = unpack_all_inner_thoughts_from_kwargs(
-                response=chat_completion_response, inner_thoughts_key=INNER_THOUGHTS_KWARG
+                response=chat_completion_response,
+                inner_thoughts_key=INNER_THOUGHTS_KWARG,
             )
 
         return chat_completion_response
@@ -557,7 +576,13 @@ class AnthropicClient(LLMClientBase):
         """Add cache control to system message content"""
         if isinstance(system_content, str):
             # For string content, convert to list format with cache control
-            return [{"type": "text", "text": system_content, "cache_control": {"type": "ephemeral"}}]
+            return [
+                {
+                    "type": "text",
+                    "text": system_content,
+                    "cache_control": {"type": "ephemeral"},
+                }
+            ]
         elif isinstance(system_content, list):
             # For list content, add cache control to the last text block
             cached_content = system_content.copy()
@@ -619,7 +644,11 @@ def convert_tools_to_anthropic_format(tools: List[OpenAITool]) -> List[dict]:
     formatted_tools = []
     for tool in tools:
         # Get the input schema
-        input_schema = tool.function.parameters or {"type": "object", "properties": {}, "required": []}
+        input_schema = tool.function.parameters or {
+            "type": "object",
+            "properties": {},
+            "required": [],
+        }
 
         # Clean up the properties in the schema
         # The presence of union types / default fields seems Anthropic to produce invalid JSON for tool calls
@@ -645,7 +674,7 @@ def convert_tools_to_anthropic_format(tools: List[OpenAITool]) -> List[dict]:
 
         formatted_tool = {
             "name": tool.function.name,
-            "description": tool.function.description if tool.function.description else "",
+            "description": (tool.function.description if tool.function.description else ""),
             "input_schema": cleaned_input_schema,
         }
         formatted_tools.append(formatted_tool)

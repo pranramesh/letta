@@ -145,7 +145,10 @@ async def cancellation_aware_stream_wrapper(
                     if job.status == JobStatus.cancelled:
                         logger.info(f"Stream cancelled for job {job_id}, interrupting stream")
                         # Send cancellation event to client
-                        cancellation_event = {"message_type": "stop_reason", "stop_reason": "cancelled"}
+                        cancellation_event = {
+                            "message_type": "stop_reason",
+                            "stop_reason": "cancelled",
+                        }
                         yield f"data: {json.dumps(cancellation_event)}\n\n"
                         # Raise custom exception for explicit job cancellation
                         raise JobCancelledException(job_id, f"Job {job_id} was cancelled")
@@ -196,7 +199,12 @@ class StreamingResponseWithStatusCode(StreamingResponse):
                 logger.info(f"Pending approval conflict in stream response: {e}")
                 # Re-raise as HTTPException for proper client handling
                 raise HTTPException(
-                    status_code=409, detail={"code": "PENDING_APPROVAL", "message": str(e), "pending_request_id": e.pending_request_id}
+                    status_code=409,
+                    detail={
+                        "code": "PENDING_APPROVAL",
+                        "message": str(e),
+                        "pending_request_id": e.pending_request_id,
+                    },
                 )
             except Exception as e:
                 logger.error(f"Error in protected stream response: {e}")

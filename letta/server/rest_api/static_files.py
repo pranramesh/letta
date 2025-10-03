@@ -19,9 +19,17 @@ class SPAStaticFiles(StaticFiles):
 
 
 def mount_static_files(app: FastAPI):
-    static_files_path = os.path.join(os.path.dirname(importlib.util.find_spec("letta").origin), "server", "static_files")
+    static_files_path = os.path.join(
+        os.path.dirname(importlib.util.find_spec("letta").origin),
+        "server",
+        "static_files",
+    )
     if os.path.exists(static_files_path):
-        app.mount("/assets", StaticFiles(directory=os.path.join(static_files_path, "assets")), name="assets")
+        app.mount(
+            "/assets",
+            StaticFiles(directory=os.path.join(static_files_path, "assets")),
+            name="assets",
+        )
 
         @app.get("/letta_logo_transparent.png", include_in_schema=False)
         async def serve_spa():

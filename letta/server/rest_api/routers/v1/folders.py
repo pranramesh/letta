@@ -26,16 +26,28 @@ from letta.schemas.passage import Passage
 from letta.schemas.source import Source, SourceCreate, SourceUpdate
 from letta.schemas.source_metadata import OrganizationSourcesStats
 from letta.schemas.user import User
-from letta.server.rest_api.dependencies import HeaderParams, get_headers, get_letta_server
+from letta.server.rest_api.dependencies import (
+    HeaderParams,
+    get_headers,
+    get_letta_server,
+)
 from letta.server.server import SyncServer
 from letta.services.file_processor.embedder.openai_embedder import OpenAIEmbedder
 from letta.services.file_processor.embedder.pinecone_embedder import PineconeEmbedder
 from letta.services.file_processor.file_processor import FileProcessor
-from letta.services.file_processor.file_types import get_allowed_media_types, get_extension_to_mime_type_map, register_mime_types
+from letta.services.file_processor.file_types import (
+    get_allowed_media_types,
+    get_extension_to_mime_type_map,
+    register_mime_types,
+)
 from letta.services.file_processor.parser.markitdown_parser import MarkitdownFileParser
 from letta.services.file_processor.parser.mistral_parser import MistralFileParser
 from letta.settings import settings
-from letta.utils import safe_create_file_processing_task, safe_create_task, sanitize_filename
+from letta.utils import (
+    safe_create_file_processing_task,
+    safe_create_task,
+    sanitize_filename,
+)
 
 logger = get_logger(__name__)
 
@@ -75,7 +87,12 @@ async def retrieve_folder(
     return folder
 
 
-@router.get("/name/{folder_name}", response_model=str, operation_id="get_folder_by_name", deprecated=True)
+@router.get(
+    "/name/{folder_name}",
+    response_model=str,
+    operation_id="get_folder_by_name",
+    deprecated=True,
+)
 async def get_folder_by_name(
     folder_name: str,
     server: "SyncServer" = Depends(get_letta_server),
@@ -95,7 +112,11 @@ async def get_folder_by_name(
     return folder.id
 
 
-@router.get("/metadata", response_model=OrganizationSourcesStats, operation_id="retrieve_metadata")
+@router.get(
+    "/metadata",
+    response_model=OrganizationSourcesStats,
+    operation_id="retrieve_metadata",
+)
 async def retrieve_metadata(
     server: "SyncServer" = Depends(get_letta_server),
     headers: HeaderParams = Depends(get_headers),
@@ -112,21 +133,25 @@ async def retrieve_metadata(
     """
     actor = await server.user_manager.get_actor_or_default_async(actor_id=headers.actor_id)
     return await server.file_manager.get_organization_sources_metadata(
-        actor=actor, include_detailed_per_source_metadata=include_detailed_per_source_metadata
+        actor=actor,
+        include_detailed_per_source_metadata=include_detailed_per_source_metadata,
     )
 
 
 @router.get("/", response_model=List[Folder], operation_id="list_folders")
 async def list_folders(
     before: Optional[str] = Query(
-        None, description="Folder ID cursor for pagination. Returns folders that come before this folder ID in the specified sort order"
+        None,
+        description="Folder ID cursor for pagination. Returns folders that come before this folder ID in the specified sort order",
     ),
     after: Optional[str] = Query(
-        None, description="Folder ID cursor for pagination. Returns folders that come after this folder ID in the specified sort order"
+        None,
+        description="Folder ID cursor for pagination. Returns folders that come after this folder ID in the specified sort order",
     ),
     limit: Optional[int] = Query(50, description="Maximum number of folders to return"),
     order: Literal["asc", "desc"] = Query(
-        "asc", description="Sort order for folders by creation time. 'asc' for oldest first, 'desc' for newest first"
+        "asc",
+        description="Sort order for folders by creation time. 'asc' for oldest first, 'desc' for newest first",
     ),
     order_by: Literal["created_at"] = Query("created_at", description="Field to sort by"),
     name: Optional[str] = Query(None, description="Folder name to filter by"),
@@ -138,7 +163,12 @@ async def list_folders(
     """
     actor = await server.user_manager.get_actor_or_default_async(actor_id=headers.actor_id)
     return await server.source_manager.list_sources(
-        actor=actor, before=before, after=after, limit=limit, ascending=(order == "asc"), name=name
+        actor=actor,
+        before=before,
+        after=after,
+        limit=limit,
+        ascending=(order == "asc"),
+        name=name,
     )
 
 
@@ -230,7 +260,11 @@ async def delete_folder(
     await server.delete_source(source_id=folder_id, actor=actor)
 
 
-@router.post("/{folder_id}/upload", response_model=FileMetadata, operation_id="upload_file_to_folder")
+@router.post(
+    "/{folder_id}/upload",
+    response_model=FileMetadata,
+    operation_id="upload_file_to_folder",
+)
 async def upload_file_to_folder(
     file: UploadFile,
     folder_id: str,
@@ -278,7 +312,10 @@ async def upload_file_to_folder(
 
     folder = await server.source_manager.get_source_by_id(source_id=folder_id, actor=actor)
     if folder is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Folder with id={folder_id} not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Folder with id={folder_id} not found.",
+        )
 
     content = await file.read()
 
@@ -298,12 +335,15 @@ async def upload_file_to_folder(
         # Duplicate found, handle based on strategy
         if duplicate_handling == DuplicateFileHandling.ERROR:
             raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail=f"File '{original_filename}' already exists in folder '{folder.name}'"
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"File '{original_filename}' already exists in folder '{folder.name}'",
             )
         elif duplicate_handling == DuplicateFileHandling.SKIP:
             # Return existing file metadata with custom header to indicate it was skipped
             response = Response(
-                content=existing_file.model_dump_json(), media_type="application/json", headers={"X-Upload-Result": "skipped"}
+                content=existing_file.model_dump_json(),
+                media_type="application/json",
+                headers={"X-Upload-Result": "skipped"},
             )
             return response
         elif duplicate_handling == DuplicateFileHandling.REPLACE:
@@ -315,7 +355,9 @@ async def upload_file_to_folder(
         # For SUFFIX, continue to generate unique filename
         # Generate unique filename (adds suffix if needed)
         unique_filename = await server.file_manager.generate_unique_filename(
-            original_filename=original_filename, source=folder, organization_id=actor.organization_id
+            original_filename=original_filename,
+            source=folder,
+            organization_id=actor.organization_id,
         )
 
     # create file metadata
@@ -336,19 +378,34 @@ async def upload_file_to_folder(
     # Use cloud processing for all files (simple files always, complex files with Mistral key)
     logger.info("Running experimental cloud based file processing...")
     safe_create_file_processing_task(
-        load_file_to_source_cloud(server, agent_states, content, folder_id, actor, folder.embedding_config, file_metadata),
+        load_file_to_source_cloud(
+            server,
+            agent_states,
+            content,
+            folder_id,
+            actor,
+            folder.embedding_config,
+            file_metadata,
+        ),
         file_metadata=file_metadata,
         server=server,
         actor=actor,
         logger=logger,
         label="file_processor.process",
     )
-    safe_create_task(sleeptime_document_ingest_async(server, folder_id, actor), label="sleeptime_document_ingest_async")
+    safe_create_task(
+        sleeptime_document_ingest_async(server, folder_id, actor),
+        label="sleeptime_document_ingest_async",
+    )
 
     return file_metadata
 
 
-@router.get("/{folder_id}/agents", response_model=List[str], operation_id="list_agents_for_folder")
+@router.get(
+    "/{folder_id}/agents",
+    response_model=List[str],
+    operation_id="list_agents_for_folder",
+)
 async def list_agents_for_folder(
     folder_id: str,
     before: Optional[str] = Query(
@@ -361,7 +418,8 @@ async def list_agents_for_folder(
     ),
     limit: Optional[int] = Query(50, description="Maximum number of agents to return"),
     order: Literal["asc", "desc"] = Query(
-        "desc", description="Sort order for agents by creation time. 'asc' for oldest first, 'desc' for newest first"
+        "desc",
+        description="Sort order for agents by creation time. 'asc' for oldest first, 'desc' for newest first",
     ),
     order_by: Literal["created_at"] = Query("created_at", description="Field to sort by"),
     server: SyncServer = Depends(get_letta_server),
@@ -381,7 +439,11 @@ async def list_agents_for_folder(
     )
 
 
-@router.get("/{folder_id}/passages", response_model=List[Passage], operation_id="list_folder_passages")
+@router.get(
+    "/{folder_id}/passages",
+    response_model=List[Passage],
+    operation_id="list_folder_passages",
+)
 async def list_folder_passages(
     folder_id: str,
     before: Optional[str] = Query(
@@ -394,7 +456,8 @@ async def list_folder_passages(
     ),
     limit: Optional[int] = Query(100, description="Maximum number of passages to return"),
     order: Literal["asc", "desc"] = Query(
-        "desc", description="Sort order for passages by creation time. 'asc' for oldest first, 'desc' for newest first"
+        "desc",
+        description="Sort order for passages by creation time. 'asc' for oldest first, 'desc' for newest first",
     ),
     order_by: Literal["created_at"] = Query("created_at", description="Field to sort by"),
     server: SyncServer = Depends(get_letta_server),
@@ -414,7 +477,11 @@ async def list_folder_passages(
     )
 
 
-@router.get("/{folder_id}/files", response_model=List[FileMetadata], operation_id="list_folder_files")
+@router.get(
+    "/{folder_id}/files",
+    response_model=List[FileMetadata],
+    operation_id="list_folder_files",
+)
 async def list_folder_files(
     folder_id: str,
     before: Optional[str] = Query(
@@ -427,7 +494,8 @@ async def list_folder_files(
     ),
     limit: Optional[int] = Query(1000, description="Maximum number of files to return"),
     order: Literal["asc", "desc"] = Query(
-        "desc", description="Sort order for files by creation time. 'asc' for oldest first, 'desc' for newest first"
+        "desc",
+        description="Sort order for files by creation time. 'asc' for oldest first, 'desc' for newest first",
     ),
     order_by: Literal["created_at"] = Query("created_at", description="Field to sort by"),
     include_content: bool = Query(False, description="Whether to include full file content"),
@@ -527,12 +595,22 @@ async def delete_file_from_folder(
         logger.info(f"Deleting file {file_id} from pinecone index")
         await delete_file_records_from_pinecone_index(file_id=file_id, actor=actor)
 
-    safe_create_task(sleeptime_document_ingest_async(server, folder_id, actor, clear_history=True), label="document_ingest_after_delete")
+    safe_create_task(
+        sleeptime_document_ingest_async(server, folder_id, actor, clear_history=True),
+        label="document_ingest_after_delete",
+    )
     if deleted_file is None:
         raise HTTPException(status_code=404, detail=f"File with id={file_id} not found.")
 
 
-async def load_file_to_source_async(server: SyncServer, source_id: str, job_id: str, filename: str, bytes: bytes, actor: User):
+async def load_file_to_source_async(
+    server: SyncServer,
+    source_id: str,
+    job_id: str,
+    filename: str,
+    bytes: bytes,
+    actor: User,
+):
     # Create a temporary directory (deleted after the context manager exits)
     with tempfile.TemporaryDirectory() as tmpdirname:
         file_path = os.path.join(tmpdirname, filename)
@@ -571,7 +649,9 @@ async def load_file_to_source_cloud(
 
     # determine which embedder to use - turbopuffer takes precedence
     if should_use_tpuf():
-        from letta.services.file_processor.embedder.turbopuffer_embedder import TurbopufferEmbedder
+        from letta.services.file_processor.embedder.turbopuffer_embedder import (
+            TurbopufferEmbedder,
+        )
 
         embedder = TurbopufferEmbedder(embedding_config=embedding_config)
     elif should_use_pinecone():
@@ -580,4 +660,9 @@ async def load_file_to_source_cloud(
         embedder = OpenAIEmbedder(embedding_config=embedding_config)
 
     file_processor = FileProcessor(file_parser=file_parser, embedder=embedder, actor=actor)
-    await file_processor.process(agent_states=agent_states, source_id=source_id, content=content, file_metadata=file_metadata)
+    await file_processor.process(
+        agent_states=agent_states,
+        source_id=source_id,
+        content=content,
+        file_metadata=file_metadata,
+    )

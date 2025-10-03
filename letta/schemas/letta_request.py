@@ -2,7 +2,11 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, HttpUrl, field_validator
 
-from letta.constants import DEFAULT_MAX_STEPS, DEFAULT_MESSAGE_TOOL, DEFAULT_MESSAGE_TOOL_KWARG
+from letta.constants import (
+    DEFAULT_MAX_STEPS,
+    DEFAULT_MESSAGE_TOOL,
+    DEFAULT_MESSAGE_TOOL_KWARG,
+)
 from letta.schemas.letta_message import MessageType
 from letta.schemas.message import MessageCreateUnion
 
@@ -28,7 +32,8 @@ class LettaRequest(BaseModel):
 
     # filter to only return specific message types
     include_return_message_types: Optional[List[MessageType]] = Field(
-        default=None, description="Only return specified message types in the response. If `None` (default) returns all messages."
+        default=None,
+        description="Only return specified message types in the response. If `None` (default) returns all messages.",
     )
 
     enable_thinking: str = Field(
@@ -91,7 +96,8 @@ class CreateBatch(BaseModel):
 
 class RetrieveStreamRequest(BaseModel):
     starting_after: int = Field(
-        0, description="Sequence id to use as a cursor for pagination. Response will start streaming after this chunk sequence id"
+        0,
+        description="Sequence id to use as a cursor for pagination. Response will start streaming after this chunk sequence id",
     )
     include_pings: Optional[bool] = Field(
         default=True,

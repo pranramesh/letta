@@ -144,7 +144,7 @@ class ContextWindowCalculator:
             token_counter.count_text_tokens(system_prompt),
             token_counter.count_text_tokens(core_memory),
             token_counter.count_text_tokens(external_memory_summary),
-            token_counter.count_text_tokens(summary_memory) if summary_memory else asyncio.sleep(0, result=0),
+            (token_counter.count_text_tokens(summary_memory) if summary_memory else asyncio.sleep(0, result=0)),
             (
                 token_counter.count_message_tokens(converted_messages[message_start_index:])
                 if len(converted_messages) > message_start_index

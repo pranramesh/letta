@@ -17,7 +17,17 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from functools import wraps
 from logging import Logger
-from typing import Any, Callable, Coroutine, Optional, Union, _GenericAlias, get_args, get_origin, get_type_hints
+from typing import (
+    Any,
+    Callable,
+    Coroutine,
+    Optional,
+    Union,
+    _GenericAlias,
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 from urllib.parse import urljoin, urlparse
 
 import demjson3 as demjson
@@ -707,7 +717,9 @@ def create_random_username() -> str:
 
 
 def verify_first_message_correctness(
-    response: ChatCompletionResponse, require_send_message: bool = True, require_monologue: bool = False
+    response: ChatCompletionResponse,
+    require_send_message: bool = True,
+    require_monologue: bool = False,
 ) -> bool:
     """Can be used to enforce that the first message always uses send_message"""
     response_message = response.choices[0].message
@@ -853,7 +865,12 @@ def parse_json(string) -> dict:
         raise e
 
 
-def validate_function_response(function_response: Any, return_char_limit: int, strict: bool = False, truncate: bool = True) -> str:
+def validate_function_response(
+    function_response: Any,
+    return_char_limit: int,
+    strict: bool = False,
+    truncate: bool = True,
+) -> str:
     """Check to make sure that a function used by Letta returned a valid response. Truncates to return_char_limit if necessary.
 
     This makes sure that we can coerce the function_response into a string that meets our criteria. We handle some soft coercion.
@@ -971,7 +988,12 @@ def get_schema_diff(schema_a, schema_b):
     linked_function_json = json_dumps(schema_b)
 
     # Compute the difference using difflib
-    difference = list(difflib.ndiff(f_schema_json.splitlines(keepends=True), linked_function_json.splitlines(keepends=True)))
+    difference = list(
+        difflib.ndiff(
+            f_schema_json.splitlines(keepends=True),
+            linked_function_json.splitlines(keepends=True),
+        )
+    )
 
     # Filter out lines that don't represent changes
     difference = [line for line in difference if line.startswith("+ ") or line.startswith("- ")]
@@ -1162,7 +1184,14 @@ def safe_create_shielded_task(coro, label: str = "shielded background task"):
     return task
 
 
-def safe_create_file_processing_task(coro, file_metadata, server, actor, logger: Logger, label: str = "file processing task"):
+def safe_create_file_processing_task(
+    coro,
+    file_metadata,
+    server,
+    actor,
+    logger: Logger,
+    label: str = "file processing task",
+):
     """
     Create a task for file processing that updates file status on failure.
 
@@ -1191,7 +1220,7 @@ def safe_create_file_processing_task(coro, file_metadata, server, actor, logger:
                     file_id=file_metadata.id,
                     actor=actor,
                     processing_status=FileProcessingStatus.ERROR,
-                    error_message=f"Processing failed: {str(e)}" if str(e) else f"Processing failed: {type(e).__name__}",
+                    error_message=(f"Processing failed: {str(e)}" if str(e) else f"Processing failed: {type(e).__name__}"),
                 )
             except Exception as update_error:
                 logger.error(f"Failed to update file status to ERROR for {file_metadata.id}: {update_error}")
@@ -1297,7 +1326,9 @@ async def get_latest_alembic_revision() -> str:
         return "unknown"
 
 
-def calculate_file_defaults_based_on_context_window(context_window: Optional[int]) -> tuple[int, int]:
+def calculate_file_defaults_based_on_context_window(
+    context_window: Optional[int],
+) -> tuple[int, int]:
     """Calculate reasonable defaults for max_files_open and per_file_view_window_char_limit
     based on the model's context window size.
 
@@ -1340,7 +1371,11 @@ def truncate_file_visible_content(visible_content: str, is_open: bool, per_file_
     return visible_content
 
 
-def fire_and_forget(coro, task_name: Optional[str] = None, error_callback: Optional[Callable[[Exception], None]] = None) -> asyncio.Task:
+def fire_and_forget(
+    coro,
+    task_name: Optional[str] = None,
+    error_callback: Optional[Callable[[Exception], None]] = None,
+) -> asyncio.Task:
     """
     Execute an async coroutine in the background without waiting for completion.
 

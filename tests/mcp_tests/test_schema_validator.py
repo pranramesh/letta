@@ -17,12 +17,19 @@ class TestSchemaValidator:
                 "age": {"type": "integer", "description": "The age of the user"},
                 "address": {
                     "type": "object",
-                    "properties": {"street": {"type": "string"}, "city": {"type": "string"}},
+                    "properties": {
+                        "street": {"type": "string"},
+                        "city": {"type": "string"},
+                    },
                     "required": ["street", "city"],
                     "additionalProperties": False,
                 },
             },
-            "required": ["name", "age", "address"],  # All properties must be required for strict mode
+            "required": [
+                "name",
+                "age",
+                "address",
+            ],  # All properties must be required for strict mode
             "additionalProperties": False,
         }
 
@@ -54,7 +61,12 @@ class TestSchemaValidator:
         schema = {
             "type": "object",
             "properties": {
-                "config": {"type": "object", "properties": {}, "required": [], "additionalProperties": False}  # Empty object schema
+                "config": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                    "additionalProperties": False,
+                }  # Empty object schema
             },
             "required": ["config"],  # Required but allows empty object
             "additionalProperties": False,
@@ -156,7 +168,10 @@ class TestSchemaValidator:
                     "type": "array",
                     "items": {
                         "type": "object",
-                        "properties": {"id": {"type": "string"}, "value": {"type": "number"}},
+                        "properties": {
+                            "id": {"type": "string"},
+                            "value": {"type": "number"},
+                        },
                         "required": ["id", "value"],
                         "additionalProperties": False,
                     },
@@ -255,11 +270,20 @@ class TestSchemaValidator:
             "type": "object",
             "properties": {
                 "thinking": {"type": "string", "description": "Deep inner monologue"},
-                "connected_account_id": {"type": "string", "description": "Specific connected account ID"},
+                "connected_account_id": {
+                    "type": "string",
+                    "description": "Specific connected account ID",
+                },
                 "toolkit": {"type": "string", "description": "Name of the toolkit"},
-                "request_heartbeat": {"type": "boolean", "description": "Request immediate heartbeat"},
+                "request_heartbeat": {
+                    "type": "boolean",
+                    "description": "Request immediate heartbeat",
+                },
             },
-            "required": ["thinking", "request_heartbeat"],  # Not all properties are required
+            "required": [
+                "thinking",
+                "request_heartbeat",
+            ],  # Not all properties are required
             "additionalProperties": False,
         }
 
@@ -294,7 +318,10 @@ class TestSchemaValidator:
                     "properties": {
                         "preferences": {
                             "type": "object",
-                            "properties": {"theme": {"type": "string"}, "language": {"type": "string"}},
+                            "properties": {
+                                "theme": {"type": "string"},
+                                "language": {"type": "string"},
+                            },
                             # Missing "required" field in nested object
                             "additionalProperties": False,
                         },
@@ -318,7 +345,11 @@ class TestSchemaValidator:
             "type": "object",
             "properties": {
                 "a": {"title": "A", "type": "integer"},
-                "b": {"anyOf": [{"type": "integer"}, {"type": "null"}], "default": None, "title": "B"},
+                "b": {
+                    "anyOf": [{"type": "integer"}, {"type": "null"}],
+                    "default": None,
+                    "title": "B",
+                },
             },
             "required": ["a"],  # Only 'a' is required, 'b' is not
             "additionalProperties": False,
@@ -334,7 +365,11 @@ class TestSchemaValidator:
             "type": "object",
             "properties": {
                 "a": {"title": "A", "type": "integer"},
-                "b": {"anyOf": [{"type": "integer"}, {"type": "null"}], "default": None, "title": "B"},
+                "b": {
+                    "anyOf": [{"type": "integer"}, {"type": "null"}],
+                    "default": None,
+                    "title": "B",
+                },
             },
             "required": ["a", "b"],  # All properties are required
             "additionalProperties": False,

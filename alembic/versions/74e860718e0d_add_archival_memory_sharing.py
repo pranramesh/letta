@@ -75,9 +75,24 @@ def upgrade() -> None:
                 sa.Column("description", sa.String(), nullable=True),
                 sa.Column("metadata_", sa.JSON(), nullable=True),
                 sa.Column("id", sa.String(), nullable=False),
-                sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
-                sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
-                sa.Column("is_deleted", sa.Boolean(), server_default=sa.text("FALSE"), nullable=False),
+                sa.Column(
+                    "created_at",
+                    sa.DateTime(timezone=True),
+                    server_default=sa.text("now()"),
+                    nullable=True,
+                ),
+                sa.Column(
+                    "updated_at",
+                    sa.DateTime(timezone=True),
+                    server_default=sa.text("now()"),
+                    nullable=True,
+                ),
+                sa.Column(
+                    "is_deleted",
+                    sa.Boolean(),
+                    server_default=sa.text("FALSE"),
+                    nullable=False,
+                ),
                 sa.Column("_created_by_id", sa.String(), nullable=True),
                 sa.Column("_last_updated_by_id", sa.String(), nullable=True),
                 sa.Column("organization_id", sa.String(), nullable=False),
@@ -96,7 +111,12 @@ def upgrade() -> None:
             "archives_agents",
             sa.Column("agent_id", sa.String(), nullable=False),
             sa.Column("archive_id", sa.String(), nullable=False),
-            sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("datetime('now')"), nullable=False),
+            sa.Column(
+                "created_at",
+                sa.DateTime(timezone=True),
+                server_default=sa.text("datetime('now')"),
+                nullable=False,
+            ),
             sa.Column("is_owner", sa.Boolean(), nullable=False),
             sa.ForeignKeyConstraint(["agent_id"], ["agents.id"], ondelete="CASCADE"),
             sa.ForeignKeyConstraint(["archive_id"], ["archives.id"], ondelete="CASCADE"),
@@ -109,7 +129,12 @@ def upgrade() -> None:
             "archives_agents",
             sa.Column("agent_id", sa.String(), nullable=False),
             sa.Column("archive_id", sa.String(), nullable=False),
-            sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+            sa.Column(
+                "created_at",
+                sa.DateTime(timezone=True),
+                server_default=sa.text("now()"),
+                nullable=False,
+            ),
             sa.Column("is_owner", sa.Boolean(), nullable=False),
             sa.ForeignKeyConstraint(["agent_id"], ["agents.id"], ondelete="CASCADE"),
             sa.ForeignKeyConstraint(["archive_id"], ["archives.id"], ondelete="CASCADE"),
@@ -217,8 +242,16 @@ def upgrade() -> None:
 
         # create indexes
         op.create_index("ix_archival_passages_archive_id", "archival_passages", ["archive_id"])
-        op.create_index("ix_archival_passages_org_archive", "archival_passages", ["organization_id", "archive_id"])
-        op.create_index("archival_passages_created_at_id_idx", "archival_passages", ["created_at", "id"])
+        op.create_index(
+            "ix_archival_passages_org_archive",
+            "archival_passages",
+            ["organization_id", "archive_id"],
+        )
+        op.create_index(
+            "archival_passages_created_at_id_idx",
+            "archival_passages",
+            ["created_at", "id"],
+        )
 
     else:
         # PostgreSQL
@@ -292,7 +325,10 @@ def upgrade() -> None:
                                 )
                                 RETURNING id
                             """
-                            ).bindparams(archive_name=f"{agent_name or f'Agent {agent_id}'}'s Archive", org_id=org_id)
+                            ).bindparams(
+                                archive_name=f"{agent_name or f'Agent {agent_id}'}'s Archive",
+                                org_id=org_id,
+                            )
                         )
                         archive_id = archive_result.scalar()
 
@@ -372,7 +408,14 @@ def upgrade() -> None:
 
         # schema changes
         op.alter_column("agent_passages", "archive_id", nullable=False)
-        op.create_foreign_key("agent_passages_archive_id_fkey", "agent_passages", "archives", ["archive_id"], ["id"], ondelete="CASCADE")
+        op.create_foreign_key(
+            "agent_passages_archive_id_fkey",
+            "agent_passages",
+            "archives",
+            ["archive_id"],
+            ["id"],
+            ondelete="CASCADE",
+        )
 
         # drop old indexes and constraints
         op.drop_index("ix_agent_passages_org_agent", table_name="agent_passages")
@@ -384,9 +427,17 @@ def upgrade() -> None:
         # rename table and create new indexes
         op.rename_table("agent_passages", "archival_passages")
         op.create_index("ix_archival_passages_archive_id", "archival_passages", ["archive_id"])
-        op.create_index("ix_archival_passages_org_archive", "archival_passages", ["organization_id", "archive_id"])
+        op.create_index(
+            "ix_archival_passages_org_archive",
+            "archival_passages",
+            ["organization_id", "archive_id"],
+        )
         op.create_index("archival_passages_org_idx", "archival_passages", ["organization_id"])
-        op.create_index("archival_passages_created_at_id_idx", "archival_passages", ["created_at", "id"])
+        op.create_index(
+            "archival_passages_created_at_id_idx",
+            "archival_passages",
+            ["created_at", "id"],
+        )
 
 
 def downgrade() -> None:
@@ -457,7 +508,11 @@ def downgrade() -> None:
         op.execute("DROP TABLE temp_archival_passages;")
 
         # create original indexes
-        op.create_index("ix_agent_passages_org_agent", "agent_passages", ["organization_id", "agent_id"])
+        op.create_index(
+            "ix_agent_passages_org_agent",
+            "agent_passages",
+            ["organization_id", "agent_id"],
+        )
         op.create_index("agent_passages_org_idx", "agent_passages", ["organization_id"])
         op.create_index("agent_passages_created_at_id_idx", "agent_passages", ["created_at", "id"])
 
@@ -490,14 +545,25 @@ def downgrade() -> None:
 
         # schema changes
         op.alter_column("agent_passages", "agent_id", nullable=False)
-        op.create_foreign_key("agent_passages_agent_id_fkey", "agent_passages", "agents", ["agent_id"], ["id"], ondelete="CASCADE")
+        op.create_foreign_key(
+            "agent_passages_agent_id_fkey",
+            "agent_passages",
+            "agents",
+            ["agent_id"],
+            ["id"],
+            ondelete="CASCADE",
+        )
 
         # drop archive_id column and constraint
         op.drop_constraint("agent_passages_archive_id_fkey", "agent_passages", type_="foreignkey")
         op.drop_column("agent_passages", "archive_id")
 
         # restore original indexes
-        op.create_index("ix_agent_passages_org_agent", "agent_passages", ["organization_id", "agent_id"])
+        op.create_index(
+            "ix_agent_passages_org_agent",
+            "agent_passages",
+            ["organization_id", "agent_id"],
+        )
         op.create_index("agent_passages_org_idx", "agent_passages", ["organization_id"])
         op.create_index("agent_passages_created_at_id_idx", "agent_passages", ["created_at", "id"])
 

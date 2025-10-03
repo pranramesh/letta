@@ -108,19 +108,34 @@ def main():
     try:
         # Initially populate the seen_ids with all current unread emails
         print("Grabbing initial state...")
-        initial_results = service.users().messages().list(userId="me", q="is:unread", maxResults=500).execute()
+        initial_results = (
+            service.users()
+            .messages()
+            .list(userId="me", q="is:unread", maxResults=500)
+            .execute()
+        )
         initial_messages = initial_results.get("messages", [])
         seen_ids.update(msg["id"] for msg in initial_messages)
 
         print("Listening...")
         while True:
-            results = service.users().messages().list(userId="me", q="is:unread", maxResults=5).execute()
+            results = (
+                service.users()
+                .messages()
+                .list(userId="me", q="is:unread", maxResults=5)
+                .execute()
+            )
             messages = results.get("messages", [])
             if messages:
                 for message in messages:
                     if message["id"] not in seen_ids:
                         seen_ids.add(message["id"])
-                        msg = service.users().messages().get(userId="me", id=message["id"], format="raw").execute()
+                        msg = (
+                            service.users()
+                            .messages()
+                            .get(userId="me", id=message["id"], format="raw")
+                            .execute()
+                        )
 
                         # Optionally mark the message as read here if required
                         email_obj = process_email(msg)

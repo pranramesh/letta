@@ -2,7 +2,9 @@ import httpx
 import pytest
 from dotenv import load_dotenv
 
-from letta.embeddings import GoogleEmbeddings  # Adjust the import based on your module structure
+from letta.embeddings import (
+    GoogleEmbeddings,
+)  # Adjust the import based on your module structure
 
 load_dotenv()
 import os
@@ -72,7 +74,10 @@ def test_archival_insert_text_embedding_004(client: LettaSDKClient):
         name="archival_insert_text_embedding_004",
         memory_blocks=[
             CreateBlock(label="human", value="name: archival_test"),
-            CreateBlock(label="persona", value="You are a helpful assistant that loves helping out the user"),
+            CreateBlock(
+                label="persona",
+                value="You are a helpful assistant that loves helping out the user",
+            ),
         ],
         model="google_ai/gemini-2.0-flash-exp",
         embedding="google_ai/text-embedding-004",
@@ -84,14 +89,24 @@ def test_archival_insert_text_embedding_004(client: LettaSDKClient):
     # Send a message instructing the agent to archive it.
     res = client.agents.messages.create(
         agent_id=agent.id,
-        messages=[MessageCreate(role="user", content=f"Store this in your archive memory: {archival_message}")],
+        messages=[
+            MessageCreate(
+                role="user",
+                content=f"Store this in your archive memory: {archival_message}",
+            )
+        ],
     )
     print(res.messages)
 
     # Retrieve the archival messages through the agent messaging API.
     archived_messages = client.agents.messages.create(
         agent_id=agent.id,
-        messages=[MessageCreate(role="user", content=f"retrieve from archival memory : {archival_message}")],
+        messages=[
+            MessageCreate(
+                role="user",
+                content=f"retrieve from archival memory : {archival_message}",
+            )
+        ],
     )
 
     print(archived_messages.messages)
@@ -120,7 +135,10 @@ def test_archival_insert_embedding_001(client: LettaSDKClient):
         name="archival_insert_embedding_001",
         memory_blocks=[
             CreateBlock(label="human", value="name: archival_test"),
-            CreateBlock(label="persona", value="You are a helpful assistant that loves helping out the user"),
+            CreateBlock(
+                label="persona",
+                value="You are a helpful assistant that loves helping out the user",
+            ),
         ],
         model="google_ai/gemini-2.0-flash-exp",
         embedding="google_ai/embedding-001",
@@ -138,7 +156,12 @@ def test_archival_insert_embedding_001(client: LettaSDKClient):
     # Retrieve the archival messages through the agent messaging API.
     archived_messages = client.agents.messages.create(
         agent_id=agent.id,
-        messages=[MessageCreate(role="user", content=f"retrieve from archival memory : {archival_message}")],
+        messages=[
+            MessageCreate(
+                role="user",
+                content=f"retrieve from archival memory : {archival_message}",
+            )
+        ],
     )
 
     # Assert that the archival message is present.

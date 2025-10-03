@@ -80,7 +80,11 @@ class DataPreprocessor:
         # Fill categorical missing values with mode
         for col in categorical_cols:
             if df_cleaned[col].isnull().any():
-                mode_value = df_cleaned[col].mode().iloc[0] if not df_cleaned[col].mode().empty else "Unknown"
+                mode_value = (
+                    df_cleaned[col].mode().iloc[0]
+                    if not df_cleaned[col].mode().empty
+                    else "Unknown"
+                )
                 df_cleaned[col].fillna(mode_value, inplace=True)
                 self.transformations_applied.append(f"Filled {col} with mode")
 
@@ -90,7 +94,9 @@ class DataPreprocessor:
         duplicates_removed = initial_rows - len(df_cleaned)
 
         if duplicates_removed > 0:
-            self.transformations_applied.append(f"Removed {duplicates_removed} duplicate rows")
+            self.transformations_applied.append(
+                f"Removed {duplicates_removed} duplicate rows"
+            )
 
         print(f"Data cleaning complete: {original_shape} -> {df_cleaned.shape}")
         return df_cleaned
@@ -114,15 +120,21 @@ class DataPreprocessor:
             # Create interaction features
             for i, col1 in enumerate(numeric_cols):
                 for col2 in numeric_cols[i + 1 :]:
-                    df_featured[f"{col1}_{col2}_ratio"] = df_featured[col1] / (df_featured[col2] + 1e-8)
-                    df_featured[f"{col1}_{col2}_sum"] = df_featured[col1] + df_featured[col2]
+                    df_featured[f"{col1}_{col2}_ratio"] = df_featured[col1] / (
+                        df_featured[col2] + 1e-8
+                    )
+                    df_featured[f"{col1}_{col2}_sum"] = (
+                        df_featured[col1] + df_featured[col2]
+                    )
 
             self.transformations_applied.append("Created interaction features")
 
         # Binning continuous variables
         for col in numeric_cols:
             if df_featured[col].nunique() > 10:  # Only bin if many unique values
-                df_featured[f"{col}_binned"] = pd.qcut(df_featured[col], q=5, labels=False, duplicates="drop")
+                df_featured[f"{col}_binned"] = pd.qcut(
+                    df_featured[col], q=5, labels=False, duplicates="drop"
+                )
                 self.transformations_applied.append(f"Binned {col}")
 
         return df_featured
@@ -173,7 +185,12 @@ class StatisticalAnalyzer:
                 "missing_values": df.isnull().sum().to_dict(),
             }
 
-            return AnalysisResult(analysis_type=AnalysisType.DESCRIPTIVE, timestamp=datetime.now(), metrics=metrics, metadata=metadata)
+            return AnalysisResult(
+                analysis_type=AnalysisType.DESCRIPTIVE,
+                timestamp=datetime.now(),
+                metrics=metrics,
+                metadata=metadata,
+            )
 
         except Exception as e:
             return AnalysisResult(
@@ -186,7 +203,9 @@ class StatisticalAnalyzer:
             )
 
     @staticmethod
-    def correlation_analysis(df: pd.DataFrame, method: str = "pearson") -> AnalysisResult:
+    def correlation_analysis(
+        df: pd.DataFrame, method: str = "pearson"
+    ) -> AnalysisResult:
         """
         Perform correlation analysis between variables.
 
@@ -230,9 +249,17 @@ class StatisticalAnalyzer:
                 "method_used": method,
             }
 
-            metadata = {"variables_analyzed": list(numeric_df.columns), "total_pairs": len(corr_pairs)}
+            metadata = {
+                "variables_analyzed": list(numeric_df.columns),
+                "total_pairs": len(corr_pairs),
+            }
 
-            return AnalysisResult(analysis_type=AnalysisType.CORRELATION, timestamp=datetime.now(), metrics=metrics, metadata=metadata)
+            return AnalysisResult(
+                analysis_type=AnalysisType.CORRELATION,
+                timestamp=datetime.now(),
+                metrics=metrics,
+                metadata=metadata,
+            )
 
         except Exception as e:
             return AnalysisResult(
@@ -274,12 +301,16 @@ class TimeSeriesAnalyzer:
                         autocorr_values.append((lag, autocorr))
 
             # Find peaks in autocorrelation
-            significant_lags = [(lag, corr) for lag, corr in autocorr_values if abs(corr) > 0.5]
+            significant_lags = [
+                (lag, corr) for lag, corr in autocorr_values if abs(corr) > 0.5
+            ]
             significant_lags.sort(key=lambda x: abs(x[1]), reverse=True)
 
             return {
                 "seasonal_lags": significant_lags[:5],
-                "strongest_seasonality": significant_lags[0] if significant_lags else None,
+                "strongest_seasonality": (
+                    significant_lags[0] if significant_lags else None
+                ),
                 "autocorrelation_values": autocorr_values,
             }
 
@@ -308,7 +339,9 @@ class TimeSeriesAnalyzer:
             last_third = rolling_mean.iloc[-len(rolling_mean) // 3 :].mean()
 
             trend_direction = "increasing" if last_third > first_third else "decreasing"
-            trend_strength = abs(last_third - first_third) / first_third if first_third != 0 else 0
+            trend_strength = (
+                abs(last_third - first_third) / first_third if first_third != 0 else 0
+            )
 
             return {
                 "trend_direction": trend_direction,
@@ -347,7 +380,9 @@ def generate_sample_data(n_samples: int = 1000) -> pd.DataFrame:
     data["feature_4"] = data["feature_1"] * 0.7 + np.random.normal(0, 10, n_samples)
 
     # Add missing values
-    missing_indices = np.random.choice(n_samples, size=int(0.05 * n_samples), replace=False)
+    missing_indices = np.random.choice(
+        n_samples, size=int(0.05 * n_samples), replace=False
+    )
     for idx in missing_indices:
         col = np.random.choice(["feature_1", "feature_2", "feature_3"])
         data[col][idx] = np.nan
@@ -385,7 +420,9 @@ def main():
     corr_result = analyzer.correlation_analysis(df_featured)
     if corr_result.success:
         print(f"Correlation analysis completed")
-        print(f"Found {len(corr_result.metrics['highest_correlations'])} significant correlations")
+        print(
+            f"Found {len(corr_result.metrics['highest_correlations'])} significant correlations"
+        )
 
     # Time series analysis
     ts_analyzer = TimeSeriesAnalyzer()

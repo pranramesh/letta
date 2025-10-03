@@ -48,7 +48,11 @@ class SourceManager:
         """
         source_exists_query = select(
             exists().where(
-                and_(SourceModel.id == source_id, SourceModel.organization_id == actor.organization_id, SourceModel.is_deleted == False)
+                and_(
+                    SourceModel.id == source_id,
+                    SourceModel.organization_id == actor.organization_id,
+                    SourceModel.is_deleted == False,
+                )
             )
         )
 
@@ -170,7 +174,9 @@ class SourceManager:
         # fetch results
         source_names = [source.name for source in source_data_list]
         result_query = select(SourceModel).where(
-            SourceModel.name.in_(source_names), SourceModel.organization_id == actor.organization_id, SourceModel.is_deleted == False
+            SourceModel.name.in_(source_names),
+            SourceModel.organization_id == actor.organization_id,
+            SourceModel.is_deleted == False,
         )
         result = await session.execute(result_query)
         return [source.to_pydantic() for source in result.scalars()]
@@ -386,7 +392,9 @@ class SourceManager:
 
         async with db_registry.async_session() as session:
             query = select(SourceModel).where(
-                SourceModel.id.in_(source_ids), SourceModel.organization_id == actor.organization_id, SourceModel.is_deleted == False
+                SourceModel.id.in_(source_ids),
+                SourceModel.organization_id == actor.organization_id,
+                SourceModel.is_deleted == False,
             )
 
             result = await session.execute(query)
@@ -446,7 +454,9 @@ class SourceManager:
 
         async with db_registry.async_session() as session:
             query = select(SourceModel.name).where(
-                SourceModel.name.in_(source_names), SourceModel.organization_id == actor.organization_id, SourceModel.is_deleted == False
+                SourceModel.name.in_(source_names),
+                SourceModel.organization_id == actor.organization_id,
+                SourceModel.is_deleted == False,
             )
 
             result = await session.execute(query)

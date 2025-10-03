@@ -9,16 +9,26 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
 from letta.constants import MAX_FILENAME_LENGTH
-from letta.helpers.pinecone_utils import list_pinecone_index_for_files, should_use_pinecone
+from letta.helpers.pinecone_utils import (
+    list_pinecone_index_for_files,
+    should_use_pinecone,
+)
 from letta.log import get_logger
 from letta.orm.errors import NoResultFound
-from letta.orm.file import FileContent as FileContentModel, FileMetadata as FileMetadataModel
+from letta.orm.file import (
+    FileContent as FileContentModel,
+    FileMetadata as FileMetadataModel,
+)
 from letta.orm.sqlalchemy_base import AccessType
 from letta.otel.tracing import trace_method
 from letta.schemas.enums import FileProcessingStatus
 from letta.schemas.file import FileMetadata as PydanticFileMetadata
 from letta.schemas.source import Source as PydanticSource
-from letta.schemas.source_metadata import FileStats, OrganizationSourcesStats, SourceStats
+from letta.schemas.source_metadata import (
+    FileStats,
+    OrganizationSourcesStats,
+    SourceStats,
+)
 from letta.schemas.user import User as PydanticUser
 from letta.server.db import db_registry
 from letta.settings import settings
@@ -39,7 +49,13 @@ class DuplicateFileError(Exception):
 class FileManager:
     """Manager class to handle business logic related to files."""
 
-    async def _invalidate_file_caches(self, file_id: str, actor: PydanticUser, original_filename: str = None, source_id: str = None):
+    async def _invalidate_file_caches(
+        self,
+        file_id: str,
+        actor: PydanticUser,
+        original_filename: str = None,
+        source_id: str = None,
+    ):
         """Invalidate all caches related to a file."""
         # TEMPORARILY DISABLED - caching is disabled
         # # invalidate file content cache (all variants)
@@ -96,7 +112,12 @@ class FileManager:
     #     model_class=PydanticFileMetadata,
     # )
     async def get_file_by_id(
-        self, file_id: str, actor: Optional[PydanticUser] = None, *, include_content: bool = False, strip_directory_prefix: bool = False
+        self,
+        file_id: str,
+        actor: Optional[PydanticUser] = None,
+        *,
+        include_content: bool = False,
+        strip_directory_prefix: bool = False,
     ) -> Optional[PydanticFileMetadata]:
         """Retrieve a file by its ID.
 
@@ -130,7 +151,10 @@ class FileManager:
                         actor=actor,
                     )
 
-                return await file_orm.to_pydantic_async(include_content=include_content, strip_directory_prefix=strip_directory_prefix)
+                return await file_orm.to_pydantic_async(
+                    include_content=include_content,
+                    strip_directory_prefix=strip_directory_prefix,
+                )
 
             except NoResultFound:
                 return None
@@ -212,11 +236,21 @@ class FileManager:
                     )
                 elif processing_status == FileProcessingStatus.EMBEDDING:
                     where_conditions.append(
-                        FileMetadataModel.processing_status.in_([FileProcessingStatus.PARSING, FileProcessingStatus.EMBEDDING])
+                        FileMetadataModel.processing_status.in_(
+                            [
+                                FileProcessingStatus.PARSING,
+                                FileProcessingStatus.EMBEDDING,
+                            ]
+                        )
                     )
                 elif processing_status == FileProcessingStatus.COMPLETED:
                     where_conditions.append(
-                        FileMetadataModel.processing_status.in_([FileProcessingStatus.EMBEDDING, FileProcessingStatus.COMPLETED])
+                        FileMetadataModel.processing_status.in_(
+                            [
+                                FileProcessingStatus.EMBEDDING,
+                                FileProcessingStatus.COMPLETED,
+                            ]
+                        )
                     )
                 elif processing_status == FileProcessingStatus.ERROR:
                     # ERROR can be set from any non-terminal state
@@ -255,7 +289,10 @@ class FileManager:
 
                     # build informative error message
                     if processing_status is not None:
-                        if current_status in [FileProcessingStatus.ERROR, FileProcessingStatus.COMPLETED]:
+                        if current_status in [
+                            FileProcessingStatus.ERROR,
+                            FileProcessingStatus.COMPLETED,
+                        ]:
                             raise ValueError(
                                 f"Cannot update file {file_id} status from terminal state {current_status} to {processing_status}"
                             )
@@ -343,7 +380,10 @@ class FileManager:
                     file_status = FileProcessingStatus.COMPLETED
                 try:
                     file_metadata = await self.update_file_status(
-                        file_id=file_metadata.id, actor=actor, chunks_embedded=len(ids), processing_status=file_status
+                        file_id=file_metadata.id,
+                        actor=actor,
+                        chunks_embedded=len(ids),
+                        processing_status=file_status,
                     )
                 except ValueError as e:
                     # state transition was blocked - this is a race condition
@@ -444,7 +484,13 @@ class FileManager:
 
             # convert all files to pydantic models
             file_metadatas = await asyncio.gather(
-                *[file.to_pydantic_async(include_content=include_content, strip_directory_prefix=strip_directory_prefix) for file in files]
+                *[
+                    file.to_pydantic_async(
+                        include_content=include_content,
+                        strip_directory_prefix=strip_directory_prefix,
+                    )
+                    for file in files
+                ]
             )
 
             # if status checking is enabled, check all files concurrently
@@ -576,7 +622,10 @@ class FileManager:
                     func.count(FileMetadataModel.id).label("file_count"),
                     func.coalesce(func.sum(FileMetadataModel.file_size), 0).label("total_size"),
                 )
-                .outerjoin(FileMetadataModel, (FileMetadataModel.source_id == SourceModel.id) & (FileMetadataModel.is_deleted == False))
+                .outerjoin(
+                    FileMetadataModel,
+                    (FileMetadataModel.source_id == SourceModel.id) & (FileMetadataModel.is_deleted == False),
+                )
                 .where(SourceModel.organization_id == actor.organization_id)
                 .where(SourceModel.is_deleted == False)
                 .group_by(SourceModel.id, SourceModel.name)
@@ -595,7 +644,11 @@ class FileManager:
                 if include_detailed_per_source_metadata:
                     # Get individual file details for this source
                     files_query = (
-                        select(FileMetadataModel.id, FileMetadataModel.file_name, FileMetadataModel.file_size)
+                        select(
+                            FileMetadataModel.id,
+                            FileMetadataModel.file_name,
+                            FileMetadataModel.file_size,
+                        )
                         .where(
                             FileMetadataModel.source_id == source_id,
                             FileMetadataModel.organization_id == actor.organization_id,
@@ -608,11 +661,22 @@ class FileManager:
                     files_rows = files_result.fetchall()
 
                     # Build file stats
-                    files = [FileStats(file_id=file_row[0], file_name=file_row[1], file_size=file_row[2]) for file_row in files_rows]
+                    files = [
+                        FileStats(
+                            file_id=file_row[0],
+                            file_name=file_row[1],
+                            file_size=file_row[2],
+                        )
+                        for file_row in files_rows
+                    ]
 
                     # Build source metadata
                     source_metadata = SourceStats(
-                        source_id=source_id, source_name=source_name, file_count=file_count, total_size=total_size, files=files
+                        source_id=source_id,
+                        source_name=source_name,
+                        file_count=file_count,
+                        total_size=total_size,
+                        files=files,
                     )
 
                     metadata.sources.append(source_metadata)
@@ -661,7 +725,11 @@ class FileManager:
     @enforce_types
     @trace_method
     async def get_files_for_agents_async(
-        self, agent_ids: List[str], actor: PydanticUser, *, include_content: bool = False
+        self,
+        agent_ids: List[str],
+        actor: PydanticUser,
+        *,
+        include_content: bool = False,
     ) -> List[PydanticFileMetadata]:
         """
         Get all files associated with the given agents via file-agent relationships.

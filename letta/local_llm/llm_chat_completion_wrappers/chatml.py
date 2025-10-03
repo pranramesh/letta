@@ -1,7 +1,9 @@
 from letta.errors import LLMJSONParsingError
 from letta.helpers.json_helpers import json_dumps, json_loads
 from letta.local_llm.json_parser import clean_json
-from letta.local_llm.llm_chat_completion_wrappers.wrapper_base import LLMChatCompletionWrapper
+from letta.local_llm.llm_chat_completion_wrappers.wrapper_base import (
+    LLMChatCompletionWrapper,
+)
 from letta.schemas.enums import MessageRole
 
 PREFIX_HINT = """# Reminders:
@@ -73,7 +75,10 @@ class ChatMLInnerMonologueWrapper(LLMChatCompletionWrapper):
         func_str += f"\n  description: {schema['description']}"
         func_str += "\n  params:"
         if add_inner_thoughts:
-            from letta.local_llm.constants import INNER_THOUGHTS_KWARG, INNER_THOUGHTS_KWARG_DESCRIPTION
+            from letta.local_llm.constants import (
+                INNER_THOUGHTS_KWARG,
+                INNER_THOUGHTS_KWARG_DESCRIPTION,
+            )
 
             func_str += f"\n    {INNER_THOUGHTS_KWARG}: {INNER_THOUGHTS_KWARG_DESCRIPTION}"
         for param_k, param_v in schema["parameters"]["properties"].items():
@@ -198,7 +203,9 @@ class ChatMLInnerMonologueWrapper(LLMChatCompletionWrapper):
         # System insturctions go first
         assert messages[0]["role"] == "system"
         system_block = self._compile_system_message(
-            system_message=messages[0]["content"], functions=functions, function_documentation=function_documentation
+            system_message=messages[0]["content"],
+            functions=functions,
+            function_documentation=function_documentation,
         )
         prompt += f"<|im_start|>system\n{system_block.strip()}<|im_end|>"
 
@@ -232,7 +239,9 @@ class ChatMLInnerMonologueWrapper(LLMChatCompletionWrapper):
             elif message["role"] == "system":
                 role_str = "system"
                 msg_str = self._compile_system_message(
-                    system_message=message["content"], functions=functions, function_documentation=function_documentation
+                    system_message=message["content"],
+                    functions=functions,
+                    function_documentation=function_documentation,
                 )
 
                 prompt += f"\n<|im_start|>{role_str}\n{msg_str.strip()}<|im_end|>"

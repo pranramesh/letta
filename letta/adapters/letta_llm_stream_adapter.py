@@ -53,7 +53,10 @@ class LettaLLMStreamAdapter(LettaLLMAdapter):
         self.request_data = request_data
 
         # Instantiate streaming interface
-        if self.llm_config.model_endpoint_type in [ProviderType.anthropic, ProviderType.bedrock]:
+        if self.llm_config.model_endpoint_type in [
+            ProviderType.anthropic,
+            ProviderType.bedrock,
+        ]:
             self.interface = AnthropicStreamingInterface(
                 use_assistant_message=use_assistant_message,
                 put_inner_thoughts_in_kwarg=self.llm_config.put_inner_thoughts_in_kwargs,
@@ -149,7 +152,7 @@ class LettaLLMStreamAdapter(LettaLLMAdapter):
                     request_json=self.request_data,
                     response_json={
                         "content": {
-                            "tool_call": self.tool_call.model_dump_json() if self.tool_call else None,
+                            "tool_call": (self.tool_call.model_dump_json() if self.tool_call else None),
                             "reasoning": [content.model_dump_json() for content in self.reasoning_content],
                         },
                         "id": self.interface.message_id,

@@ -21,7 +21,8 @@ class VLLMProvider(Provider):
     base_url: str = Field(..., description="Base URL for the vLLM API.")
     api_key: str | None = Field(None, description="API key for the vLLM API.")
     default_prompt_formatter: str | None = Field(
-        default=None, description="Default prompt formatter (aka model wrapper) to use on a /completions style API."
+        default=None,
+        description="Default prompt formatter (aka model wrapper) to use on a /completions style API.",
     )
 
     async def list_llm_models_async(self) -> list[LLMConfig]:

@@ -51,19 +51,43 @@ def upgrade() -> None:
     op.add_column("steps", sa.Column("context_window_limit", sa.Integer(), nullable=True))
     op.add_column(
         "steps",
-        sa.Column("completion_tokens_details", postgresql.JSON(astext_type=sa.Text()), autoincrement=False, nullable=True),
+        sa.Column(
+            "completion_tokens_details",
+            postgresql.JSON(astext_type=sa.Text()),
+            autoincrement=False,
+            nullable=True,
+        ),
     )
     op.add_column(
         "steps",
-        sa.Column("tags", postgresql.JSON(astext_type=sa.Text()), autoincrement=False, nullable=True),
+        sa.Column(
+            "tags",
+            postgresql.JSON(astext_type=sa.Text()),
+            autoincrement=False,
+            nullable=True,
+        ),
     )
     op.add_column("steps", sa.Column("tid", sa.String(), nullable=True))
 
     # Add new foreign key constraint for provider_id
-    op.create_foreign_key("fk_steps_organization_id", "steps", "providers", ["provider_id"], ["id"], ondelete="RESTRICT")
+    op.create_foreign_key(
+        "fk_steps_organization_id",
+        "steps",
+        "providers",
+        ["provider_id"],
+        ["id"],
+        ondelete="RESTRICT",
+    )
 
     # Add new foreign key constraint for provider_id
-    op.create_foreign_key("fk_steps_provider_id", "steps", "organizations", ["organization_id"], ["id"], ondelete="RESTRICT")
+    op.create_foreign_key(
+        "fk_steps_provider_id",
+        "steps",
+        "organizations",
+        ["organization_id"],
+        ["id"],
+        ondelete="RESTRICT",
+    )
 
     # Add new foreign key constraint for provider_id
     op.create_foreign_key("fk_steps_job_id", "steps", "jobs", ["job_id"], ["id"], ondelete="SET NULL")
@@ -74,7 +98,14 @@ def upgrade() -> None:
 
     # Add step_id to messages table
     op.add_column("messages", sa.Column("step_id", sa.String(), nullable=True))
-    op.create_foreign_key("fk_messages_step_id", "messages", "steps", ["step_id"], ["id"], ondelete="SET NULL")
+    op.create_foreign_key(
+        "fk_messages_step_id",
+        "messages",
+        "steps",
+        ["step_id"],
+        ["id"],
+        ondelete="SET NULL",
+    )
     # ### end Alembic commands ###
 
 
@@ -110,7 +141,14 @@ def downgrade() -> None:
     # Add constraints back
     op.execute("DELETE FROM steps WHERE job_id IS NULL")
     op.alter_column("steps", "job_id", nullable=False)
-    op.create_foreign_key("fk_job_usage_statistics_job_id", "steps", "jobs", ["job_id"], ["id"], ondelete="CASCADE")
+    op.create_foreign_key(
+        "fk_job_usage_statistics_job_id",
+        "steps",
+        "jobs",
+        ["job_id"],
+        ["id"],
+        ondelete="CASCADE",
+    )
 
     # Change id field from string back to int
     op.add_column("steps", sa.Column("old_id", sa.Integer(), nullable=True))

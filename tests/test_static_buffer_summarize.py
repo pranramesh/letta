@@ -20,7 +20,12 @@ SUMMARY_TEXT = "Summarized memory"
 @pytest.fixture
 def mock_summarizer_agent():
     agent = AsyncMock(spec=BaseAgent)
-    agent.step.return_value = [Message(role=MessageRole.assistant, content=[TextContent(type="text", text=SUMMARY_TEXT)])]
+    agent.step.return_value = [
+        Message(
+            role=MessageRole.assistant,
+            content=[TextContent(type="text", text=SUMMARY_TEXT)],
+        )
+    ]
     agent.update_message_transcript = AsyncMock()
     return agent
 
@@ -39,7 +44,11 @@ def messages():
 
 @pytest.mark.asyncio
 async def test_static_buffer_summarization_no_trim_needed(mock_summarizer_agent, messages):
-    summarizer = Summarizer(SummarizationMode.STATIC_MESSAGE_BUFFER, mock_summarizer_agent, message_buffer_limit=20)
+    summarizer = Summarizer(
+        SummarizationMode.STATIC_MESSAGE_BUFFER,
+        mock_summarizer_agent,
+        message_buffer_limit=20,
+    )
     updated_messages, updated = summarizer._static_buffer_summarization(messages[:5], [])
 
     assert len(updated_messages) == 5
@@ -82,7 +91,11 @@ async def test_static_buffer_summarization_trim_user_message(mock_summarizer_age
 
 @pytest.mark.asyncio
 async def test_static_buffer_summarization_no_trim_no_summarization(mock_summarizer_agent, messages):
-    summarizer = Summarizer(SummarizationMode.STATIC_MESSAGE_BUFFER, mock_summarizer_agent, message_buffer_limit=15)
+    summarizer = Summarizer(
+        SummarizationMode.STATIC_MESSAGE_BUFFER,
+        mock_summarizer_agent,
+        message_buffer_limit=15,
+    )
     updated_messages, updated = summarizer._static_buffer_summarization(messages[:8], [])
 
     assert len(updated_messages) == 8

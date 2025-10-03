@@ -48,7 +48,10 @@ class Identity(IdentityBase):
     agent_ids: List[str] = Field(..., description="The IDs of the agents associated with the identity.")
     block_ids: List[str] = Field(..., description="The IDs of the blocks associated with the identity.")
     organization_id: Optional[str] = Field(None, description="The organization id of the user")
-    properties: List[IdentityProperty] = Field(default_factory=list, description="List of properties associated with the identity")
+    properties: List[IdentityProperty] = Field(
+        default_factory=list,
+        description="List of properties associated with the identity",
+    )
 
 
 class IdentityCreate(LettaBase):

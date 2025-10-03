@@ -74,7 +74,12 @@ def create_user_message(agent_id, organization_id, message_text, timestamp):
             {
                 "type": "text",
                 "text": json.dumps(
-                    {"type": "user_message", "message": message_text, "time": timestamp.strftime("%Y-%m-%d %I:%M:%S %p PST-0800")}, indent=2
+                    {
+                        "type": "user_message",
+                        "message": message_text,
+                        "time": timestamp.strftime("%Y-%m-%d %I:%M:%S %p PST-0800"),
+                    },
+                    indent=2,
                 ),
             }
         ],
@@ -91,7 +96,12 @@ def create_send_message(agent_id, organization_id, assistant_text, tool_call_id,
     """Creates an assistant message dictionary."""
     return {
         "role": "assistant",
-        "content": [{"type": "text", "text": f"Assistant reply generated at {timestamp.strftime('%Y-%m-%d %I:%M:%S %p PST-0800')}."}],
+        "content": [
+            {
+                "type": "text",
+                "text": f"Assistant reply generated at {timestamp.strftime('%Y-%m-%d %I:%M:%S %p PST-0800')}.",
+            }
+        ],
         "organization_id": organization_id,
         "agent_id": agent_id,
         "model": "claude-3-5-haiku-20241022",
@@ -102,7 +112,11 @@ def create_send_message(agent_id, organization_id, assistant_text, tool_call_id,
                 "function": {
                     "name": "send_message",
                     "arguments": json.dumps(
-                        {"message": assistant_text, "time": timestamp.strftime("%Y-%m-%d %I:%M:%S %p PST-0800")}, indent=2
+                        {
+                            "message": assistant_text,
+                            "time": timestamp.strftime("%Y-%m-%d %I:%M:%S %p PST-0800"),
+                        },
+                        indent=2,
                     ),
                 },
                 "type": "function",
@@ -120,7 +134,12 @@ def create_tool_message(agent_id, organization_id, tool_call_id, timestamp):
             {
                 "type": "text",
                 "text": json.dumps(
-                    {"status": "OK", "message": "None", "time": timestamp.strftime("%Y-%m-%d %I:%M:%S %p PST-0800")}, indent=2
+                    {
+                        "status": "OK",
+                        "message": "None",
+                        "time": timestamp.strftime("%Y-%m-%d %I:%M:%S %p PST-0800"),
+                    },
+                    indent=2,
                 ),
             }
         ],
@@ -178,7 +197,15 @@ def test_many_messages_performance(server, default_user, num_messages):
         all_messages.extend(
             [
                 Message(**create_user_message(agent_state.id, organization_id, user_text, user_time)),
-                Message(**create_send_message(agent_state.id, organization_id, assistant_text, tool_call_id, send_time)),
+                Message(
+                    **create_send_message(
+                        agent_state.id,
+                        organization_id,
+                        assistant_text,
+                        tool_call_id,
+                        send_time,
+                    )
+                ),
                 Message(**create_tool_message(agent_state.id, organization_id, tool_call_id, tool_time)),
             ]
         )
@@ -205,7 +232,9 @@ def test_many_messages_performance(server, default_user, num_messages):
     assert len(messages) >= num_groups * message_group_size
 
     response = server.send_messages(
-        actor=default_user, agent_id=agent_state.id, input_messages=[MessageCreate(role="user", content="What have we been talking about?")]
+        actor=default_user,
+        agent_id=agent_state.id,
+        input_messages=[MessageCreate(role="user", content="What have we been talking about?")],
     )
     log_event("Sent message to agent and received response")
 

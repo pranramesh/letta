@@ -10,7 +10,11 @@ from letta.orm.errors import NoResultFound
 from letta.schemas.job import BatchJob, JobStatus, JobType, JobUpdate
 from letta.schemas.letta_request import CreateBatch
 from letta.schemas.letta_response import LettaBatchMessages
-from letta.server.rest_api.dependencies import HeaderParams, get_headers, get_letta_server
+from letta.server.rest_api.dependencies import (
+    HeaderParams,
+    get_headers,
+    get_letta_server,
+)
 from letta.server.server import SyncServer
 from letta.settings import settings
 
@@ -42,7 +46,10 @@ async def create_batch(
     if content_length:
         length = int(content_length)
         if length > max_bytes:
-            raise HTTPException(status_code=413, detail=f"Request too large ({length} bytes). Max is {max_bytes} bytes.")
+            raise HTTPException(
+                status_code=413,
+                detail=f"Request too large ({length} bytes). Max is {max_bytes} bytes.",
+            )
 
     if not settings.enable_batch_job_polling:
         logger.warning("Batch job polling is disabled. Enable batch processing by setting LETTA_ENABLE_BATCH_JOB_POLLING to True.")
@@ -78,7 +85,11 @@ async def create_batch(
         logger.error(f"Error creating batch job: {e}")
 
         # mark job as failed
-        await server.job_manager.update_job_by_id_async(job_id=batch_job.id, job_update=JobUpdate(status=JobStatus.failed), actor=actor)
+        await server.job_manager.update_job_by_id_async(
+            job_id=batch_job.id,
+            job_update=JobUpdate(status=JobStatus.failed),
+            actor=actor,
+        )
         raise
     return batch_job
 
@@ -104,14 +115,17 @@ async def retrieve_batch(
 @router.get("/batches", response_model=List[BatchJob], operation_id="list_batches")
 async def list_batches(
     before: Optional[str] = Query(
-        None, description="Job ID cursor for pagination. Returns jobs that come before this job ID in the specified sort order"
+        None,
+        description="Job ID cursor for pagination. Returns jobs that come before this job ID in the specified sort order",
     ),
     after: Optional[str] = Query(
-        None, description="Job ID cursor for pagination. Returns jobs that come after this job ID in the specified sort order"
+        None,
+        description="Job ID cursor for pagination. Returns jobs that come after this job ID in the specified sort order",
     ),
     limit: Optional[int] = Query(100, description="Maximum number of jobs to return"),
     order: Literal["asc", "desc"] = Query(
-        "desc", description="Sort order for jobs by creation time. 'asc' for oldest first, 'desc' for newest first"
+        "desc",
+        description="Sort order for jobs by creation time. 'asc' for oldest first, 'desc' for newest first",
     ),
     order_by: Literal["created_at"] = Query("created_at", description="Field to sort by"),
     headers: HeaderParams = Depends(get_headers),
@@ -142,14 +156,17 @@ async def list_batches(
 async def list_messages_for_batch(
     batch_id: str,
     before: Optional[str] = Query(
-        None, description="Message ID cursor for pagination. Returns messages that come before this message ID in the specified sort order"
+        None,
+        description="Message ID cursor for pagination. Returns messages that come before this message ID in the specified sort order",
     ),
     after: Optional[str] = Query(
-        None, description="Message ID cursor for pagination. Returns messages that come after this message ID in the specified sort order"
+        None,
+        description="Message ID cursor for pagination. Returns messages that come after this message ID in the specified sort order",
     ),
     limit: Optional[int] = Query(100, description="Maximum number of messages to return"),
     order: Literal["asc", "desc"] = Query(
-        "desc", description="Sort order for messages by creation time. 'asc' for oldest first, 'desc' for newest first"
+        "desc",
+        description="Sort order for messages by creation time. 'asc' for oldest first, 'desc' for newest first",
     ),
     order_by: Literal["created_at"] = Query("created_at", description="Field to sort by"),
     agent_id: Optional[str] = Query(None, description="Filter messages by agent ID"),
@@ -170,7 +187,13 @@ async def list_messages_for_batch(
 
     # Get messages directly using our efficient method
     messages = await server.batch_manager.get_messages_for_letta_batch_async(
-        letta_batch_job_id=batch_id, limit=limit, actor=actor, agent_id=agent_id, ascending=(order == "asc"), before=before, after=after
+        letta_batch_job_id=batch_id,
+        limit=limit,
+        actor=actor,
+        agent_id=agent_id,
+        ascending=(order == "asc"),
+        before=before,
+        after=after,
     )
 
     return LettaBatchMessages(messages=messages)
@@ -203,7 +226,9 @@ async def cancel_batch(
 
                 # Update all the batch_job statuses
                 await server.batch_manager.update_llm_batch_status_async(
-                    llm_batch_id=llm_batch_job.id, status=JobStatus.cancelled, actor=actor
+                    llm_batch_id=llm_batch_job.id,
+                    status=JobStatus.cancelled,
+                    actor=actor,
                 )
     except NoResultFound:
         raise HTTPException(status_code=404, detail="Run not found")

@@ -24,7 +24,12 @@ class ErrorCode(Enum):
 class LettaError(Exception):
     """Base class for all Letta related errors."""
 
-    def __init__(self, message: str, code: Optional[ErrorCode] = None, details: Optional[Union[Dict, str, object]] = None):
+    def __init__(
+        self,
+        message: str,
+        code: Optional[ErrorCode] = None,
+        details: Optional[Union[Dict, str, object]] = None,
+    ):
         if details is None:
             details = {}
         self.message = message
@@ -48,7 +53,10 @@ class PendingApprovalError(LettaError):
         self.pending_request_id = pending_request_id
         message = "Cannot send a new message: The agent is waiting for approval on a tool call. Please approve or deny the pending request before continuing."
         code = ErrorCode.CONFLICT
-        details = {"error_code": "PENDING_APPROVAL", "pending_request_id": pending_request_id}
+        details = {
+            "error_code": "PENDING_APPROVAL",
+            "pending_request_id": pending_request_id,
+        }
         super().__init__(message=message, code=code, details=details)
 
 
@@ -145,7 +153,10 @@ class LLMTimeoutError(LLMError):
 class BedrockPermissionError(LettaError):
     """Exception raised for errors in the Bedrock permission process."""
 
-    def __init__(self, message="User does not have access to the Bedrock model with the specified ID."):
+    def __init__(
+        self,
+        message="User does not have access to the Bedrock model with the specified ID.",
+    ):
         super().__init__(message=message)
 
 
@@ -207,13 +218,22 @@ class LettaMessageError(LettaError):
     messages: List[Union["Message", "LettaMessage"]]
     default_error_message: str = "An error occurred with the message."
 
-    def __init__(self, *, messages: List[Union["Message", "LettaMessage"]], explanation: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        *,
+        messages: List[Union["Message", "LettaMessage"]],
+        explanation: Optional[str] = None,
+    ) -> None:
         error_msg = self.construct_error_message(messages, self.default_error_message, explanation)
         super().__init__(error_msg)
         self.messages = messages
 
     @staticmethod
-    def construct_error_message(messages: List[Union["Message", "LettaMessage"]], error_msg: str, explanation: Optional[str] = None) -> str:
+    def construct_error_message(
+        messages: List[Union["Message", "LettaMessage"]],
+        error_msg: str,
+        explanation: Optional[str] = None,
+    ) -> str:
         """Helper method to construct a clean and formatted error message."""
         if explanation:
             error_msg += f" (Explanation: {explanation})"

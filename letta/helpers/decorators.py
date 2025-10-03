@@ -38,7 +38,12 @@ def experimental(feature_name: str, fallback_function: Callable, **kwargs):
 
             @wraps(f)
             async def async_wrapper(*args, **_kwargs):
-                result = await call_function(experimental_checker, is_experimental_checker_async, feature_name, **dict(_kwargs, **kwargs))
+                result = await call_function(
+                    experimental_checker,
+                    is_experimental_checker_async,
+                    feature_name,
+                    **dict(_kwargs, **kwargs),
+                )
                 if result:
                     return await call_function(f, is_f_async, *args, **_kwargs)
                 else:
@@ -87,7 +92,10 @@ class CacheStats:
 
 
 def async_redis_cache(
-    key_func: Callable, prefix: str = REDIS_DEFAULT_CACHE_PREFIX, ttl_s: int = 600, model_class: type[BaseModel] | None = None
+    key_func: Callable,
+    prefix: str = REDIS_DEFAULT_CACHE_PREFIX,
+    ttl_s: int = 600,
+    model_class: type[BaseModel] | None = None,
 ):
     """
     Decorator for caching async function results in Redis. May be a Noop if redis is not available.

@@ -118,7 +118,11 @@ def test_parse_invalid_booleans(strict_parser, invalid_boolean):
         # If it doesn't raise, it might parse partially or incorrectly.
         # Check leftover or the returned data.
         # Adjust your assertions based on actual parser behavior.
-        assert result in [True, False, invalid_boolean], f"Unexpected parse result for {invalid_boolean}: {result}"
+        assert result in [
+            True,
+            False,
+            invalid_boolean,
+        ], f"Unexpected parse result for {invalid_boolean}: {result}"
     except json.JSONDecodeError:
         # This is also a valid outcome for truly invalid strings in strict mode.
         pass

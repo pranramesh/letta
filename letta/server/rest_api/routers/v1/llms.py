@@ -5,7 +5,11 @@ from fastapi import APIRouter, Depends, Query
 from letta.schemas.embedding_config import EmbeddingConfig
 from letta.schemas.enums import ProviderCategory, ProviderType
 from letta.schemas.llm_config import LLMConfig
-from letta.server.rest_api.dependencies import HeaderParams, get_headers, get_letta_server
+from letta.server.rest_api.dependencies import (
+    HeaderParams,
+    get_headers,
+    get_letta_server,
+)
 
 if TYPE_CHECKING:
     from letta.server.server import SyncServer
@@ -34,7 +38,11 @@ async def list_llm_models(
     return models
 
 
-@router.get("/embedding", response_model=List[EmbeddingConfig], operation_id="list_embedding_models")
+@router.get(
+    "/embedding",
+    response_model=List[EmbeddingConfig],
+    operation_id="list_embedding_models",
+)
 async def list_embedding_models(
     server: "SyncServer" = Depends(get_letta_server),
     headers: HeaderParams = Depends(get_headers),

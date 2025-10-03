@@ -101,11 +101,22 @@ class LettaFileToolExecutor(ToolExecutor):
                 status="error",
                 func_return=e,
                 agent_state=agent_state,
-                stderr=[get_friendly_error_msg(function_name=function_name, exception_name=type(e).__name__, exception_message=str(e))],
+                stderr=[
+                    get_friendly_error_msg(
+                        function_name=function_name,
+                        exception_name=type(e).__name__,
+                        exception_message=str(e),
+                    )
+                ],
             )
 
     @trace_method
-    async def open_files(self, agent_state: AgentState, file_requests: List[FileOpenRequest], close_all_others: bool = False) -> str:
+    async def open_files(
+        self,
+        agent_state: AgentState,
+        file_requests: List[FileOpenRequest],
+        close_all_others: bool = False,
+    ) -> str:
         """Open one or more files and load their contents into memory blocks."""
         # Parse raw dictionaries into FileOpenRequest objects if needed
         parsed_requests = []
@@ -141,7 +152,9 @@ class LettaFileToolExecutor(ToolExecutor):
         closed_by_close_all_others = []
         if close_all_others:
             closed_by_close_all_others = await self.files_agents_manager.close_all_other_files(
-                agent_id=agent_state.id, keep_file_names=file_names, actor=self.actor
+                agent_id=agent_state.id,
+                keep_file_names=file_names,
+                actor=self.actor,
             )
 
         # Process each file
@@ -195,8 +208,8 @@ class LettaFileToolExecutor(ToolExecutor):
                 actor=self.actor,
                 visible_content=visible_content,
                 max_files_open=agent_state.max_files_open,
-                start_line=start + 1 if start is not None else None,  # convert to 1-indexed for user display
-                end_line=end if end is not None else None,  # end is already exclusive, shows as 1-indexed inclusive
+                start_line=(start + 1 if start is not None else None),  # convert to 1-indexed for user display
+                end_line=(end if end is not None else None),  # end is already exclusive, shows as 1-indexed inclusive
             )
 
             opened_files.append(file_name)
@@ -353,7 +366,9 @@ class LettaFileToolExecutor(ToolExecutor):
 
         # Get all attached files for this agent
         file_agents = await self.files_agents_manager.list_files_for_agent(
-            agent_id=agent_state.id, per_file_view_window_char_limit=agent_state.per_file_view_window_char_limit, actor=self.actor
+            agent_id=agent_state.id,
+            per_file_view_window_char_limit=agent_state.per_file_view_window_char_limit,
+            actor=self.actor,
         )
 
         if not file_agents:
@@ -442,7 +457,11 @@ class LettaFileToolExecutor(ToolExecutor):
                         if pattern_regex.search(line_content):
                             # Mark this file as having matches for LRU tracking
                             files_with_matches.add(file.file_name)
-                            context = self._get_context_lines(formatted_lines, match_line_num=line_num, context_lines=context_lines or 0)
+                            context = self._get_context_lines(
+                                formatted_lines,
+                                match_line_num=line_num,
+                                context_lines=context_lines or 0,
+                            )
 
                             # Store match data for later pagination
                             all_matches.append((file.file_name, line_num, context))
@@ -456,7 +475,11 @@ class LettaFileToolExecutor(ToolExecutor):
 
         # Mark access for files that had matches
         if files_with_matches:
-            await self.files_agents_manager.mark_access_bulk(agent_id=agent_state.id, file_names=list(files_with_matches), actor=self.actor)
+            await self.files_agents_manager.mark_access_bulk(
+                agent_id=agent_state.id,
+                file_names=list(files_with_matches),
+                actor=self.actor,
+            )
 
         # Handle no matches case
         total_matches = len(all_matches)
@@ -588,7 +611,13 @@ class LettaFileToolExecutor(ToolExecutor):
         # fallback if no results from either source
         return "No results found"
 
-    async def _search_files_turbopuffer(self, agent_state: AgentState, attached_sources: List[Source], query: str, limit: int) -> str:
+    async def _search_files_turbopuffer(
+        self,
+        agent_state: AgentState,
+        attached_sources: List[Source],
+        query: str,
+        limit: int,
+    ) -> str:
         """Search files using Turbopuffer vector database."""
 
         # Get attached sources
@@ -598,7 +627,9 @@ class LettaFileToolExecutor(ToolExecutor):
 
         # Get all attached files for this agent
         file_agents = await self.files_agents_manager.list_files_for_agent(
-            agent_id=agent_state.id, per_file_view_window_char_limit=agent_state.per_file_view_window_char_limit, actor=self.actor
+            agent_id=agent_state.id,
+            per_file_view_window_char_limit=agent_state.per_file_view_window_char_limit,
+            actor=self.actor,
         )
         if not file_agents:
             return "No files are currently attached to search"
@@ -674,7 +705,11 @@ class LettaFileToolExecutor(ToolExecutor):
         if files_with_matches:
             matched_file_names = [name for name in files_with_matches.keys() if name != "Unknown File"]
             if matched_file_names:
-                await self.files_agents_manager.mark_access_bulk(agent_id=agent_state.id, file_names=matched_file_names, actor=self.actor)
+                await self.files_agents_manager.mark_access_bulk(
+                    agent_id=agent_state.id,
+                    file_names=matched_file_names,
+                    actor=self.actor,
+                )
 
         # create summary header
         file_count = len(files_with_matches)
@@ -686,7 +721,13 @@ class LettaFileToolExecutor(ToolExecutor):
         self.logger.info(f"Turbopuffer search completed: {total_hits} matches across {file_count} files")
         return "\n".join(formatted_results)
 
-    async def _search_files_pinecone(self, agent_state: AgentState, attached_sources: List[Source], query: str, limit: int) -> str:
+    async def _search_files_pinecone(
+        self,
+        agent_state: AgentState,
+        attached_sources: List[Source],
+        query: str,
+        limit: int,
+    ) -> str:
         """Search files using Pinecone vector database."""
 
         # Extract unique source_ids
@@ -697,7 +738,9 @@ class LettaFileToolExecutor(ToolExecutor):
 
         # Get all attached files for this agent
         file_agents = await self.files_agents_manager.list_files_for_agent(
-            agent_id=agent_state.id, per_file_view_window_char_limit=agent_state.per_file_view_window_char_limit, actor=self.actor
+            agent_id=agent_state.id,
+            per_file_view_window_char_limit=agent_state.per_file_view_window_char_limit,
+            actor=self.actor,
         )
         if not file_agents:
             return "No files are currently attached to search"
@@ -771,7 +814,11 @@ class LettaFileToolExecutor(ToolExecutor):
         if files_with_matches:
             matched_file_names = [name for name in files_with_matches.keys() if name != "Unknown File"]
             if matched_file_names:
-                await self.files_agents_manager.mark_access_bulk(agent_id=agent_state.id, file_names=matched_file_names, actor=self.actor)
+                await self.files_agents_manager.mark_access_bulk(
+                    agent_id=agent_state.id,
+                    file_names=matched_file_names,
+                    actor=self.actor,
+                )
 
         # Create summary header
         file_count = len(files_with_matches)
@@ -837,7 +884,11 @@ class LettaFileToolExecutor(ToolExecutor):
         if files_with_passages:
             matched_file_names = [name for name in files_with_passages.keys() if name != "Unknown File"]
             if matched_file_names:
-                await self.files_agents_manager.mark_access_bulk(agent_id=agent_state.id, file_names=matched_file_names, actor=self.actor)
+                await self.files_agents_manager.mark_access_bulk(
+                    agent_id=agent_state.id,
+                    file_names=matched_file_names,
+                    actor=self.actor,
+                )
 
         # Create summary header
         file_count = len(files_with_passages)

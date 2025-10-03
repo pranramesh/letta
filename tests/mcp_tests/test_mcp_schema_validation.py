@@ -22,7 +22,12 @@ async def test_mcp_tools_get_health_status():
         # Strict compliant tool
         MCPTool(
             name="strict_tool",
-            inputSchema={"type": "object", "properties": {"text": {"type": "string"}}, "required": ["text"], "additionalProperties": False},
+            inputSchema={
+                "type": "object",
+                "properties": {"text": {"type": "string"}},
+                "required": ["text"],
+                "additionalProperties": False,
+            },
         ),
         # Non-strict tool (free-form object)
         MCPTool(
@@ -35,7 +40,13 @@ async def test_mcp_tools_get_health_status():
             },
         ),
         # Invalid tool (missing type)
-        MCPTool(name="invalid_tool", inputSchema={"properties": {"data": {"type": "string"}}, "required": ["data"]}),
+        MCPTool(
+            name="invalid_tool",
+            inputSchema={
+                "properties": {"data": {"type": "string"}},
+                "required": ["data"],
+            },
+        ),
     ]
 
     # Mock the server and client
@@ -82,7 +93,11 @@ def test_composio_like_schema_marked_non_strict():
     composio_schema = {
         "type": "object",
         "properties": {
-            "message": {"type": "object", "additionalProperties": {}, "description": "Message to send"}  # Free-form, missing "type"
+            "message": {
+                "type": "object",
+                "additionalProperties": {},
+                "description": "Message to send",
+            }  # Free-form, missing "type"
         },
         "required": ["message"],
         "additionalProperties": False,
@@ -101,7 +116,12 @@ def test_empty_object_in_required_marked_invalid():
     schema = {
         "type": "object",
         "properties": {
-            "config": {"type": "object", "properties": {}, "required": [], "additionalProperties": False}  # Empty object schema
+            "config": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": False,
+            }  # Empty object schema
         },
         "required": ["config"],  # Required but allows empty object
         "additionalProperties": False,
@@ -130,7 +150,10 @@ async def test_add_mcp_tool_accepts_non_strict_schemas():
             "additionalProperties": False,
         },
     )
-    non_strict_tool.health = MCPToolHealth(status=SchemaHealth.NON_STRICT_ONLY.value, reasons=["Missing additionalProperties for message"])
+    non_strict_tool.health = MCPToolHealth(
+        status=SchemaHealth.NON_STRICT_ONLY.value,
+        reasons=["Missing additionalProperties for message"],
+    )
 
     # Mock server response
     with patch("letta.server.rest_api.routers.v1.tools.get_letta_server") as mock_get_server:
@@ -143,7 +166,12 @@ async def test_add_mcp_tool_accepts_non_strict_schemas():
 
             # Should accept non-strict schema without raising an exception
             headers = HeaderParams(actor_id="test_user")
-            result = await add_mcp_tool(mcp_server_name="test_server", mcp_tool_name="test_tool", server=mock_server, headers=headers)
+            result = await add_mcp_tool(
+                mcp_server_name="test_server",
+                mcp_tool_name="test_tool",
+                server=mock_server,
+                headers=headers,
+            )
 
             # Verify the tool was added successfully
             assert result is not None
@@ -184,7 +212,12 @@ async def test_add_mcp_tool_rejects_invalid_schemas():
             # Should raise HTTPException for invalid schema
             headers = HeaderParams(actor_id="test_user")
             with pytest.raises(HTTPException) as exc_info:
-                await add_mcp_tool(mcp_server_name="test_server", mcp_tool_name="test_tool", server=mock_server, headers=headers)
+                await add_mcp_tool(
+                    mcp_server_name="test_server",
+                    mcp_tool_name="test_tool",
+                    server=mock_server,
+                    headers=headers,
+                )
 
             assert exc_info.value.status_code == 400
             assert "invalid schema" in exc_info.value.detail["message"].lower()
@@ -223,7 +256,10 @@ def test_mcp_schema_healing_for_optional_fields():
     assert strict_schema["strict"] is True
     assert "a" in strict_schema["parameters"]["required"]
     assert "b" in strict_schema["parameters"]["required"]  # Now required
-    assert set(strict_schema["parameters"]["properties"]["b"]["type"]) == {"integer", "null"}  # Now accepts null
+    assert set(strict_schema["parameters"]["properties"]["b"]["type"]) == {
+        "integer",
+        "null",
+    }  # Now accepts null
 
     # Validate strict schema
     status, _ = validate_complete_json_schema(strict_schema["parameters"])
@@ -255,7 +291,10 @@ def test_mcp_schema_healing_with_anyof():
     assert "a" in strict_schema["parameters"]["required"]
     assert "b" in strict_schema["parameters"]["required"]  # Now required
     # Type should be flattened array with deduplication
-    assert set(strict_schema["parameters"]["properties"]["b"]["type"]) == {"integer", "null"}
+    assert set(strict_schema["parameters"]["properties"]["b"]["type"]) == {
+        "integer",
+        "null",
+    }
 
     # Validate strict schema
     status, _ = validate_complete_json_schema(strict_schema["parameters"])
@@ -358,7 +397,11 @@ def test_mcp_schema_with_uuid_format():
             "type": "object",
             "properties": {
                 "session_id": {
-                    "anyOf": [{"type": "string"}, {"format": "uuid", "type": "string"}, {"type": "null"}],
+                    "anyOf": [
+                        {"type": "string"},
+                        {"format": "uuid", "type": "string"},
+                        {"type": "null"},
+                    ],
                     "description": "Session ID that can be a string, UUID, or null",
                 },
             },
@@ -412,10 +455,20 @@ def test_mcp_schema_healing_only_in_strict_mode():
     # Test with strict=True - healing happens
     strict = generate_tool_schema_for_mcp(mcp_tool, append_heartbeat=False, strict=True)
     assert strict["strict"] is True  # strict flag is set
-    assert set(strict["parameters"]["required"]) == {"required_field", "optional_field1", "optional_field2"}
+    assert set(strict["parameters"]["required"]) == {
+        "required_field",
+        "optional_field1",
+        "optional_field2",
+    }
     assert strict["parameters"]["properties"]["required_field"]["type"] == "string"
-    assert set(strict["parameters"]["properties"]["optional_field1"]["type"]) == {"integer", "null"}
-    assert set(strict["parameters"]["properties"]["optional_field2"]["type"]) == {"boolean", "null"}
+    assert set(strict["parameters"]["properties"]["optional_field1"]["type"]) == {
+        "integer",
+        "null",
+    }
+    assert set(strict["parameters"]["properties"]["optional_field2"]["type"]) == {
+        "boolean",
+        "null",
+    }
 
     # Both should be strict compliant (validator is relaxed)
     status1, _ = validate_complete_json_schema(non_strict["parameters"])

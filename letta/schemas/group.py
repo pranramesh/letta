@@ -157,13 +157,25 @@ class VoiceSleeptimeManagerUpdate(ManagerConfig):
 
 
 ManagerConfigUnion = Annotated[
-    Union[RoundRobinManager, SupervisorManager, DynamicManager, SleeptimeManager, VoiceSleeptimeManager],
+    Union[
+        RoundRobinManager,
+        SupervisorManager,
+        DynamicManager,
+        SleeptimeManager,
+        VoiceSleeptimeManager,
+    ],
     Field(discriminator="manager_type"),
 ]
 
 
 ManagerConfigUpdateUnion = Annotated[
-    Union[RoundRobinManagerUpdate, SupervisorManagerUpdate, DynamicManagerUpdate, SleeptimeManagerUpdate, VoiceSleeptimeManagerUpdate],
+    Union[
+        RoundRobinManagerUpdate,
+        SupervisorManagerUpdate,
+        DynamicManagerUpdate,
+        SleeptimeManagerUpdate,
+        VoiceSleeptimeManagerUpdate,
+    ],
     Field(discriminator="manager_type"),
 ]
 

@@ -97,9 +97,15 @@ class AnthropicProvider(Provider):
             anthropic_client = anthropic.Anthropic(api_key=self.api_key)
             try:
                 # just use a cheap model to count some tokens - as of 5/7/2025 this is faster than fetching the list of models
-                anthropic_client.messages.count_tokens(model=MODEL_LIST[-1]["name"], messages=[{"role": "user", "content": "a"}])
+                anthropic_client.messages.count_tokens(
+                    model=MODEL_LIST[-1]["name"],
+                    messages=[{"role": "user", "content": "a"}],
+                )
             except anthropic.AuthenticationError as e:
-                raise LLMAuthenticationError(message=f"Failed to authenticate with Anthropic: {e}", code=ErrorCode.UNAUTHENTICATED)
+                raise LLMAuthenticationError(
+                    message=f"Failed to authenticate with Anthropic: {e}",
+                    code=ErrorCode.UNAUTHENTICATED,
+                )
             except Exception as e:
                 raise LLMError(message=f"{e}", code=ErrorCode.INTERNAL_SERVER_ERROR)
         else:
@@ -128,7 +134,13 @@ class AnthropicProvider(Provider):
     def _list_llm_models(self, models) -> list[LLMConfig]:
         configs = []
         for model in models:
-            if any((model.get("type") != "model", "id" not in model, model.get("id").startswith("claude-2"))):
+            if any(
+                (
+                    model.get("type") != "model",
+                    "id" not in model,
+                    model.get("id").startswith("claude-2"),
+                )
+            ):
                 continue
 
             # Anthropic doesn't return the context window in their API

@@ -67,7 +67,13 @@ class LettaCoreToolExecutor(ToolExecutor):
                 status="error",
                 func_return=e,
                 agent_state=agent_state,
-                stderr=[get_friendly_error_msg(function_name=function_name, exception_name=type(e).__name__, exception_message=str(e))],
+                stderr=[
+                    get_friendly_error_msg(
+                        function_name=function_name,
+                        exception_name=type(e).__name__,
+                        exception_message=str(e),
+                    )
+                ],
             )
 
     async def send_message(self, agent_state: AgentState, actor: User, message: str) -> Optional[str]:
@@ -282,7 +288,11 @@ class LettaCoreToolExecutor(ToolExecutor):
             raise e
 
     async def archival_memory_insert(
-        self, agent_state: AgentState, actor: User, content: str, tags: Optional[list[str]] = None
+        self,
+        agent_state: AgentState,
+        actor: User,
+        content: str,
+        tags: Optional[list[str]] = None,
     ) -> Optional[str]:
         await self.passage_manager.insert_passage(
             agent_state=agent_state,
@@ -320,7 +330,14 @@ class LettaCoreToolExecutor(ToolExecutor):
         await self.agent_manager.update_memory_if_changed_async(agent_id=agent_state.id, new_memory=agent_state.memory, actor=actor)
         return None
 
-    async def memory_replace(self, agent_state: AgentState, actor: User, label: str, old_str: str, new_str: str) -> str:
+    async def memory_replace(
+        self,
+        agent_state: AgentState,
+        actor: User,
+        label: str,
+        old_str: str,
+        new_str: str,
+    ) -> str:
         if agent_state.memory.get_block(label).read_only:
             raise ValueError(f"{READ_ONLY_BLOCK_EDIT_ERROR}")
 

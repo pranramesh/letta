@@ -24,7 +24,8 @@ print("Agent tools", [tool.name for tool in agent.tools])
 
 # message the agent
 response = client.agents.messages.create(
-    agent_id=agent.id, messages=[{"role": "user", "content": "Star the github repo `letta` by `letta-ai`"}]
+    agent_id=agent.id,
+    messages=[{"role": "user", "content": "Star the github repo `letta` by `letta-ai`"}],
 )
 for message in response.messages:
     print(message)

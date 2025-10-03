@@ -43,7 +43,11 @@ def find_python_executable(local_configs: LocalSandboxConfig) -> str:
     return python_exec
 
 
-def run_subprocess(command: list, env: Optional[Dict[str, str]] = None, fail_msg: str = "Command failed"):
+def run_subprocess(
+    command: list,
+    env: Optional[Dict[str, str]] = None,
+    fail_msg: str = "Command failed",
+):
     """
     Helper to execute a subprocess with logging and error handling.
 
@@ -77,7 +81,16 @@ def ensure_pip_is_up_to_date(python_exec: str, env: Optional[Dict[str, str]] = N
         env (dict, optional): Environment variables to pass to subprocess.
     """
     run_subprocess(
-        [python_exec, "-m", "pip", "install", "--upgrade", "pip", "setuptools", "wheel"],
+        [
+            python_exec,
+            "-m",
+            "pip",
+            "install",
+            "--upgrade",
+            "pip",
+            "setuptools",
+            "wheel",
+        ],
         env=env,
         fail_msg="Failed to upgrade pip, setuptools, and wheel.",
     )

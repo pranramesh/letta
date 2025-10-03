@@ -39,7 +39,10 @@ class PassageTag(SqlalchemyBase, OrganizationMixin):
 
     # foreign keys
     passage_id: Mapped[str] = mapped_column(
-        String, ForeignKey("archival_passages.id", ondelete="CASCADE"), nullable=False, doc="ID of the passage this tag belongs to"
+        String,
+        ForeignKey("archival_passages.id", ondelete="CASCADE"),
+        nullable=False,
+        doc="ID of the passage this tag belongs to",
     )
 
     archive_id: Mapped[str] = mapped_column(

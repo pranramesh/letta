@@ -12,7 +12,10 @@ logger = logging.getLogger(__name__)
 
 class BaseToolRule(LettaBase):
     __id_prefix__ = "tool_rule"
-    tool_name: str = Field(..., description="The name of the tool. Must exist in the database for the user's organization.")
+    tool_name: str = Field(
+        ...,
+        description="The name of the tool. Must exist in the database for the user's organization.",
+    )
     type: ToolRuleType = Field(..., description="The type of the message.")
     prompt_template: Optional[str] = Field(
         None,
@@ -29,7 +32,12 @@ class BaseToolRule(LettaBase):
             return False
         return self.tool_name == other.tool_name and self.type == other.type
 
-    def get_valid_tools(self, tool_call_history: List[str], available_tools: Set[str], last_function_response: Optional[str]) -> set[str]:
+    def get_valid_tools(
+        self,
+        tool_call_history: List[str],
+        available_tools: Set[str],
+        last_function_response: Optional[str],
+    ) -> set[str]:
         raise NotImplementedError
 
     def render_prompt(self) -> str | None:
@@ -59,7 +67,12 @@ class ChildToolRule(BaseToolRule):
             return False
         return self.tool_name == other.tool_name and self.type == other.type and sorted(self.children) == sorted(other.children)
 
-    def get_valid_tools(self, tool_call_history: List[str], available_tools: Set[str], last_function_response: Optional[str]) -> Set[str]:
+    def get_valid_tools(
+        self,
+        tool_call_history: List[str],
+        available_tools: Set[str],
+        last_function_response: Optional[str],
+    ) -> Set[str]:
         last_tool = tool_call_history[-1] if tool_call_history else None
         return set(self.children) if last_tool == self.tool_name else available_tools
 
@@ -87,7 +100,12 @@ class ParentToolRule(BaseToolRule):
             return False
         return self.tool_name == other.tool_name and self.type == other.type and sorted(self.children) == sorted(other.children)
 
-    def get_valid_tools(self, tool_call_history: List[str], available_tools: Set[str], last_function_response: Optional[str]) -> Set[str]:
+    def get_valid_tools(
+        self,
+        tool_call_history: List[str],
+        available_tools: Set[str],
+        last_function_response: Optional[str],
+    ) -> Set[str]:
         last_tool = tool_call_history[-1] if tool_call_history else None
         return set(self.children) if last_tool == self.tool_name else available_tools - set(self.children)
 
@@ -102,16 +120,30 @@ class ConditionalToolRule(BaseToolRule):
     """
 
     type: Literal[ToolRuleType.conditional] = ToolRuleType.conditional
-    default_child: Optional[str] = Field(None, description="The default child tool to be called. If None, any tool can be called.")
+    default_child: Optional[str] = Field(
+        None,
+        description="The default child tool to be called. If None, any tool can be called.",
+    )
     child_output_mapping: Dict[Any, str] = Field(..., description="The output case to check for mapping")
-    require_output_mapping: bool = Field(default=False, description="Whether to throw an error when output doesn't match any case")
+    require_output_mapping: bool = Field(
+        default=False,
+        description="Whether to throw an error when output doesn't match any case",
+    )
     prompt_template: Optional[str] = Field(default=None, description="Optional template string (ignored).")
 
     def __hash__(self):
         """Hash including all configuration fields."""
         # convert dict to sorted tuple of items for consistent hashing
         mapping_items = tuple(sorted(self.child_output_mapping.items()))
-        return hash((self.tool_name, self.type, self.default_child, mapping_items, self.require_output_mapping))
+        return hash(
+            (
+                self.tool_name,
+                self.type,
+                self.default_child,
+                mapping_items,
+                self.require_output_mapping,
+            )
+        )
 
     def __eq__(self, other):
         """Equality including all configuration fields."""
@@ -125,7 +157,12 @@ class ConditionalToolRule(BaseToolRule):
             and self.require_output_mapping == other.require_output_mapping
         )
 
-    def get_valid_tools(self, tool_call_history: List[str], available_tools: Set[str], last_function_response: Optional[str]) -> Set[str]:
+    def get_valid_tools(
+        self,
+        tool_call_history: List[str],
+        available_tools: Set[str],
+        last_function_response: Optional[str],
+    ) -> Set[str]:
         """Determine valid tools based on function output mapping."""
         if not tool_call_history or tool_call_history[-1] != self.tool_name:
             return available_tools  # No constraints if this rule doesn't apply
@@ -221,7 +258,12 @@ class RequiredBeforeExitToolRule(BaseToolRule):
     type: Literal[ToolRuleType.required_before_exit] = ToolRuleType.required_before_exit
     prompt_template: Optional[str] = Field(default=None, description="Optional template string (ignored).")
 
-    def get_valid_tools(self, tool_call_history: List[str], available_tools: Set[str], last_function_response: Optional[str]) -> Set[str]:
+    def get_valid_tools(
+        self,
+        tool_call_history: List[str],
+        available_tools: Set[str],
+        last_function_response: Optional[str],
+    ) -> Set[str]:
         """Returns all available tools - the logic for preventing exit is handled elsewhere."""
         return available_tools
 
@@ -235,7 +277,10 @@ class MaxCountPerStepToolRule(BaseToolRule):
     """
 
     type: Literal[ToolRuleType.max_count_per_step] = ToolRuleType.max_count_per_step
-    max_count_limit: int = Field(..., description="The max limit for the total number of times this tool can be invoked in a single step.")
+    max_count_limit: int = Field(
+        ...,
+        description="The max limit for the total number of times this tool can be invoked in a single step.",
+    )
     prompt_template: Optional[str] = Field(default=None, description="Optional template string (ignored).")
 
     def __hash__(self):
@@ -248,7 +293,12 @@ class MaxCountPerStepToolRule(BaseToolRule):
             return False
         return self.tool_name == other.tool_name and self.type == other.type and self.max_count_limit == other.max_count_limit
 
-    def get_valid_tools(self, tool_call_history: List[str], available_tools: Set[str], last_function_response: Optional[str]) -> Set[str]:
+    def get_valid_tools(
+        self,
+        tool_call_history: List[str],
+        available_tools: Set[str],
+        last_function_response: Optional[str],
+    ) -> Set[str]:
         """Restricts the tool if it has been called max_count_limit times in the current step."""
         count = tool_call_history.count(self.tool_name)
 
@@ -269,7 +319,12 @@ class RequiresApprovalToolRule(BaseToolRule):
 
     type: Literal[ToolRuleType.requires_approval] = ToolRuleType.requires_approval
 
-    def get_valid_tools(self, tool_call_history: List[str], available_tools: Set[str], last_function_response: Optional[str]) -> Set[str]:
+    def get_valid_tools(
+        self,
+        tool_call_history: List[str],
+        available_tools: Set[str],
+        last_function_response: Optional[str],
+    ) -> Set[str]:
         """Does not enforce any restrictions on which tools are valid"""
         return available_tools
 

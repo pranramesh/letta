@@ -68,8 +68,17 @@ class TestOpenAIEmbedder:
     async def test_token_limit_retry_splits_batch(self, embedder, mock_user):
         """Test that token limit errors trigger batch splitting and retry"""
         # create a mock token limit error
-        mock_error_body = {"error": {"code": "max_tokens_per_request", "message": "Requested 319270 tokens, max 300000 tokens per request"}}
-        token_limit_error = openai.BadRequestError(message="Token limit exceeded", response=Mock(status_code=400), body=mock_error_body)
+        mock_error_body = {
+            "error": {
+                "code": "max_tokens_per_request",
+                "message": "Requested 319270 tokens, max 300000 tokens per request",
+            }
+        }
+        token_limit_error = openai.BadRequestError(
+            message="Token limit exceeded",
+            response=Mock(status_code=400),
+            body=mock_error_body,
+        )
 
         # first call fails with token limit, subsequent calls succeed
         call_count = 0
@@ -102,14 +111,25 @@ class TestOpenAIEmbedder:
     async def test_token_limit_error_detection(self, embedder):
         """Test various token limit error detection patterns"""
         # test openai BadRequestError with proper structure
-        mock_error_body = {"error": {"code": "max_tokens_per_request", "message": "Requested 319270 tokens, max 300000 tokens per request"}}
-        openai_error = openai.BadRequestError(message="Token limit exceeded", response=Mock(status_code=400), body=mock_error_body)
+        mock_error_body = {
+            "error": {
+                "code": "max_tokens_per_request",
+                "message": "Requested 319270 tokens, max 300000 tokens per request",
+            }
+        }
+        openai_error = openai.BadRequestError(
+            message="Token limit exceeded",
+            response=Mock(status_code=400),
+            body=mock_error_body,
+        )
         assert embedder._is_token_limit_error(openai_error) is True
 
         # test error with message but no code
         mock_error_body_no_code = {"error": {"message": "max_tokens_per_request exceeded"}}
         openai_error_no_code = openai.BadRequestError(
-            message="Token limit exceeded", response=Mock(status_code=400), body=mock_error_body_no_code
+            message="Token limit exceeded",
+            response=Mock(status_code=400),
+            body=mock_error_body_no_code,
         )
         assert embedder._is_token_limit_error(openai_error_no_code) is True
 
@@ -122,7 +142,9 @@ class TestOpenAIEmbedder:
         assert embedder._is_token_limit_error(other_error) is False
 
         auth_error = openai.AuthenticationError(
-            message="Invalid API key", response=Mock(status_code=401), body={"error": {"code": "invalid_api_key"}}
+            message="Invalid API key",
+            response=Mock(status_code=401),
+            body={"error": {"code": "invalid_api_key"}},
         )
         assert embedder._is_token_limit_error(auth_error) is False
 
@@ -131,7 +153,9 @@ class TestOpenAIEmbedder:
         """Test that non-token errors are properly handled and re-raised"""
         # create a non-token error
         auth_error = openai.AuthenticationError(
-            message="Invalid API key", response=Mock(status_code=401), body={"error": {"code": "invalid_api_key"}}
+            message="Invalid API key",
+            response=Mock(status_code=401),
+            body={"error": {"code": "invalid_api_key"}},
         )
 
         # mock handle_llm_error to return a standardized error
@@ -153,8 +177,17 @@ class TestOpenAIEmbedder:
     async def test_single_item_batch_no_retry(self, embedder, mock_user):
         """Test that single-item batches don't retry on token limit errors"""
         # create a token limit error
-        mock_error_body = {"error": {"code": "max_tokens_per_request", "message": "Requested 319270 tokens, max 300000 tokens per request"}}
-        token_limit_error = openai.BadRequestError(message="Token limit exceeded", response=Mock(status_code=400), body=mock_error_body)
+        mock_error_body = {
+            "error": {
+                "code": "max_tokens_per_request",
+                "message": "Requested 319270 tokens, max 300000 tokens per request",
+            }
+        }
+        token_limit_error = openai.BadRequestError(
+            message="Token limit exceeded",
+            response=Mock(status_code=400),
+            body=mock_error_body,
+        )
 
         handled_error = LLMBadRequestError(message="Handled token limit error", code=ErrorCode.INVALID_ARGUMENT)
         embedder.client.handle_llm_error.return_value = handled_error
@@ -210,7 +243,10 @@ class TestOpenAIEmbedder:
         # verify order is preserved
         assert len(passages) == 4
         assert passages[0].text == "chunk 1"
-        assert passages[0].embedding[:2] == [0.1, 0.1]  # check first 2 values before padding
+        assert passages[0].embedding[:2] == [
+            0.1,
+            0.1,
+        ]  # check first 2 values before padding
         assert passages[1].text == "chunk 2"
         assert passages[1].embedding[:2] == [0.2, 0.2]
         assert passages[2].text == "chunk 3"
@@ -227,9 +263,13 @@ class TestFileProcessorWithPinecone:
         """Test that file processor sets total_chunks and chunks_embedded=0 when using Pinecone"""
         from letta.schemas.enums import FileProcessingStatus
         from letta.schemas.file import FileMetadata
-        from letta.services.file_processor.embedder.pinecone_embedder import PineconeEmbedder
+        from letta.services.file_processor.embedder.pinecone_embedder import (
+            PineconeEmbedder,
+        )
         from letta.services.file_processor.file_processor import FileProcessor
-        from letta.services.file_processor.parser.markitdown_parser import MarkitdownFileParser
+        from letta.services.file_processor.parser.markitdown_parser import (
+            MarkitdownFileParser,
+        )
 
         # Mock dependencies
         mock_actor = Mock()
@@ -249,7 +289,10 @@ class TestFileProcessorWithPinecone:
         )
 
         # Mock only the Pinecone-specific functionality
-        with patch("letta.services.file_processor.embedder.pinecone_embedder.PINECONE_AVAILABLE", True):
+        with patch(
+            "letta.services.file_processor.embedder.pinecone_embedder.PINECONE_AVAILABLE",
+            True,
+        ):
             with patch("letta.services.file_processor.embedder.pinecone_embedder.upsert_file_records_to_pinecone_index") as mock_upsert:
                 # Mock successful Pinecone upsert
                 mock_upsert.return_value = None
@@ -269,7 +312,11 @@ class TestFileProcessorWithPinecone:
 
                 # Mock managers to track calls
                 with patch.object(file_processor.file_manager, "update_file_status", new=track_update):
-                    with patch.object(file_processor.passage_manager, "create_many_source_passages_async", new=AsyncMock()):
+                    with patch.object(
+                        file_processor.passage_manager,
+                        "create_many_source_passages_async",
+                        new=AsyncMock(),
+                    ):
                         # Process the imported file (which has content)
                         await file_processor.process_imported_file(mock_file, mock_file.source_id)
 

@@ -59,7 +59,8 @@ def upgrade() -> None:
         source_id, original_name, duplicate_number = row
         new_name = f"{original_name}_{duplicate_number}"
         connection.execute(
-            sa.text("UPDATE sources SET name = :new_name WHERE id = :source_id"), {"new_name": new_name, "source_id": source_id}
+            sa.text("UPDATE sources SET name = :new_name WHERE id = :source_id"),
+            {"new_name": new_name, "source_id": source_id},
         )
 
     op.create_unique_constraint("uq_source_name_organization", "sources", ["name", "organization_id"])

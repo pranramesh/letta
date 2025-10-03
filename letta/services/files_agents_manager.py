@@ -194,10 +194,20 @@ class FileAgentManager:
             # Build compound OR conditions for each agent-file pair
             conditions = []
             for agent_id, file_id in agent_file_pairs:
-                conditions.append(and_(FileAgentModel.agent_id == agent_id, FileAgentModel.file_id == file_id))
+                conditions.append(
+                    and_(
+                        FileAgentModel.agent_id == agent_id,
+                        FileAgentModel.file_id == file_id,
+                    )
+                )
 
             # Create delete statement with all conditions
-            stmt = delete(FileAgentModel).where(and_(or_(*conditions), FileAgentModel.organization_id == actor.organization_id))
+            stmt = delete(FileAgentModel).where(
+                and_(
+                    or_(*conditions),
+                    FileAgentModel.organization_id == actor.organization_id,
+                )
+            )
 
             result = await session.execute(stmt)
             await session.commit()
@@ -430,7 +440,7 @@ class FileAgentManager:
                         FileAgentModel.organization_id == actor.organization_id,
                         FileAgentModel.is_open.is_(True),
                         # Only add the NOT IN filter when there are names to keep
-                        ~FileAgentModel.file_name.in_(keep_file_names) if keep_file_names else True,
+                        (~FileAgentModel.file_name.in_(keep_file_names) if keep_file_names else True),
                     )
                 )
                 .values(is_open=False, visible_content=None)

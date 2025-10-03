@@ -10,7 +10,11 @@ from letta.schemas.group import Group, GroupCreate, GroupUpdate, ManagerType
 from letta.schemas.letta_message import LettaMessageUnion, LettaMessageUpdateUnion
 from letta.schemas.letta_request import LettaRequest, LettaStreamingRequest
 from letta.schemas.letta_response import LettaResponse
-from letta.server.rest_api.dependencies import HeaderParams, get_headers, get_letta_server
+from letta.server.rest_api.dependencies import (
+    HeaderParams,
+    get_headers,
+    get_letta_server,
+)
 from letta.server.server import SyncServer
 
 router = APIRouter(prefix="/groups", tags=["groups"])
@@ -22,14 +26,17 @@ async def list_groups(
     headers: HeaderParams = Depends(get_headers),
     manager_type: Optional[ManagerType] = Query(None, description="Search groups by manager type"),
     before: Optional[str] = Query(
-        None, description="Group ID cursor for pagination. Returns groups that come before this group ID in the specified sort order"
+        None,
+        description="Group ID cursor for pagination. Returns groups that come before this group ID in the specified sort order",
     ),
     after: Optional[str] = Query(
-        None, description="Group ID cursor for pagination. Returns groups that come after this group ID in the specified sort order"
+        None,
+        description="Group ID cursor for pagination. Returns groups that come after this group ID in the specified sort order",
     ),
     limit: Optional[int] = Query(50, description="Maximum number of groups to return"),
     order: Literal["asc", "desc"] = Query(
-        "asc", description="Sort order for groups by creation time. 'asc' for oldest first, 'desc' for newest first"
+        "asc",
+        description="Sort order for groups by creation time. 'asc' for oldest first, 'desc' for newest first",
     ),
     order_by: Literal["created_at"] = Query("created_at", description="Field to sort by"),
     project_id: Optional[str] = Query(None, description="Search groups by project id"),
@@ -90,7 +97,9 @@ async def create_group(
     server: "SyncServer" = Depends(get_letta_server),
     headers: HeaderParams = Depends(get_headers),
     x_project: Optional[str] = Header(
-        None, alias="X-Project", description="The project slug to associate with the group (cloud only)."
+        None,
+        alias="X-Project",
+        description="The project slug to associate with the group (cloud only).",
     ),  # Only handled by next js middleware
 ):
     """
@@ -110,7 +119,9 @@ async def modify_group(
     server: "SyncServer" = Depends(get_letta_server),
     headers: HeaderParams = Depends(get_headers),
     x_project: Optional[str] = Header(
-        None, alias="X-Project", description="The project slug to associate with the group (cloud only)."
+        None,
+        alias="X-Project",
+        description="The project slug to associate with the group (cloud only).",
     ),  # Only handled by next js middleware
 ):
     """
@@ -135,9 +146,15 @@ async def delete_group(
     actor = await server.user_manager.get_actor_or_default_async(actor_id=headers.actor_id)
     try:
         await server.group_manager.delete_group_async(group_id=group_id, actor=actor)
-        return JSONResponse(status_code=status.HTTP_200_OK, content={"message": f"Group id={group_id} successfully deleted"})
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"message": f"Group id={group_id} successfully deleted"},
+        )
     except NoResultFound:
-        raise HTTPException(status_code=404, detail=f"Group id={group_id} not found for user_id={actor.id}.")
+        raise HTTPException(
+            status_code=404,
+            detail=f"Group id={group_id} not found for user_id={actor.id}.",
+        )
 
 
 @router.post(
@@ -210,11 +227,21 @@ async def send_group_message_streaming(
 
 
 GroupMessagesResponse = Annotated[
-    List[LettaMessageUnion], Field(json_schema_extra={"type": "array", "items": {"$ref": "#/components/schemas/LettaMessageUnion"}})
+    List[LettaMessageUnion],
+    Field(
+        json_schema_extra={
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/LettaMessageUnion"},
+        }
+    ),
 ]
 
 
-@router.patch("/{group_id}/messages/{message_id}", response_model=LettaMessageUnion, operation_id="modify_group_message")
+@router.patch(
+    "/{group_id}/messages/{message_id}",
+    response_model=LettaMessageUnion,
+    operation_id="modify_group_message",
+)
 async def modify_group_message(
     group_id: str,
     message_id: str,
@@ -230,7 +257,11 @@ async def modify_group_message(
     return await server.message_manager.update_message_by_letta_message(message_id=message_id, letta_message_update=request, actor=actor)
 
 
-@router.get("/{group_id}/messages", response_model=GroupMessagesResponse, operation_id="list_group_messages")
+@router.get(
+    "/{group_id}/messages",
+    response_model=GroupMessagesResponse,
+    operation_id="list_group_messages",
+)
 async def list_group_messages(
     group_id: str,
     before: Optional[str] = Query(
@@ -243,7 +274,8 @@ async def list_group_messages(
     ),
     limit: Optional[int] = Query(10, description="Maximum number of messages to retrieve"),
     order: Literal["asc", "desc"] = Query(
-        "desc", description="Sort order for messages by creation time. 'asc' for oldest first, 'desc' for newest first"
+        "desc",
+        description="Sort order for messages by creation time. 'asc' for oldest first, 'desc' for newest first",
     ),
     order_by: Literal["created_at"] = Query("created_at", description="Field to sort by"),
     use_assistant_message: bool = Query(True, description="Whether to use assistant messages"),
@@ -285,7 +317,11 @@ async def list_group_messages(
         )
 
 
-@router.patch("/{group_id}/reset-messages", response_model=None, operation_id="reset_group_messages")
+@router.patch(
+    "/{group_id}/reset-messages",
+    response_model=None,
+    operation_id="reset_group_messages",
+)
 async def reset_group_messages(
     group_id: str,
     server: "SyncServer" = Depends(get_letta_server),

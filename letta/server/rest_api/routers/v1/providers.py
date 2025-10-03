@@ -6,8 +6,17 @@ from fastapi.responses import JSONResponse
 from letta.errors import LLMAuthenticationError
 from letta.orm.errors import NoResultFound
 from letta.schemas.enums import ProviderType
-from letta.schemas.providers import Provider, ProviderCheck, ProviderCreate, ProviderUpdate
-from letta.server.rest_api.dependencies import HeaderParams, get_headers, get_letta_server
+from letta.schemas.providers import (
+    Provider,
+    ProviderCheck,
+    ProviderCreate,
+    ProviderUpdate,
+)
+from letta.server.rest_api.dependencies import (
+    HeaderParams,
+    get_headers,
+    get_letta_server,
+)
 
 if TYPE_CHECKING:
     from letta.server.server import SyncServer
@@ -27,7 +36,8 @@ async def list_providers(
     ),
     limit: Optional[int] = Query(50, description="Maximum number of providers to return"),
     order: Literal["asc", "desc"] = Query(
-        "desc", description="Sort order for providers by creation time. 'asc' for oldest first, 'desc' for newest first"
+        "desc",
+        description="Sort order for providers by creation time. 'asc' for oldest first, 'desc' for newest first",
     ),
     order_by: Literal["created_at"] = Query("created_at", description="Field to sort by"),
     name: Optional[str] = Query(None, description="Filter providers by name"),
@@ -41,7 +51,13 @@ async def list_providers(
     try:
         actor = await server.user_manager.get_actor_or_default_async(actor_id=headers.actor_id)
         providers = await server.provider_manager.list_providers_async(
-            before=before, after=after, limit=limit, actor=actor, name=name, provider_type=provider_type, ascending=(order == "asc")
+            before=before,
+            after=after,
+            limit=limit,
+            actor=actor,
+            name=name,
+            provider_type=provider_type,
+            ascending=(order == "asc"),
         )
     except HTTPException:
         raise
@@ -112,7 +128,8 @@ async def check_provider(
             request.base_url = None
         await server.provider_manager.check_provider_api_key(provider_check=request)
         return JSONResponse(
-            status_code=status.HTTP_200_OK, content={"message": f"Valid api key for provider_type={request.provider_type.value}"}
+            status_code=status.HTTP_200_OK,
+            content={"message": f"Valid api key for provider_type={request.provider_type.value}"},
         )
     except LLMAuthenticationError as e:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"{e.message}")
@@ -132,9 +149,15 @@ async def delete_provider(
     try:
         actor = await server.user_manager.get_actor_or_default_async(actor_id=headers.actor_id)
         await server.provider_manager.delete_provider_by_id_async(provider_id=provider_id, actor=actor)
-        return JSONResponse(status_code=status.HTTP_200_OK, content={"message": f"Provider id={provider_id} successfully deleted"})
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"message": f"Provider id={provider_id} successfully deleted"},
+        )
     except NoResultFound:
-        raise HTTPException(status_code=404, detail=f"Provider provider_id={provider_id} not found for user_id={actor.id}.")
+        raise HTTPException(
+            status_code=404,
+            detail=f"Provider provider_id={provider_id} not found for user_id={actor.id}.",
+        )
     except HTTPException:
         raise
     except Exception as e:

@@ -176,7 +176,11 @@ def preferences_tool(client: LettaSDKClient):
         Returns:
             The user's preference for the specified category, or "not specified" if unknown.
         """
-        preferences = {"notification": "email only", "theme": "dark mode", "language": "english"}
+        preferences = {
+            "notification": "email only",
+            "theme": "dark mode",
+            "language": "english",
+        }
         return preferences.get(category, "not specified")
 
     tool = client.tools.upsert_from_function(func=get_user_preferences, tags=["user", "preferences"])
@@ -1128,7 +1132,10 @@ def test_pydantic_inventory_management_tool(e2b_sandbox_mode, client: LettaSDKCl
 def test_pydantic_task_planning_tool(e2b_sandbox_mode, client: LettaSDKClient):
     class Step(BaseModel):
         name: str = Field(..., description="Name of the step.")
-        description: str = Field(..., description="An exhaustive description of what this step is trying to achieve.")
+        description: str = Field(
+            ...,
+            description="An exhaustive description of what this step is trying to achieve.",
+        )
 
     class StepsList(BaseModel):
         steps: List[Step] = Field(..., description="List of steps to add to the task plan.")
@@ -1140,7 +1147,11 @@ def test_pydantic_task_planning_tool(e2b_sandbox_mode, client: LettaSDKClient):
         return steps
 
     # test creation
-    client.tools.upsert_from_function(func=create_task_plan, args_schema=StepsList, tags=["planning", "task", "pydantic_test"])
+    client.tools.upsert_from_function(
+        func=create_task_plan,
+        args_schema=StepsList,
+        tags=["planning", "task", "pydantic_test"],
+    )
 
     # test upsert
     new_steps_description = "NEW"
@@ -1149,7 +1160,11 @@ def test_pydantic_task_planning_tool(e2b_sandbox_mode, client: LettaSDKClient):
         steps: List[Step] = Field(..., description=new_steps_description)
         explanation: str = Field(..., description="Explanation for the list of steps.")
 
-    tool = client.tools.upsert_from_function(func=create_task_plan, args_schema=StepsListModified, description=new_steps_description)
+    tool = client.tools.upsert_from_function(
+        func=create_task_plan,
+        args_schema=StepsListModified,
+        description=new_steps_description,
+    )
     assert tool.description == new_steps_description
 
     assert tool is not None
@@ -1305,7 +1320,10 @@ def test_preview_payload(client: LettaSDKClient):
         assert "Letta" in system_msg["content"]
 
         # Assistant tool call: send_message greeting
-        assistant_tool_msg = next((m for m in messages if m.get("role") == "assistant" and m.get("tool_calls")), None)
+        assistant_tool_msg = next(
+            (m for m in messages if m.get("role") == "assistant" and m.get("tool_calls")),
+            None,
+        )
         assert assistant_tool_msg is not None, f"No assistant tool call found in messages: {messages}"
         assert isinstance(assistant_tool_msg.get("tool_calls"), list) and len(assistant_tool_msg["tool_calls"]) == 1
         tool_call = assistant_tool_msg["tool_calls"][0]
@@ -1319,7 +1337,10 @@ def test_preview_payload(client: LettaSDKClient):
         assert "thinking" in args and "Persona activated" in args["thinking"]
 
         # Tool result corresponding to the tool call
-        tool_result_msg = next((m for m in messages if m.get("role") == "tool" and m.get("tool_call_id") == tool_call["id"]), None)
+        tool_result_msg = next(
+            (m for m in messages if m.get("role") == "tool" and m.get("tool_call_id") == tool_call["id"]),
+            None,
+        )
         assert tool_result_msg is not None, "No tool result found matching the assistant tool call id"
         tool_content = json.loads(tool_result_msg.get("content", "{}"))
         assert tool_content.get("status") == "OK"
@@ -1330,7 +1351,10 @@ def test_preview_payload(client: LettaSDKClient):
             None,
         )
         assert user_login_msg is not None, "Expected a user login event in messages"
-        user_text_msg = next((m for m in messages if m.get("role") == "user" and m.get("content") == "text"), None)
+        user_text_msg = next(
+            (m for m in messages if m.get("role") == "user" and m.get("content") == "text"),
+            None,
+        )
         assert user_text_msg is not None, "Expected a user text message with content 'text'"
     finally:
         # Clean up the agent
@@ -1353,14 +1377,28 @@ def test_archive_tags_in_system_prompt(client: LettaSDKClient):
 
     try:
         # Add passages with different tags to the agent's archive
-        test_tags = ["project_alpha", "meeting_notes", "research", "ideas", "todo_items"]
+        test_tags = [
+            "project_alpha",
+            "meeting_notes",
+            "research",
+            "ideas",
+            "todo_items",
+        ]
 
         # Create passages with tags
         for i, tag in enumerate(test_tags):
-            client.agents.passages.create(agent_id=temp_agent.id, text=f"Test passage {i} with tag {tag}", tags=[tag])
+            client.agents.passages.create(
+                agent_id=temp_agent.id,
+                text=f"Test passage {i} with tag {tag}",
+                tags=[tag],
+            )
 
         # Also create a passage with multiple tags
-        client.agents.passages.create(agent_id=temp_agent.id, text="Passage with multiple tags", tags=["multi_tag_1", "multi_tag_2"])
+        client.agents.passages.create(
+            agent_id=temp_agent.id,
+            text="Passage with multiple tags",
+            tags=["multi_tag_1", "multi_tag_2"],
+        )
 
         # Get the raw payload to check the system prompt
         payload = client.agents.messages.preview_raw_payload(
@@ -1767,8 +1805,15 @@ def test_tool_rename_with_json_schema_and_source_code(client: LettaSDKClient):
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "value": {"type": "number", "description": "Input value from JSON schema"},
-                    "multiplier": {"type": "number", "description": "Multiplier from JSON schema", "default": 2.0},
+                    "value": {
+                        "type": "number",
+                        "description": "Input value from JSON schema",
+                    },
+                    "multiplier": {
+                        "type": "number",
+                        "description": "Multiplier from JSON schema",
+                        "default": 2.0,
+                    },
                 },
                 "required": ["value"],
             },
@@ -1776,7 +1821,11 @@ def test_tool_rename_with_json_schema_and_source_code(client: LettaSDKClient):
 
         # verify there is a 400 error when both source code and json schema are provided
         with pytest.raises(Exception) as e:
-            client.tools.modify(tool_id=tool.id, source_code=new_source_code, json_schema=custom_json_schema)
+            client.tools.modify(
+                tool_id=tool.id,
+                source_code=new_source_code,
+                json_schema=custom_json_schema,
+            )
         assert e.value.status_code == 400
 
         # update with consistent name and schema
@@ -1791,7 +1840,13 @@ def test_tool_rename_with_json_schema_and_source_code(client: LettaSDKClient):
 
 
 def test_import_agent_file_from_disk(
-    client: LettaSDKClient, fibonacci_tool, preferences_tool, data_analysis_tool, persona_block, human_block, context_block
+    client: LettaSDKClient,
+    fibonacci_tool,
+    preferences_tool,
+    data_analysis_tool,
+    persona_block,
+    human_block,
+    context_block,
 ):
     """Test exporting an agent to file and importing it back from disk."""
     # Create a comprehensive agent (similar to test_agent_serialization_v2)
@@ -1808,7 +1863,10 @@ def test_import_agent_file_from_disk(
     )
 
     # Add archival memory
-    archival_passages = ["Test archival passage for export/import testing.", "Another passage with data about testing procedures."]
+    archival_passages = [
+        "Test archival passage for export/import testing.",
+        "Another passage with data about testing procedures.",
+    ]
 
     for passage_text in archival_passages:
         client.agents.passages.create(agent_id=temp_agent.id, text=passage_text)
@@ -1828,7 +1886,11 @@ def test_import_agent_file_from_disk(
     serialized_v2 = client.agents.export_file(agent_id=temp_agent.id, use_legacy_format=False)
 
     # Save to file
-    file_path = os.path.join(os.path.dirname(__file__), "test_agent_files", "test_basic_agent_with_blocks_tools_messages_v2.af")
+    file_path = os.path.join(
+        os.path.dirname(__file__),
+        "test_agent_files",
+        "test_basic_agent_with_blocks_tools_messages_v2.af",
+    )
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
     with open(file_path, "w") as f:
@@ -1859,7 +1921,13 @@ def test_import_agent_file_from_disk(
 
 
 def test_agent_serialization_v2(
-    client: LettaSDKClient, fibonacci_tool, preferences_tool, data_analysis_tool, persona_block, human_block, context_block
+    client: LettaSDKClient,
+    fibonacci_tool,
+    preferences_tool,
+    data_analysis_tool,
+    persona_block,
+    human_block,
+    context_block,
 ):
     """Test agent serialization with comprehensive setup including custom tools, blocks, messages, and archival memory."""
     name = f"comprehensive_test_agent_{str(uuid.uuid4())}"
@@ -2095,7 +2163,11 @@ def test_import_agent_with_files_from_disk(client: LettaSDKClient):
     test_files = ["tests/data/test.txt", "tests/data/test.md"]
 
     # Save to file
-    file_path = os.path.join(os.path.dirname(__file__), "test_agent_files", "test_agent_with_files_and_sources.af")
+    file_path = os.path.join(
+        os.path.dirname(__file__),
+        "test_agent_files",
+        "test_agent_with_files_and_sources.af",
+    )
 
     # Now import from the file
     with open(file_path, "rb") as f:

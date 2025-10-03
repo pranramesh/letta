@@ -2,7 +2,10 @@ from collections import OrderedDict
 from typing import Any, Dict, Optional
 
 from letta.constants import PRE_EXECUTION_MESSAGE_ARG
-from letta.schemas.tool import MCP_TOOL_METADATA_SCHEMA_STATUS, MCP_TOOL_METADATA_SCHEMA_WARNINGS
+from letta.schemas.tool import (
+    MCP_TOOL_METADATA_SCHEMA_STATUS,
+    MCP_TOOL_METADATA_SCHEMA_WARNINGS,
+)
 from letta.utils import get_logger
 
 logger = get_logger(__name__)
@@ -126,6 +129,10 @@ def remove_request_heartbeat(tool_schema: Dict[str, Any]) -> Dict[str, Any]:
             required = [r for r in required if r != "request_heartbeat"]
 
         # Update parameters with modified properties and required list
-        schema["parameters"] = {**parameters, "properties": properties, "required": required}
+        schema["parameters"] = {
+            **parameters,
+            "properties": properties,
+            "required": required,
+        }
 
     return schema

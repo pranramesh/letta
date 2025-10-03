@@ -15,7 +15,11 @@ from pydantic import BaseModel, ConfigDict, Field
 from letta.log import get_logger
 from letta.schemas.tool import ToolUpdate
 from letta.services.tool_manager import ToolManager
-from letta.services.tool_sandbox.modal_constants import CACHE_TTL_SECONDS, DEFAULT_CONFIG_KEY, MODAL_DEPLOYMENTS_KEY
+from letta.services.tool_sandbox.modal_constants import (
+    CACHE_TTL_SECONDS,
+    DEFAULT_CONFIG_KEY,
+    MODAL_DEPLOYMENTS_KEY,
+)
 from letta.utils import safe_create_task
 
 logger = get_logger(__name__)
@@ -149,7 +153,13 @@ class ModalVersionManager:
             self._deployments[cache_key] = info  # Track for stats
             return info
 
-    async def needs_redeployment(self, tool_id: str, current_version: str, sandbox_config_id: str | None = None, actor=None) -> bool:
+    async def needs_redeployment(
+        self,
+        tool_id: str,
+        current_version: str,
+        sandbox_config_id: str | None = None,
+        actor=None,
+    ) -> bool:
         """Check if an app needs to be redeployed."""
         deployment = await self.get_deployment(tool_id, sandbox_config_id, actor=actor)
         if not deployment:
@@ -198,7 +208,10 @@ class ModalVersionManager:
         if deployment_key in self._deployments_in_progress:
             self._deployments_in_progress[deployment_key].set()
             # Clean up after a short delay to allow waiters to wake up
-            safe_create_task(self._cleanup_deployment_marker(deployment_key), label=f"cleanup_deployment_{deployment_key}")
+            safe_create_task(
+                self._cleanup_deployment_marker(deployment_key),
+                label=f"cleanup_deployment_{deployment_key}",
+            )
 
     async def _cleanup_deployment_marker(self, deployment_key: str):
         """Clean up deployment marker after a delay."""

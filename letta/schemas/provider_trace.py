@@ -38,4 +38,7 @@ class ProviderTrace(BaseProviderTrace):
     request_json: Dict[str, Any] = Field(..., description="JSON content of the provider request")
     response_json: Dict[str, Any] = Field(..., description="JSON content of the provider response")
     step_id: Optional[str] = Field(None, description="ID of the step that this trace is associated with")
-    created_at: datetime = Field(default_factory=get_utc_time, description="The timestamp when the object was created.")
+    created_at: datetime = Field(
+        default_factory=get_utc_time,
+        description="The timestamp when the object was created.",
+    )

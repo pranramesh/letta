@@ -10,11 +10,23 @@ import pytest
 from sqlalchemy import delete
 
 import letta.utils as utils
-from letta.constants import BASE_MEMORY_TOOLS, BASE_TOOLS, LETTA_DIR, LETTA_TOOL_EXECUTION_DIR
+from letta.constants import (
+    BASE_MEMORY_TOOLS,
+    BASE_TOOLS,
+    LETTA_DIR,
+    LETTA_TOOL_EXECUTION_DIR,
+)
 from letta.orm import Provider, ProviderTrace, Step
 from letta.schemas.block import CreateBlock
 from letta.schemas.enums import MessageRole, ProviderCategory, ProviderType, SandboxType
-from letta.schemas.letta_message import LettaMessage, ReasoningMessage, SystemMessage, ToolCallMessage, ToolReturnMessage, UserMessage
+from letta.schemas.letta_message import (
+    LettaMessage,
+    ReasoningMessage,
+    SystemMessage,
+    ToolCallMessage,
+    ToolReturnMessage,
+    UserMessage,
+)
 from letta.schemas.llm_config import LLMConfig
 from letta.schemas.providers import ProviderCreate
 from letta.schemas.user import User
@@ -588,7 +600,10 @@ async def test_tool_run_with_explicit_json_schema(server, disable_e2b_api_key, u
         "parameters": {
             "type": "object",
             "properties": {
-                "message": {"type": "string", "description": "The message to ingest into the system."},
+                "message": {
+                    "type": "string",
+                    "description": "The message to ingest into the system.",
+                },
                 "request_heartbeat": {
                     "type": "boolean",
                     "description": "Request an immediate heartbeat after function execution. Set to `True` if you want to send a follow-up message or run a follow-up function.",

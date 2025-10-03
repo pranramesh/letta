@@ -11,7 +11,12 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 from sqlalchemy import Engine, NullPool, QueuePool, create_engine, event
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlalchemy.orm import sessionmaker
 
 from letta.config import LettaConfig
@@ -26,13 +31,22 @@ def print_sqlite_schema_error():
     """Print a formatted error message for SQLite schema issues"""
     console = Console()
     error_text = Text()
-    error_text.append("Existing SQLite DB schema is invalid, and schema migrations are not supported for SQLite. ", style="bold red")
-    error_text.append("To have migrations supported between Letta versions, please run Letta with Docker (", style="white")
+    error_text.append(
+        "Existing SQLite DB schema is invalid, and schema migrations are not supported for SQLite. ",
+        style="bold red",
+    )
+    error_text.append(
+        "To have migrations supported between Letta versions, please run Letta with Docker (",
+        style="white",
+    )
     error_text.append("https://docs.letta.com/server/docker", style="blue underline")
     error_text.append(") or use Postgres by setting ", style="white")
     error_text.append("LETTA_PG_URI", style="yellow")
     error_text.append(".\n\n", style="white")
-    error_text.append("If you wish to keep using SQLite, you can reset your database by removing the DB file with ", style="white")
+    error_text.append(
+        "If you wish to keep using SQLite, you can reset your database by removing the DB file with ",
+        style="white",
+    )
     error_text.append("rm ~/.letta/sqlite.db", style="yellow")
     error_text.append(" or downgrade to your previous version of Letta.", style="white")
 
@@ -138,7 +152,10 @@ class DatabaseRegistry:
                 self.config.archival_storage_type = "postgres"
                 self.config.archival_storage_uri = settings.letta_pg_uri_no_default
 
-                engine = create_engine(settings.letta_pg_uri, **self._build_sqlalchemy_engine_args(is_async=False))
+                engine = create_engine(
+                    settings.letta_pg_uri,
+                    **self._build_sqlalchemy_engine_args(is_async=False),
+                )
 
                 self._engines["default"] = engine
             # SQLite engine

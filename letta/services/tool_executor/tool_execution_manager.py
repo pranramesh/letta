@@ -20,11 +20,15 @@ from letta.services.job_manager import JobManager
 from letta.services.message_manager import MessageManager
 from letta.services.passage_manager import PassageManager
 from letta.services.tool_executor.builtin_tool_executor import LettaBuiltinToolExecutor
-from letta.services.tool_executor.composio_tool_executor import ExternalComposioToolExecutor
+from letta.services.tool_executor.composio_tool_executor import (
+    ExternalComposioToolExecutor,
+)
 from letta.services.tool_executor.core_tool_executor import LettaCoreToolExecutor
 from letta.services.tool_executor.files_tool_executor import LettaFileToolExecutor
 from letta.services.tool_executor.mcp_tool_executor import ExternalMCPToolExecutor
-from letta.services.tool_executor.multi_agent_tool_executor import LettaMultiAgentToolExecutor
+from letta.services.tool_executor.multi_agent_tool_executor import (
+    LettaMultiAgentToolExecutor,
+)
 from letta.services.tool_executor.sandbox_tool_executor import SandboxToolExecutor
 from letta.services.tool_executor.tool_executor_base import ToolExecutor
 from letta.utils import get_friendly_error_msg
@@ -95,7 +99,11 @@ class ToolExecutionManager:
 
     @trace_method
     async def execute_tool_async(
-        self, function_name: str, function_args: dict, tool: Tool, step_id: str | None = None
+        self,
+        function_name: str,
+        function_args: dict,
+        tool: Tool,
+        step_id: str | None = None,
     ) -> ToolExecutionResult:
         """
         Execute a tool asynchronously and persist any state changes.
@@ -119,7 +127,13 @@ class ToolExecutionManager:
 
             async with AsyncTimer(callback_func=_metrics_callback):
                 result = await executor.execute(
-                    function_name, function_args, tool, self.actor, self.agent_state, self.sandbox_config, self.sandbox_env_vars
+                    function_name,
+                    function_args,
+                    tool,
+                    self.actor,
+                    self.agent_state,
+                    self.sandbox_config,
+                    self.sandbox_env_vars,
                 )
             status = result.status
 
@@ -156,7 +170,10 @@ class ToolExecutionManager:
                 stderr=[traceback.format_exc()],
             )
         finally:
-            metric_attrs = {"tool.name": tool.name, "tool.execution_success": status == "success"}
+            metric_attrs = {
+                "tool.name": tool.name,
+                "tool.execution_success": status == "success",
+            }
             if status == "error" and step_id:
                 metric_attrs["step.id"] = step_id
             MetricRegistry().tool_execution_counter.add(1, dict(get_ctx_attributes(), **metric_attrs))

@@ -17,7 +17,10 @@ logger = get_logger(__name__)
 # TODO: Get rid of Async prefix on this class name once we deprecate old sync code
 class AsyncSSEMCPClient(AsyncBaseMCPClient):
     def __init__(
-        self, server_config: SSEServerConfig, oauth_provider: Optional[OAuthClientProvider] = None, agent_id: Optional[str] = None
+        self,
+        server_config: SSEServerConfig,
+        oauth_provider: Optional[OAuthClientProvider] = None,
+        agent_id: Optional[str] = None,
     ):
         super().__init__(server_config, oauth_provider, agent_id)
 
@@ -34,7 +37,11 @@ class AsyncSSEMCPClient(AsyncBaseMCPClient):
 
         # Use OAuth provider if available, otherwise use regular headers
         if self.oauth_provider:
-            sse_cm = sse_client(url=server_config.server_url, headers=headers if headers else None, auth=self.oauth_provider)
+            sse_cm = sse_client(
+                url=server_config.server_url,
+                headers=headers if headers else None,
+                auth=self.oauth_provider,
+            )
         else:
             sse_cm = sse_client(url=server_config.server_url, headers=headers if headers else None)
 

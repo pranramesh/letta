@@ -74,7 +74,11 @@ class BlockManager:
 
         with db_registry.session() as session:
             block_models = [
-                BlockModel(**block.model_dump(to_orm=True, exclude_none=True), organization_id=actor.organization_id) for block in blocks
+                BlockModel(
+                    **block.model_dump(to_orm=True, exclude_none=True),
+                    organization_id=actor.organization_id,
+                )
+                for block in blocks
             ]
 
             created_models = BlockModel.batch_create(items=block_models, db_session=session, actor=actor)
@@ -98,10 +102,18 @@ class BlockManager:
 
         async with db_registry.async_session() as session:
             block_models = [
-                BlockModel(**block.model_dump(to_orm=True, exclude_none=True), organization_id=actor.organization_id) for block in blocks
+                BlockModel(
+                    **block.model_dump(to_orm=True, exclude_none=True),
+                    organization_id=actor.organization_id,
+                )
+                for block in blocks
             ]
             created_models = await BlockModel.batch_create_async(
-                items=block_models, db_session=session, actor=actor, no_commit=True, no_refresh=True
+                items=block_models,
+                db_session=session,
+                actor=actor,
+                no_commit=True,
+                no_refresh=True,
             )
             result = [m.to_pydantic() for m in created_models]
             await session.commit()
@@ -201,7 +213,11 @@ class BlockManager:
             query = select(BlockModel)
 
             # Explicitly avoid loading relationships
-            query = query.options(noload(BlockModel.agents), noload(BlockModel.identities), noload(BlockModel.groups))
+            query = query.options(
+                noload(BlockModel.agents),
+                noload(BlockModel.identities),
+                noload(BlockModel.groups),
+            )
 
             # Apply access control
             query = BlockModel.apply_access_predicate(query, actor, ["read"], AccessType.ORGANIZATION)
@@ -237,14 +253,21 @@ class BlockManager:
 
             needs_agent_count_join = any(
                 condition is not None
-                for condition in [connected_to_agents_count_gt, connected_to_agents_count_lt, connected_to_agents_count_eq]
+                for condition in [
+                    connected_to_agents_count_gt,
+                    connected_to_agents_count_lt,
+                    connected_to_agents_count_eq,
+                ]
             )
 
             # If any agent count filters are specified, create a single subquery and apply all filters
             if needs_agent_count_join:
                 # Create a subquery to count agents per block
                 agent_count_subquery = (
-                    select(BlocksAgents.block_id, func.count(BlocksAgents.agent_id).label("agent_count"))
+                    select(
+                        BlocksAgents.block_id,
+                        func.count(BlocksAgents.agent_id).label("agent_count"),
+                    )
                     .group_by(BlocksAgents.block_id)
                     .subquery()
                 )
@@ -256,12 +279,18 @@ class BlockManager:
 
                 if needs_left_join:
                     # Left join to include blocks with no agents
-                    query = query.outerjoin(agent_count_subquery, BlockModel.id == agent_count_subquery.c.block_id)
+                    query = query.outerjoin(
+                        agent_count_subquery,
+                        BlockModel.id == agent_count_subquery.c.block_id,
+                    )
                     # Use coalesce to treat NULL as 0 for blocks with no agents
                     agent_count_expr = func.coalesce(agent_count_subquery.c.agent_count, 0)
                 else:
                     # Inner join since we don't need blocks with no agents
-                    query = query.join(agent_count_subquery, BlockModel.id == agent_count_subquery.c.block_id)
+                    query = query.join(
+                        agent_count_subquery,
+                        BlockModel.id == agent_count_subquery.c.block_id,
+                    )
                     agent_count_expr = agent_count_subquery.c.agent_count
 
                 # Build the combined filter conditions
@@ -303,12 +332,18 @@ class BlockManager:
                     if ascending:
                         query = query.where(
                             BlockModel.created_at > after_sort_value,
-                            or_(BlockModel.created_at == after_sort_value, BlockModel.id > after_id),
+                            or_(
+                                BlockModel.created_at == after_sort_value,
+                                BlockModel.id > after_id,
+                            ),
                         )
                     else:
                         query = query.where(
                             BlockModel.created_at < after_sort_value,
-                            or_(BlockModel.created_at == after_sort_value, BlockModel.id < after_id),
+                            or_(
+                                BlockModel.created_at == after_sort_value,
+                                BlockModel.id < after_id,
+                            ),
                         )
 
             if before:
@@ -322,12 +357,18 @@ class BlockManager:
                     if ascending:
                         query = query.where(
                             BlockModel.created_at < before_sort_value,
-                            or_(BlockModel.created_at == before_sort_value, BlockModel.id < before_id),
+                            or_(
+                                BlockModel.created_at == before_sort_value,
+                                BlockModel.id < before_id,
+                            ),
                         )
                     else:
                         query = query.where(
                             BlockModel.created_at > before_sort_value,
-                            or_(BlockModel.created_at == before_sort_value, BlockModel.id > before_id),
+                            or_(
+                                BlockModel.created_at == before_sort_value,
+                                BlockModel.id > before_id,
+                            ),
                         )
 
             # Apply ordering and handle distinct if needed
@@ -394,7 +435,11 @@ class BlockManager:
             query = query.where(BlockModel.id.in_(block_ids))
 
             # Explicitly avoid loading relationships
-            query = query.options(noload(BlockModel.agents), noload(BlockModel.identities), noload(BlockModel.groups))
+            query = query.options(
+                noload(BlockModel.agents),
+                noload(BlockModel.identities),
+                noload(BlockModel.groups),
+            )
 
             # Apply access control if actor is provided
             if actor:
@@ -469,12 +514,18 @@ class BlockManager:
                     if ascending:
                         query = query.where(
                             AgentModel.created_at > after_sort_value,
-                            or_(AgentModel.created_at == after_sort_value, AgentModel.id > after_id),
+                            or_(
+                                AgentModel.created_at == after_sort_value,
+                                AgentModel.id > after_id,
+                            ),
                         )
                     else:
                         query = query.where(
                             AgentModel.created_at < after_sort_value,
-                            or_(AgentModel.created_at == after_sort_value, AgentModel.id < after_id),
+                            or_(
+                                AgentModel.created_at == after_sort_value,
+                                AgentModel.id < after_id,
+                            ),
                         )
 
             if before:
@@ -488,12 +539,18 @@ class BlockManager:
                     if ascending:
                         query = query.where(
                             AgentModel.created_at < before_sort_value,
-                            or_(AgentModel.created_at == before_sort_value, AgentModel.id < before_id),
+                            or_(
+                                AgentModel.created_at == before_sort_value,
+                                AgentModel.id < before_id,
+                            ),
                         )
                     else:
                         query = query.where(
                             AgentModel.created_at > before_sort_value,
-                            or_(AgentModel.created_at == before_sort_value, AgentModel.id > before_id),
+                            or_(
+                                AgentModel.created_at == before_sort_value,
+                                AgentModel.id > before_id,
+                            ),
                         )
 
             # Apply sorting
@@ -561,7 +618,10 @@ class BlockManager:
             # 3) Truncate any future checkpoints
             #    If we are at seq=2, but there's a seq=3 or higher from a prior "redo chain",
             #    remove those, so we maintain a strictly linear undo/redo stack.
-            session.query(BlockHistory).filter(BlockHistory.block_id == block.id, BlockHistory.sequence_number > current_seq).delete()
+            session.query(BlockHistory).filter(
+                BlockHistory.block_id == block.id,
+                BlockHistory.sequence_number > current_seq,
+            ).delete()
 
             # 4) Determine the next sequence number
             next_seq = current_seq + 1
@@ -630,7 +690,12 @@ class BlockManager:
 
     @enforce_types
     @trace_method
-    def undo_checkpoint_block(self, block_id: str, actor: PydanticUser, use_preloaded_block: Optional[BlockModel] = None) -> PydanticBlock:
+    def undo_checkpoint_block(
+        self,
+        block_id: str,
+        actor: PydanticUser,
+        use_preloaded_block: Optional[BlockModel] = None,
+    ) -> PydanticBlock:
         """
         Move the block to the immediately previous checkpoint in BlockHistory.
         If older sequences have been pruned, we jump to the largest sequence
@@ -656,7 +721,10 @@ class BlockManager:
             # 2) Find the largest sequence < current_seq
             previous_entry = (
                 session.query(BlockHistory)
-                .filter(BlockHistory.block_id == block.id, BlockHistory.sequence_number < current_seq)
+                .filter(
+                    BlockHistory.block_id == block.id,
+                    BlockHistory.sequence_number < current_seq,
+                )
                 .order_by(BlockHistory.sequence_number.desc())
                 .first()
             )
@@ -673,7 +741,12 @@ class BlockManager:
 
     @enforce_types
     @trace_method
-    def redo_checkpoint_block(self, block_id: str, actor: PydanticUser, use_preloaded_block: Optional[BlockModel] = None) -> PydanticBlock:
+    def redo_checkpoint_block(
+        self,
+        block_id: str,
+        actor: PydanticUser,
+        use_preloaded_block: Optional[BlockModel] = None,
+    ) -> PydanticBlock:
         """
         Move the block to the next checkpoint if it exists.
         If some middle checkpoints have been pruned, we jump to the smallest
@@ -698,7 +771,10 @@ class BlockManager:
             # Find the smallest sequence that is > current_seq
             next_entry = (
                 session.query(BlockHistory)
-                .filter(BlockHistory.block_id == block.id, BlockHistory.sequence_number > current_seq)
+                .filter(
+                    BlockHistory.block_id == block.id,
+                    BlockHistory.sequence_number > current_seq,
+                )
                 .order_by(BlockHistory.sequence_number.asc())
                 .first()
             )
@@ -713,7 +789,10 @@ class BlockManager:
     @enforce_types
     @trace_method
     async def bulk_update_block_values_async(
-        self, updates: Dict[str, str], actor: PydanticUser, return_hydrated: bool = False
+        self,
+        updates: Dict[str, str],
+        actor: PydanticUser,
+        return_hydrated: bool = False,
     ) -> Optional[List[PydanticBlock]]:
         """
         Bulk-update the `value` field for multiple blocks in one transaction.
@@ -731,7 +810,10 @@ class BlockManager:
             ValueError     if any new value exceeds its block's limit
         """
         async with db_registry.async_session() as session:
-            query = select(BlockModel).where(BlockModel.id.in_(updates.keys()), BlockModel.organization_id == actor.organization_id)
+            query = select(BlockModel).where(
+                BlockModel.id.in_(updates.keys()),
+                BlockModel.organization_id == actor.organization_id,
+            )
             result = await session.execute(query)
             blocks = result.scalars().all()
 

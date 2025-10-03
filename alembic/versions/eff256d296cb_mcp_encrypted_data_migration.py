@@ -59,12 +59,25 @@ def upgrade() -> None:
         .select_from(mcp_oauth)
         .where(
             sa.and_(
-                sa.or_(mcp_oauth.c.access_token.isnot(None), mcp_oauth.c.refresh_token.isnot(None), mcp_oauth.c.client_secret.isnot(None)),
+                sa.or_(
+                    mcp_oauth.c.access_token.isnot(None),
+                    mcp_oauth.c.refresh_token.isnot(None),
+                    mcp_oauth.c.client_secret.isnot(None),
+                ),
                 # Only count rows that need encryption
                 sa.or_(
-                    sa.and_(mcp_oauth.c.access_token.isnot(None), mcp_oauth.c.access_token_enc.is_(None)),
-                    sa.and_(mcp_oauth.c.refresh_token.isnot(None), mcp_oauth.c.refresh_token_enc.is_(None)),
-                    sa.and_(mcp_oauth.c.client_secret.isnot(None), mcp_oauth.c.client_secret_enc.is_(None)),
+                    sa.and_(
+                        mcp_oauth.c.access_token.isnot(None),
+                        mcp_oauth.c.access_token_enc.is_(None),
+                    ),
+                    sa.and_(
+                        mcp_oauth.c.refresh_token.isnot(None),
+                        mcp_oauth.c.refresh_token_enc.is_(None),
+                    ),
+                    sa.and_(
+                        mcp_oauth.c.client_secret.isnot(None),
+                        mcp_oauth.c.client_secret_enc.is_(None),
+                    ),
                 ),
             )
         )
@@ -99,9 +112,18 @@ def upgrade() -> None:
                         ),
                         # Only select rows that need encryption
                         sa.or_(
-                            sa.and_(mcp_oauth.c.access_token.isnot(None), mcp_oauth.c.access_token_enc.is_(None)),
-                            sa.and_(mcp_oauth.c.refresh_token.isnot(None), mcp_oauth.c.refresh_token_enc.is_(None)),
-                            sa.and_(mcp_oauth.c.client_secret.isnot(None), mcp_oauth.c.client_secret_enc.is_(None)),
+                            sa.and_(
+                                mcp_oauth.c.access_token.isnot(None),
+                                mcp_oauth.c.access_token_enc.is_(None),
+                            ),
+                            sa.and_(
+                                mcp_oauth.c.refresh_token.isnot(None),
+                                mcp_oauth.c.refresh_token_enc.is_(None),
+                            ),
+                            sa.and_(
+                                mcp_oauth.c.client_secret.isnot(None),
+                                mcp_oauth.c.client_secret_enc.is_(None),
+                            ),
                         ),
                     )
                 )
@@ -193,11 +215,17 @@ def upgrade() -> None:
         .select_from(mcp_server)
         .where(
             sa.and_(
-                sa.or_(mcp_server.c.token.isnot(None), mcp_server.c.custom_headers.isnot(None)),
+                sa.or_(
+                    mcp_server.c.token.isnot(None),
+                    mcp_server.c.custom_headers.isnot(None),
+                ),
                 # Only count rows that need encryption
                 sa.or_(
                     sa.and_(mcp_server.c.token.isnot(None), mcp_server.c.token_enc.is_(None)),
-                    sa.and_(mcp_server.c.custom_headers.isnot(None), mcp_server.c.custom_headers_enc.is_(None)),
+                    sa.and_(
+                        mcp_server.c.custom_headers.isnot(None),
+                        mcp_server.c.custom_headers_enc.is_(None),
+                    ),
                 ),
             )
         )
@@ -223,11 +251,20 @@ def upgrade() -> None:
                 )
                 .where(
                     sa.and_(
-                        sa.or_(mcp_server.c.token.isnot(None), mcp_server.c.custom_headers.isnot(None)),
+                        sa.or_(
+                            mcp_server.c.token.isnot(None),
+                            mcp_server.c.custom_headers.isnot(None),
+                        ),
                         # Only select rows that need encryption
                         sa.or_(
-                            sa.and_(mcp_server.c.token.isnot(None), mcp_server.c.token_enc.is_(None)),
-                            sa.and_(mcp_server.c.custom_headers.isnot(None), mcp_server.c.custom_headers_enc.is_(None)),
+                            sa.and_(
+                                mcp_server.c.token.isnot(None),
+                                mcp_server.c.token_enc.is_(None),
+                            ),
+                            sa.and_(
+                                mcp_server.c.custom_headers.isnot(None),
+                                mcp_server.c.custom_headers_enc.is_(None),
+                            ),
                         ),
                     )
                 )

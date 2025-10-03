@@ -84,7 +84,7 @@ class RoundRobinMultiAgent(Agent):
                 new_messages = [
                     MessageCreate(
                         role="system",
-                        content=[TextContent(text=message.content)] if isinstance(message.content, str) else message.content,
+                        content=([TextContent(text=message.content)] if isinstance(message.content, str) else message.content),
                         name=participant_agent.agent_state.name,
                         otid=message.otid,
                         sender_id=participant_agent.agent_state.id,

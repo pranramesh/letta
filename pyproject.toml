@@ -70,6 +70,7 @@ dependencies = [
     "ruff[dev]>=0.12.10",
     "trafilatura",
     "readability-lxml",
+    "trufflehog>=2.2.1",
 ]
 
 [project.scripts]
@@ -196,3 +197,8 @@ line-ending = "auto"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.3.0",
+]

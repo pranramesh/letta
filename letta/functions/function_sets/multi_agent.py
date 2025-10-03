@@ -34,7 +34,13 @@ def send_message_to_agent_and_wait_for_reply(self: "Agent", message: str, other_
         f"make sure to use the 'send_message' at the end, and the system will notify the sender of your response] "
         f"{message}"
     )
-    messages = [MessageCreate(role=MessageRole.system, content=augmented_message, name=self.agent_state.name)]
+    messages = [
+        MessageCreate(
+            role=MessageRole.system,
+            content=augmented_message,
+            name=self.agent_state.name,
+        )
+    ]
 
     return execute_send_message_to_agent(
         sender_agent=self,
@@ -76,7 +82,13 @@ def send_message_to_agents_matching_tags(self: "Agent", message: str, match_all:
         agent = server.load_agent(agent_id=agent_id, interface=None, actor=actor)
 
         # Prepare the message
-        messages = [MessageCreate(role=MessageRole.system, content=augmented_message, name=self.agent_state.name)]
+        messages = [
+            MessageCreate(
+                role=MessageRole.system,
+                content=augmented_message,
+                name=self.agent_state.name,
+            )
+        ]
 
         # Run .step() and return the response
         usage_stats = agent.step(

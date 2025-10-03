@@ -1,7 +1,10 @@
 from typing import Any, Dict, Optional
 
 from letta.constants import COMPOSIO_ENTITY_ENV_VAR_KEY
-from letta.functions.composio_helpers import execute_composio_action_async, generate_composio_action_from_func_name
+from letta.functions.composio_helpers import (
+    execute_composio_action_async,
+    generate_composio_action_from_func_name,
+)
 from letta.helpers.composio_helpers import get_composio_api_key_async
 from letta.otel.tracing import trace_method
 from letta.schemas.agent import AgentState
@@ -41,7 +44,10 @@ class ExternalComposioToolExecutor(ToolExecutor):
 
         # TODO (matt): Roll in execute_composio_action into this class
         function_response = await execute_composio_action_async(
-            action_name=action_name, args=function_args, api_key=composio_api_key, entity_id=entity_id
+            action_name=action_name,
+            args=function_args,
+            api_key=composio_api_key,
+            entity_id=entity_id,
         )
 
         return ToolExecutionResult(

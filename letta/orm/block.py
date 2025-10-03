@@ -1,12 +1,32 @@
 from typing import TYPE_CHECKING, List, Optional, Type
 
-from sqlalchemy import JSON, BigInteger, ForeignKey, Index, Integer, String, UniqueConstraint, event
-from sqlalchemy.orm import Mapped, attributes, declared_attr, mapped_column, relationship
+from sqlalchemy import (
+    JSON,
+    BigInteger,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    UniqueConstraint,
+    event,
+)
+from sqlalchemy.orm import (
+    Mapped,
+    attributes,
+    declared_attr,
+    mapped_column,
+    relationship,
+)
 
 from letta.constants import CORE_MEMORY_BLOCK_CHAR_LIMIT
 from letta.orm.block_history import BlockHistory
 from letta.orm.blocks_agents import BlocksAgents
-from letta.orm.mixins import OrganizationMixin, ProjectMixin, TemplateEntityMixin, TemplateMixin
+from letta.orm.mixins import (
+    OrganizationMixin,
+    ProjectMixin,
+    TemplateEntityMixin,
+    TemplateMixin,
+)
 from letta.orm.sqlalchemy_base import SqlalchemyBase
 from letta.schemas.block import Block as PydanticBlock, Human, Persona
 
@@ -28,16 +48,22 @@ class Block(OrganizationMixin, SqlalchemyBase, ProjectMixin, TemplateEntityMixin
     )
 
     template_name: Mapped[Optional[str]] = mapped_column(
-        nullable=True, doc="the unique name that identifies a block in a human-readable way"
+        nullable=True,
+        doc="the unique name that identifies a block in a human-readable way",
     )
     description: Mapped[Optional[str]] = mapped_column(nullable=True, doc="a description of the block for context")
     label: Mapped[str] = mapped_column(doc="the type of memory block in use, ie 'human', 'persona', 'system'")
     is_template: Mapped[bool] = mapped_column(
-        doc="whether the block is a template (e.g. saved human/persona options as baselines for other templates)", default=False
+        doc="whether the block is a template (e.g. saved human/persona options as baselines for other templates)",
+        default=False,
     )
     preserve_on_migration: Mapped[Optional[bool]] = mapped_column(doc="preserve the block on template migration", default=False)
     value: Mapped[str] = mapped_column(doc="Text content of the block for the respective section of core memory.")
-    limit: Mapped[BigInteger] = mapped_column(Integer, default=CORE_MEMORY_BLOCK_CHAR_LIMIT, doc="Character limit of the block.")
+    limit: Mapped[BigInteger] = mapped_column(
+        Integer,
+        default=CORE_MEMORY_BLOCK_CHAR_LIMIT,
+        doc="Character limit of the block.",
+    )
     metadata_: Mapped[Optional[dict]] = mapped_column(JSON, default={}, doc="arbitrary information related to the block.")
 
     # permissions of the agent
@@ -46,10 +72,17 @@ class Block(OrganizationMixin, SqlalchemyBase, ProjectMixin, TemplateEntityMixin
 
     # history pointers / locking mechanisms
     current_history_entry_id: Mapped[Optional[str]] = mapped_column(
-        String, ForeignKey("block_history.id", name="fk_block_current_history_entry", use_alter=True), nullable=True, index=True
+        String,
+        ForeignKey("block_history.id", name="fk_block_current_history_entry", use_alter=True),
+        nullable=True,
+        index=True,
     )
     version: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=1, server_default="1", doc="Optimistic locking version counter, incremented on each state change."
+        Integer,
+        nullable=False,
+        default=1,
+        server_default="1",
+        doc="Optimistic locking version counter, incremented on each state change.",
     )
     # NOTE: This takes advantage of built-in optimistic locking functionality by SqlAlchemy
     # https://docs.sqlalchemy.org/en/20/orm/versioning.html
@@ -114,7 +147,10 @@ def block_before_update(mapper, connection, target):
     blocks_agents = BlocksAgents.__table__
     connection.execute(
         blocks_agents.update()
-        .where(blocks_agents.c.block_id == target.id, blocks_agents.c.block_label == label_history.deleted[0])
+        .where(
+            blocks_agents.c.block_id == target.id,
+            blocks_agents.c.block_label == label_history.deleted[0],
+        )
         .values(block_label=label_history.added[0])
     )
 

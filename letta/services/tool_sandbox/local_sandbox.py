@@ -42,7 +42,14 @@ class AsyncToolSandboxLocal(AsyncToolSandboxBase):
         sandbox_config: Optional[SandboxConfig] = None,
         sandbox_env_vars: Optional[Dict[str, Any]] = None,
     ):
-        super().__init__(tool_name, args, user, tool_object, sandbox_config=sandbox_config, sandbox_env_vars=sandbox_env_vars)
+        super().__init__(
+            tool_name,
+            args,
+            user,
+            tool_object,
+            sandbox_config=sandbox_config,
+            sandbox_env_vars=sandbox_env_vars,
+        )
         self.force_recreate_venv = force_recreate_venv
 
     @trace_method
@@ -161,7 +168,10 @@ class AsyncToolSandboxLocal(AsyncToolSandboxBase):
         """
         if self.force_recreate_venv or not await asyncio.to_thread(os.path.isdir, venv_path):
             sandbox_dir = os.path.expanduser(local_configs.sandbox_dir)
-            log_event(name="start create_venv_for_local_sandbox", attributes={"venv_path": venv_path})
+            log_event(
+                name="start create_venv_for_local_sandbox",
+                attributes={"venv_path": venv_path},
+            )
             await asyncio.to_thread(
                 create_venv_for_local_sandbox,
                 sandbox_dir_path=sandbox_dir,
@@ -172,14 +182,30 @@ class AsyncToolSandboxLocal(AsyncToolSandboxBase):
             log_event(name="finish create_venv_for_local_sandbox")
 
         if local_configs.pip_requirements or (self.tool and self.tool.pip_requirements):
-            log_event(name="start install_pip_requirements_for_sandbox", attributes={"local_configs": local_configs.model_dump_json()})
-            await asyncio.to_thread(
-                install_pip_requirements_for_sandbox, local_configs, upgrade=True, user_install_if_no_venv=False, env=env, tool=self.tool
+            log_event(
+                name="start install_pip_requirements_for_sandbox",
+                attributes={"local_configs": local_configs.model_dump_json()},
             )
-            log_event(name="finish install_pip_requirements_for_sandbox", attributes={"local_configs": local_configs.model_dump_json()})
+            await asyncio.to_thread(
+                install_pip_requirements_for_sandbox,
+                local_configs,
+                upgrade=True,
+                user_install_if_no_venv=False,
+                env=env,
+                tool=self.tool,
+            )
+            log_event(
+                name="finish install_pip_requirements_for_sandbox",
+                attributes={"local_configs": local_configs.model_dump_json()},
+            )
 
     async def _execute_tool_subprocess(
-        self, sbx_config, python_executable: str, temp_file_path: str, env: Dict[str, str], cwd: str
+        self,
+        sbx_config,
+        python_executable: str,
+        temp_file_path: str,
+        env: Dict[str, str],
+        cwd: str,
     ) -> ToolExecutionResult:
         """
         Execute user code in a subprocess, always capturing stdout and stderr.
@@ -190,7 +216,12 @@ class AsyncToolSandboxLocal(AsyncToolSandboxBase):
             log_event(name="start subprocess")
 
             process = await asyncio.create_subprocess_exec(
-                python_executable, temp_file_path, env=env, cwd=cwd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+                python_executable,
+                temp_file_path,
+                env=env,
+                cwd=cwd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
 
             try:

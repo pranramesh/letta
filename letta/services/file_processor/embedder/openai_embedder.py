@@ -54,7 +54,10 @@ class OpenAIEmbedder(BaseEmbedder):
 
         try:
             embeddings = await self.client.request_embeddings(inputs=batch, embedding_config=self.embedding_config)
-            log_event("embedder.batch_completed", {"batch_size": len(batch), "embeddings_generated": len(embeddings)})
+            log_event(
+                "embedder.batch_completed",
+                {"batch_size": len(batch), "embeddings_generated": len(embeddings)},
+            )
             return [(idx, e) for idx, e in zip(batch_indices, embeddings)]
         except Exception as e:
             # if it's a token limit error and we can split, do it
@@ -133,7 +136,11 @@ class OpenAIEmbedder(BaseEmbedder):
         logger.info(f"Processing {len(batches)} batches")
         log_event(
             "embedder.batching_completed",
-            {"total_batches": len(batches), "batch_size": self.embedding_config.batch_size, "total_chunks": len(chunks)},
+            {
+                "total_batches": len(batches),
+                "batch_size": self.embedding_config.batch_size,
+                "total_chunks": len(chunks),
+            },
         )
 
         async def process(batch: List[str], indices: List[int]):
@@ -141,7 +148,14 @@ class OpenAIEmbedder(BaseEmbedder):
                 return await self._embed_batch(batch, indices)
             except Exception as e:
                 logger.error("Failed to embed batch of size %s: %s", len(batch), e)
-                log_event("embedder.batch_failed", {"batch_size": len(batch), "error": str(e), "error_type": type(e).__name__})
+                log_event(
+                    "embedder.batch_failed",
+                    {
+                        "batch_size": len(batch),
+                        "error": str(e),
+                        "error_type": type(e).__name__,
+                    },
+                )
                 raise
 
         # Execute all batches concurrently with semaphore control
@@ -152,7 +166,10 @@ class OpenAIEmbedder(BaseEmbedder):
             {"concurrent_tasks": len(tasks)},
         )
         results = await asyncio.gather(*tasks)
-        log_event("embedder.concurrent_processing_completed", {"batches_processed": len(results)})
+        log_event(
+            "embedder.concurrent_processing_completed",
+            {"batches_processed": len(results)},
+        )
 
         # Flatten results and sort by original index
         indexed_embeddings = []
@@ -178,6 +195,11 @@ class OpenAIEmbedder(BaseEmbedder):
         logger.info(f"Successfully generated {len(passages)} embeddings")
         log_event(
             "embedder.generation_completed",
-            {"passages_created": len(passages), "total_chunks_processed": len(chunks), "file_id": file_id, "source_id": source_id},
+            {
+                "passages_created": len(passages),
+                "total_chunks_processed": len(chunks),
+                "file_id": file_id,
+                "source_id": source_id,
+            },
         )
         return passages

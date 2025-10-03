@@ -5,10 +5,19 @@ from datetime import datetime, timezone
 import pytest
 
 from letta.config import LettaConfig
-from letta.helpers.tpuf_client import TurbopufferClient, should_use_tpuf, should_use_tpuf_for_messages
+from letta.helpers.tpuf_client import (
+    TurbopufferClient,
+    should_use_tpuf,
+    should_use_tpuf_for_messages,
+)
 from letta.schemas.embedding_config import EmbeddingConfig
 from letta.schemas.enums import MessageRole, TagMatchMode, VectorDBProvider
-from letta.schemas.letta_message_content import ReasoningContent, TextContent, ToolCallContent, ToolReturnContent
+from letta.schemas.letta_message_content import (
+    ReasoningContent,
+    TextContent,
+    ToolCallContent,
+    ToolReturnContent,
+)
 from letta.schemas.message import Message as PydanticMessage
 from letta.schemas.passage import Passage
 from letta.server.server import SyncServer
@@ -115,7 +124,12 @@ def sample_embedding_config():
 
 
 async def wait_for_embedding(
-    agent_id: str, message_id: str, organization_id: str, actor, max_wait: float = 10.0, poll_interval: float = 0.5
+    agent_id: str,
+    message_id: str,
+    organization_id: str,
+    actor,
+    max_wait: float = 10.0,
+    poll_interval: float = 0.5,
 ) -> bool:
     """Poll Turbopuffer directly to check if a message has been embedded.
 
@@ -213,7 +227,10 @@ async def test_dual_write_and_query_with_real_tpuf(server, default_user, sarah_a
 
     # Attach the agent to the archive
     await server.archive_manager.attach_agent_to_archive_async(
-        agent_id=sarah_agent.id, archive_id=archive.id, is_owner=True, actor=default_user
+        agent_id=sarah_agent.id,
+        archive_id=archive.id,
+        is_owner=True,
+        actor=default_user,
     )
 
     try:
@@ -410,7 +427,11 @@ async def test_hybrid_search_with_real_tpuf(default_user, enable_turbopuffer):
 
         # Insert passages
         await client.insert_archival_memories(
-            archive_id=archive_id, text_chunks=texts, passage_ids=passage_ids, organization_id=org_id, actor=default_user
+            archive_id=archive_id,
+            text_chunks=texts,
+            passage_ids=passage_ids,
+            organization_id=org_id,
+            actor=default_user,
         )
 
         # Test vector-only search
@@ -427,7 +448,11 @@ async def test_hybrid_search_with_real_tpuf(default_user, enable_turbopuffer):
 
         # Test FTS-only search
         fts_results = await client.query_passages(
-            archive_id=archive_id, actor=default_user, query_text="Turbopuffer vector database", search_mode="fts", top_k=3
+            archive_id=archive_id,
+            actor=default_user,
+            query_text="Turbopuffer vector database",
+            search_mode="fts",
+            top_k=3,
         )
         assert 0 < len(fts_results) <= 3
         # should find passages mentioning Turbopuffer
@@ -469,9 +494,27 @@ async def test_hybrid_search_with_real_tpuf(default_user, enable_turbopuffer):
         assert all(isinstance(score, float) for _, score, _ in vector_heavy_results)
 
         # Test with different search modes
-        await client.query_passages(archive_id=archive_id, actor=default_user, query_text="test", search_mode="vector", top_k=3)
-        await client.query_passages(archive_id=archive_id, actor=default_user, query_text="test", search_mode="fts", top_k=3)
-        await client.query_passages(archive_id=archive_id, actor=default_user, query_text="test", search_mode="hybrid", top_k=3)
+        await client.query_passages(
+            archive_id=archive_id,
+            actor=default_user,
+            query_text="test",
+            search_mode="vector",
+            top_k=3,
+        )
+        await client.query_passages(
+            archive_id=archive_id,
+            actor=default_user,
+            query_text="test",
+            search_mode="fts",
+            top_k=3,
+        )
+        await client.query_passages(
+            archive_id=archive_id,
+            actor=default_user,
+            query_text="test",
+            search_mode="hybrid",
+            top_k=3,
+        )
 
         # Test explicit timestamp mode
         timestamp_results = await client.query_passages(archive_id=archive_id, actor=default_user, search_mode="timestamp", top_k=3)
@@ -1055,7 +1098,11 @@ async def test_message_dual_write_with_real_tpuf(enable_message_embedding, defau
 
         # Verify we can query the messages
         results = await client.query_messages_by_agent_id(
-            agent_id=agent_id, organization_id=org_id, search_mode="timestamp", top_k=10, actor=default_user
+            agent_id=agent_id,
+            organization_id=org_id,
+            search_mode="timestamp",
+            top_k=10,
+            actor=default_user,
         )
 
         assert len(results) == 3
@@ -1240,7 +1287,12 @@ async def test_message_role_filtering_with_real_tpuf(enable_message_embedding, d
 
         # Query only user messages
         user_results = await client.query_messages_by_agent_id(
-            agent_id=agent_id, organization_id=org_id, search_mode="timestamp", top_k=10, roles=[MessageRole.user], actor=default_user
+            agent_id=agent_id,
+            organization_id=org_id,
+            search_mode="timestamp",
+            top_k=10,
+            roles=[MessageRole.user],
+            actor=default_user,
         )
 
         assert len(user_results) == 2
@@ -1478,7 +1530,9 @@ async def test_message_deletion_syncs_with_turbopuffer(server, default_user, ena
 
         # Test 2: Batch delete 2 messages from agent A
         await server.message_manager.delete_messages_by_ids_async(
-            [agent_a_messages[1].id, agent_a_messages[2].id], default_user, strict_mode=True
+            [agent_a_messages[1].id, agent_a_messages[2].id],
+            default_user,
+            strict_mode=True,
         )
 
         # Test 3: Delete all messages for agent B
@@ -1780,7 +1834,12 @@ async def test_message_date_filtering_with_real_tpuf(enable_message_embedding, d
         # Query messages from the last 3 days
         three_days_ago = now - timedelta(days=3)
         recent_results = await client.query_messages_by_agent_id(
-            agent_id=agent_id, organization_id=org_id, search_mode="timestamp", top_k=10, start_date=three_days_ago, actor=default_user
+            agent_id=agent_id,
+            organization_id=org_id,
+            search_mode="timestamp",
+            top_k=10,
+            start_date=three_days_ago,
+            actor=default_user,
         )
 
         # Should get today's and yesterday's messages
@@ -1996,7 +2055,9 @@ async def test_message_project_id_filtering(server, sarah_agent, default_user, e
 
     # Clean up
     await tpuf_client.delete_messages(
-        agent_id=sarah_agent.id, organization_id=default_user.organization_id, message_ids=[message_a.id, message_b.id]
+        agent_id=sarah_agent.id,
+        organization_id=default_user.organization_id,
+        message_ids=[message_a.id, message_b.id],
     )
 
 
@@ -2081,5 +2142,7 @@ async def test_message_template_id_filtering(server, sarah_agent, default_user, 
 
     # Clean up
     await tpuf_client.delete_messages(
-        agent_id=sarah_agent.id, organization_id=default_user.organization_id, message_ids=[message_a.id, message_b.id]
+        agent_id=sarah_agent.id,
+        organization_id=default_user.organization_id,
+        message_ids=[message_a.id, message_b.id],
     )

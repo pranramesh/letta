@@ -37,7 +37,10 @@ def upgrade() -> None:
     )
 
     # Add properties column to identities table
-    op.add_column("identities", sa.Column("properties", postgresql.JSONB, nullable=False, server_default="[]"))
+    op.add_column(
+        "identities",
+        sa.Column("properties", postgresql.JSONB, nullable=False, server_default="[]"),
+    )
 
     # Create identities_agents table for many-to-many relationship
     op.create_table(
@@ -94,5 +97,9 @@ def downgrade() -> None:
 
     # Restore old unique constraint
     op.drop_constraint("unique_identifier_without_project", "identities", type_="unique")
-    op.create_unique_constraint("unique_identifier_pid_org_id", "identities", ["identifier_key", "project_id", "organization_id"])
+    op.create_unique_constraint(
+        "unique_identifier_pid_org_id",
+        "identities",
+        ["identifier_key", "project_id", "organization_id"],
+    )
     # ### end Alembic commands ###

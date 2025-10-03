@@ -22,7 +22,10 @@ class MCPToolHealth(BaseModel):
     """Health status for an MCP tool's schema."""
 
     # TODO: @jnjpng use the enum provided in schema_validator.py
-    status: str = Field(..., description="Schema health status: STRICT_COMPLIANT, NON_STRICT_ONLY, or INVALID")
+    status: str = Field(
+        ...,
+        description="Schema health status: STRICT_COMPLIANT, NON_STRICT_ONLY, or INVALID",
+    )
     reasons: List[str] = Field(default_factory=list, description="List of reasons for the health status")
 
 
@@ -99,7 +102,9 @@ class BaseServerConfig(BaseModel):
         return result
 
     def resolve_custom_headers(
-        self, custom_headers: Optional[Dict[str, str]], environment_variables: Optional[Dict[str, str]] = None
+        self,
+        custom_headers: Optional[Dict[str, str]],
+        environment_variables: Optional[Dict[str, str]] = None,
     ) -> Optional[Dict[str, str]]:
         """
         Resolve templated variables in custom headers dictionary.
@@ -142,8 +147,14 @@ class SSEServerConfig(BaseServerConfig):
     """
 
     type: MCPServerType = MCPServerType.SSE
-    server_url: str = Field(..., description="The URL of the server (MCP SSE client will connect to this URL)")
-    auth_header: Optional[str] = Field(None, description="The name of the authentication header (e.g., 'Authorization')")
+    server_url: str = Field(
+        ...,
+        description="The URL of the server (MCP SSE client will connect to this URL)",
+    )
+    auth_header: Optional[str] = Field(
+        None,
+        description="The name of the authentication header (e.g., 'Authorization')",
+    )
     auth_token: Optional[str] = Field(None, description="The authentication token or API key value")
     custom_headers: Optional[dict[str, str]] = Field(None, description="Custom HTTP headers to include with SSE requests")
 
@@ -223,8 +234,14 @@ class StreamableHTTPServerConfig(BaseServerConfig):
     """
 
     type: MCPServerType = MCPServerType.STREAMABLE_HTTP
-    server_url: str = Field(..., description="The URL path for the streamable HTTP server (e.g., 'example/mcp')")
-    auth_header: Optional[str] = Field(None, description="The name of the authentication header (e.g., 'Authorization')")
+    server_url: str = Field(
+        ...,
+        description="The URL path for the streamable HTTP server (e.g., 'example/mcp')",
+    )
+    auth_header: Optional[str] = Field(
+        None,
+        description="The name of the authentication header (e.g., 'Authorization')",
+    )
     auth_token: Optional[str] = Field(None, description="The authentication token or API key value")
     custom_headers: Optional[dict[str, str]] = Field(None, description="Custom HTTP headers to include with streamable HTTP requests")
 

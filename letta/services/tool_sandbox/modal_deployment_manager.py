@@ -14,7 +14,10 @@ from letta.log import get_logger
 from letta.schemas.sandbox_config import SandboxConfig
 from letta.schemas.tool import Tool
 from letta.services.tool_sandbox.modal_constants import VERSION_HASH_LENGTH
-from letta.services.tool_sandbox.modal_version_manager import ModalVersionManager, get_version_manager
+from letta.services.tool_sandbox.modal_version_manager import (
+    ModalVersionManager,
+    get_version_manager,
+)
 
 logger = get_logger(__name__)
 
@@ -116,7 +119,9 @@ class ModalDeploymentManager:
             return None
 
         deployment = await self.version_manager.get_deployment(
-            tool_id=self.tool.id, sandbox_config_id=sbx_config.id if sbx_config else None, actor=user
+            tool_id=self.tool.id,
+            sandbox_config_id=sbx_config.id if sbx_config else None,
+            actor=user,
         )
 
         if deployment and deployment.version_hash == version_hash:

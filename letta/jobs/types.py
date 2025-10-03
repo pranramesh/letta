@@ -1,6 +1,9 @@
 from typing import NamedTuple, Optional
 
-from anthropic.types.beta.messages import BetaMessageBatch, BetaMessageBatchIndividualResponse
+from anthropic.types.beta.messages import (
+    BetaMessageBatch,
+    BetaMessageBatchIndividualResponse,
+)
 
 from letta.schemas.enums import AgentStepStatus, JobStatus
 

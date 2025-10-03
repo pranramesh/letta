@@ -37,7 +37,9 @@ class Job(SqlalchemyBase, UserMixin):
         doc="The type of job. This affects whether or not we generate json_schema and source_code on the fly.",
     )
     request_config: Mapped[Optional[LettaRequestConfig]] = mapped_column(
-        JSON, nullable=True, doc="The request configuration for the job, stored as JSON."
+        JSON,
+        nullable=True,
+        doc="The request configuration for the job, stored as JSON.",
     )
     organization_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("organizations.id"))
 
@@ -46,7 +48,8 @@ class Job(SqlalchemyBase, UserMixin):
     callback_sent_at: Mapped[Optional[datetime]] = mapped_column(nullable=True, doc="Timestamp when the callback was last attempted.")
     callback_status_code: Mapped[Optional[int]] = mapped_column(nullable=True, doc="HTTP status code returned by the callback endpoint.")
     callback_error: Mapped[Optional[str]] = mapped_column(
-        nullable=True, doc="Optional error message from attempting to POST the callback endpoint."
+        nullable=True,
+        doc="Optional error message from attempting to POST the callback endpoint.",
     )
 
     # timing metrics (in nanoseconds for precision)

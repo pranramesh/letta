@@ -39,9 +39,19 @@ def upgrade() -> None:
     op.alter_column("files", "processing_status", nullable=False)
 
     # Step 5: Create indices
-    op.create_index("ix_files_org_created", "files", ["organization_id", sa.literal_column("created_at DESC")], unique=False)
+    op.create_index(
+        "ix_files_org_created",
+        "files",
+        ["organization_id", sa.literal_column("created_at DESC")],
+        unique=False,
+    )
     op.create_index("ix_files_processing_status", "files", ["processing_status"], unique=False)
-    op.create_index("ix_files_source_created", "files", ["source_id", sa.literal_column("created_at DESC")], unique=False)
+    op.create_index(
+        "ix_files_source_created",
+        "files",
+        ["source_id", sa.literal_column("created_at DESC")],
+        unique=False,
+    )
 
 
 def downgrade() -> None:

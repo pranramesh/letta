@@ -13,10 +13,17 @@ from letta.functions.function_sets.base import core_memory_append, core_memory_r
 from letta.orm.sandbox_config import SandboxConfig, SandboxEnvironmentVariable
 from letta.schemas.agent import AgentState, CreateAgent
 from letta.schemas.block import CreateBlock
-from letta.schemas.environment_variables import AgentEnvironmentVariable, SandboxEnvironmentVariableCreate
+from letta.schemas.environment_variables import (
+    AgentEnvironmentVariable,
+    SandboxEnvironmentVariableCreate,
+)
 from letta.schemas.organization import Organization
 from letta.schemas.pip_requirement import PipRequirement
-from letta.schemas.sandbox_config import E2BSandboxConfig, LocalSandboxConfig, SandboxConfigCreate
+from letta.schemas.sandbox_config import (
+    E2BSandboxConfig,
+    LocalSandboxConfig,
+    SandboxConfigCreate,
+)
 from letta.schemas.user import User
 from letta.server.db import db_registry
 from letta.server.server import SyncServer
@@ -235,7 +242,9 @@ def clear_core_memory_tool(test_user):
 
 @pytest.fixture
 def external_codebase_tool(test_user):
-    from tests.test_tool_sandbox.restaurant_management_system.adjust_menu_prices import adjust_menu_prices
+    from tests.test_tool_sandbox.restaurant_management_system.adjust_menu_prices import (
+        adjust_menu_prices,
+    )
 
     tool = create_tool_from_func(adjust_menu_prices)
     tool = ToolManager().create_or_update_tool(tool, test_user)
@@ -286,7 +295,9 @@ def custom_test_sandbox_config(test_user):
     external_codebase_path = str(Path(__file__).parent / "test_tool_sandbox" / "restaurant_management_system")
     # tqdm is used in this codebase, but NOT in the requirements.txt, this tests that we can successfully install pip requirements
     local_sandbox_config = LocalSandboxConfig(
-        sandbox_dir=external_codebase_path, use_venv=True, pip_requirements=[PipRequirement(name="tqdm")]
+        sandbox_dir=external_codebase_path,
+        use_venv=True,
+        pip_requirements=[PipRequirement(name="tqdm")],
     )
 
     # Create the sandbox configuration
@@ -560,7 +571,9 @@ async def test_local_sandbox_env(disable_e2b_api_key, get_env_tool, test_user):
     key = "secret_word"
     long_random_string = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(20))
     manager.create_sandbox_env_var(
-        SandboxEnvironmentVariableCreate(key=key, value=long_random_string), sandbox_config_id=config.id, actor=test_user
+        SandboxEnvironmentVariableCreate(key=key, value=long_random_string),
+        sandbox_config_id=config.id,
+        actor=test_user,
     )
 
     sandbox = AsyncToolSandboxLocal(get_env_tool.name, {}, user=test_user)
@@ -578,7 +591,11 @@ async def test_local_sandbox_per_agent_env(disable_e2b_api_key, get_env_tool, ag
     config = manager.create_or_update_sandbox_config(config_create, test_user)
 
     wrong_val = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(20))
-    manager.create_sandbox_env_var(SandboxEnvironmentVariableCreate(key=key, value=wrong_val), sandbox_config_id=config.id, actor=test_user)
+    manager.create_sandbox_env_var(
+        SandboxEnvironmentVariableCreate(key=key, value=wrong_val),
+        sandbox_config_id=config.id,
+        actor=test_user,
+    )
 
     correct_val = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(20))
     agent_state.secrets = [AgentEnvironmentVariable(key=key, value=correct_val, agent_id=agent_state.id)]
@@ -634,7 +651,9 @@ async def test_local_sandbox_with_venv_pip_installs_basic(disable_e2b_api_key, c
     key = "secret_word"
     long_random_string = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(20))
     manager.create_sandbox_env_var(
-        SandboxEnvironmentVariableCreate(key=key, value=long_random_string), sandbox_config_id=config.id, actor=test_user
+        SandboxEnvironmentVariableCreate(key=key, value=long_random_string),
+        sandbox_config_id=config.id,
+        actor=test_user,
     )
 
     sandbox = AsyncToolSandboxLocal(cowsay_tool.name, {}, user=test_user, force_recreate_venv=True)
@@ -652,7 +671,11 @@ async def test_local_sandbox_with_tool_pip_requirements(disable_e2b_api_key, too
     manager.create_or_update_sandbox_config(config_create, test_user)
 
     sandbox = AsyncToolSandboxLocal(
-        tool_with_pip_requirements.name, {}, user=test_user, tool_object=tool_with_pip_requirements, force_recreate_venv=True
+        tool_with_pip_requirements.name,
+        {},
+        user=test_user,
+        tool_object=tool_with_pip_requirements,
+        force_recreate_venv=True,
     )
     result = await sandbox.run()
 
@@ -671,12 +694,20 @@ async def test_local_sandbox_with_mixed_pip_requirements(disable_e2b_api_key, to
 
     # Add sandbox-level pip requirement
     config_create = SandboxConfigCreate(
-        config=LocalSandboxConfig(sandbox_dir=sandbox_dir, use_venv=True, pip_requirements=[PipRequirement(name="cowsay")]).model_dump()
+        config=LocalSandboxConfig(
+            sandbox_dir=sandbox_dir,
+            use_venv=True,
+            pip_requirements=[PipRequirement(name="cowsay")],
+        ).model_dump()
     )
     manager.create_or_update_sandbox_config(config_create, test_user)
 
     sandbox = AsyncToolSandboxLocal(
-        tool_with_pip_requirements.name, {}, user=test_user, tool_object=tool_with_pip_requirements, force_recreate_venv=True
+        tool_with_pip_requirements.name,
+        {},
+        user=test_user,
+        tool_object=tool_with_pip_requirements,
+        force_recreate_venv=True,
     )
     result = await sandbox.run()
 
@@ -696,7 +727,9 @@ async def test_local_sandbox_with_venv_pip_installs_with_update(disable_e2b_api_
     key = "secret_word"
     long_random_string = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(20))
     manager.create_sandbox_env_var(
-        SandboxEnvironmentVariableCreate(key=key, value=long_random_string), sandbox_config_id=config.id, actor=test_user
+        SandboxEnvironmentVariableCreate(key=key, value=long_random_string),
+        sandbox_config_id=config.id,
+        actor=test_user,
     )
 
     sandbox = AsyncToolSandboxLocal(cowsay_tool.name, {}, user=test_user, force_recreate_venv=True)
@@ -828,7 +861,12 @@ async def test_e2b_sandbox_with_tool_pip_requirements(check_e2b_key_is_set, tool
     config_create = SandboxConfigCreate(config=E2BSandboxConfig().model_dump())
     manager.create_or_update_sandbox_config(config_create, test_user)
 
-    sandbox = AsyncToolSandboxE2B(tool_with_pip_requirements.name, {}, user=test_user, tool_object=tool_with_pip_requirements)
+    sandbox = AsyncToolSandboxE2B(
+        tool_with_pip_requirements.name,
+        {},
+        user=test_user,
+        tool_object=tool_with_pip_requirements,
+    )
     result = await sandbox.run()
 
     # Should succeed since tool pip requirements were installed
@@ -847,7 +885,12 @@ async def test_e2b_sandbox_with_mixed_pip_requirements(check_e2b_key_is_set, too
     config_create = SandboxConfigCreate(config=E2BSandboxConfig(pip_requirements=["cowsay"]).model_dump())
     manager.create_or_update_sandbox_config(config_create, test_user)
 
-    sandbox = AsyncToolSandboxE2B(tool_with_pip_requirements.name, {}, user=test_user, tool_object=tool_with_pip_requirements)
+    sandbox = AsyncToolSandboxE2B(
+        tool_with_pip_requirements.name,
+        {},
+        user=test_user,
+        tool_object=tool_with_pip_requirements,
+    )
     result = await sandbox.run()
 
     # Should succeed since both sandbox and tool pip requirements were installed
@@ -866,7 +909,12 @@ async def test_e2b_sandbox_with_broken_tool_pip_requirements_error_handling(
     config_create = SandboxConfigCreate(config=E2BSandboxConfig().model_dump())
     manager.create_or_update_sandbox_config(config_create, test_user)
 
-    sandbox = AsyncToolSandboxE2B(tool_with_broken_pip_requirements.name, {}, user=test_user, tool_object=tool_with_broken_pip_requirements)
+    sandbox = AsyncToolSandboxE2B(
+        tool_with_broken_pip_requirements.name,
+        {},
+        user=test_user,
+        tool_object=tool_with_broken_pip_requirements,
+    )
 
     # Should raise a RuntimeError with informative message
     with pytest.raises(RuntimeError) as exc_info:
@@ -1011,7 +1059,9 @@ async def test_local_sandbox_async_with_env_vars(disable_e2b_api_key, async_get_
     key = "secret_word"
     test_value = "async_local_test_value_789"
     manager.create_sandbox_env_var(
-        SandboxEnvironmentVariableCreate(key=key, value=test_value), sandbox_config_id=config.id, actor=test_user
+        SandboxEnvironmentVariableCreate(key=key, value=test_value),
+        sandbox_config_id=config.id,
+        actor=test_user,
     )
 
     sandbox = AsyncToolSandboxLocal(async_get_env_tool.name, {}, user=test_user)
@@ -1032,7 +1082,9 @@ async def test_e2b_sandbox_async_with_env_vars(check_e2b_key_is_set, async_get_e
     key = "secret_word"
     test_value = "async_e2b_test_value_456"
     manager.create_sandbox_env_var(
-        SandboxEnvironmentVariableCreate(key=key, value=test_value), sandbox_config_id=config.id, actor=test_user
+        SandboxEnvironmentVariableCreate(key=key, value=test_value),
+        sandbox_config_id=config.id,
+        actor=test_user,
     )
 
     sandbox = AsyncToolSandboxE2B(async_get_env_tool.name, {}, user=test_user)
@@ -1105,7 +1157,11 @@ async def test_local_sandbox_async_per_agent_env(disable_e2b_api_key, async_get_
     config = manager.create_or_update_sandbox_config(config_create, test_user)
 
     wrong_val = "wrong_async_local_value"
-    manager.create_sandbox_env_var(SandboxEnvironmentVariableCreate(key=key, value=wrong_val), sandbox_config_id=config.id, actor=test_user)
+    manager.create_sandbox_env_var(
+        SandboxEnvironmentVariableCreate(key=key, value=wrong_val),
+        sandbox_config_id=config.id,
+        actor=test_user,
+    )
 
     correct_val = "correct_async_local_value"
     agent_state.secrets = [AgentEnvironmentVariable(key=key, value=correct_val, agent_id=agent_state.id)]

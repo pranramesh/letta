@@ -149,7 +149,10 @@ class AgentFileManager:
         return sorted(unique_blocks.values(), key=lambda x: x.label)
 
     async def _extract_unique_sources_and_files_from_agents(
-        self, agent_states: List[AgentState], actor: User, files_agents_cache: dict = None
+        self,
+        agent_states: List[AgentState],
+        actor: User,
+        files_agents_cache: dict = None,
     ) -> tuple[List[Source], List[FileMetadata]]:
         """Extract unique sources and files from agent states using bulk operations"""
 
@@ -158,7 +161,10 @@ class AgentFileManager:
 
         for agent_state in agent_states:
             files_agents = await self.file_agent_manager.list_files_for_agent(
-                agent_id=agent_state.id, actor=actor, is_open_only=False, return_as_blocks=False
+                agent_id=agent_state.id,
+                actor=actor,
+                is_open_only=False,
+                return_as_blocks=False,
             )
             # cache the results for reuse during conversion
             if files_agents_cache is not None:
@@ -182,10 +188,16 @@ class AgentFileManager:
             files_agents = files_agents_cache[agent_state.id]
         else:
             files_agents = await self.file_agent_manager.list_files_for_agent(
-                agent_id=agent_state.id, actor=actor, is_open_only=False, return_as_blocks=False
+                agent_id=agent_state.id,
+                actor=actor,
+                is_open_only=False,
+                return_as_blocks=False,
             )
         agent_schema = await AgentSchema.from_agent_state(
-            agent_state, message_manager=self.message_manager, files_agents=files_agents, actor=actor
+            agent_state,
+            message_manager=self.message_manager,
+            files_agents=files_agents,
+            actor=actor,
         )
         agent_schema.id = agent_file_id
 
@@ -510,7 +522,10 @@ class AgentFileManager:
 
                     # Bulk attach files to agent
                     await self.file_agent_manager.attach_files_bulk(
-                        agent_id=agent_db_id, files_metadata=files_for_agent, visible_content_map=visible_content_map, actor=actor
+                        agent_id=agent_db_id,
+                        files_metadata=files_for_agent,
+                        visible_content_map=visible_content_map,
+                        actor=actor,
                     )
                     imported_count += len(files_for_agent)
 

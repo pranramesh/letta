@@ -23,8 +23,14 @@ from letta.constants import (
     SEND_MESSAGE_TOOL_NAME,
 )
 from letta.errors import ContextWindowExceededError
-from letta.functions.ast_parsers import coerce_dict_args_by_annotations, get_function_annotations_from_source
-from letta.functions.composio_helpers import execute_composio_action, generate_composio_action_from_func_name
+from letta.functions.ast_parsers import (
+    coerce_dict_args_by_annotations,
+    get_function_annotations_from_source,
+)
+from letta.functions.composio_helpers import (
+    execute_composio_action,
+    generate_composio_action_from_func_name,
+)
 from letta.functions.functions import get_function_from_module
 from letta.helpers import ToolRulesSolver
 from letta.helpers.composio_helpers import get_composio_api_key
@@ -32,7 +38,11 @@ from letta.helpers.datetime_helpers import get_utc_time
 from letta.helpers.json_helpers import json_dumps, json_loads
 from letta.helpers.message_helper import convert_message_creates_to_messages
 from letta.interface import AgentInterface
-from letta.llm_api.helpers import calculate_summarizer_cutoff, get_token_counts_for_messages, is_context_overflow_error
+from letta.llm_api.helpers import (
+    calculate_summarizer_cutoff,
+    get_token_counts_for_messages,
+    is_context_overflow_error,
+)
 from letta.llm_api.llm_api_tools import create
 from letta.llm_api.llm_client import LLMClient
 from letta.local_llm.constants import INNER_THOUGHTS_KWARG
@@ -49,7 +59,11 @@ from letta.schemas.enums import MessageRole, ProviderType, StepStatus, ToolType
 from letta.schemas.letta_message_content import ImageContent, TextContent
 from letta.schemas.memory import ContextWindowOverview, Memory
 from letta.schemas.message import Message, MessageCreate, ToolReturn
-from letta.schemas.openai.chat_completion_response import ChatCompletionResponse, Message as ChatCompletionMessage, UsageStatistics
+from letta.schemas.openai.chat_completion_response import (
+    ChatCompletionResponse,
+    Message as ChatCompletionMessage,
+    UsageStatistics,
+)
 from letta.schemas.response_format import ResponseFormatType
 from letta.schemas.tool import Tool
 from letta.schemas.tool_execution_result import ToolExecutionResult
@@ -70,8 +84,21 @@ from letta.services.tool_executor.tool_execution_sandbox import ToolExecutionSan
 from letta.services.tool_manager import ToolManager
 from letta.settings import model_settings, settings, summarizer_settings
 from letta.streaming_interface import StreamingRefreshCLIInterface
-from letta.system import get_heartbeat, get_token_limit_warning, package_function_response, package_summarize_message, package_user_message
-from letta.utils import count_tokens, get_friendly_error_msg, get_tool_call_id, log_telemetry, parse_json, validate_function_response
+from letta.system import (
+    get_heartbeat,
+    get_token_limit_warning,
+    package_function_response,
+    package_summarize_message,
+    package_user_message,
+)
+from letta.utils import (
+    count_tokens,
+    get_friendly_error_msg,
+    get_tool_call_id,
+    log_telemetry,
+    parse_json,
+    validate_function_response,
+)
 
 logger = get_logger(__name__)
 
@@ -215,7 +242,11 @@ class Agent(BaseAgent):
                 if updated_value != self.agent_state.memory.get_block(label).value:
                     # update the block if it's changed
                     block_id = self.agent_state.memory.get_block(label).id
-                    self.block_manager.update_block(block_id=block_id, block_update=BlockUpdate(value=updated_value), actor=self.user)
+                    self.block_manager.update_block(
+                        block_id=block_id,
+                        block_update=BlockUpdate(value=updated_value),
+                        actor=self.user,
+                    )
 
             # refresh memory from DB (using block ids)
             self.agent_state.memory = Memory(
@@ -318,7 +349,8 @@ class Agent(BaseAgent):
 
         # Get allowed tools or allow all if none are allowed
         allowed_tool_names = self.tool_rules_solver.get_allowed_tool_names(
-            available_tools=available_tools, last_function_response=self.last_function_response
+            available_tools=available_tools,
+            last_function_response=self.last_function_response,
         ) or list(available_tools)
 
         # Don't allow a tool to be called if it failed last time
@@ -405,7 +437,11 @@ class Agent(BaseAgent):
                 if len(response.choices) == 0 or response.choices[0] is None:
                     raise ValueError(f"API call returned an empty message: {response}")
 
-                if response.choices[0].finish_reason not in ["stop", "function_call", "tool_calls"]:
+                if response.choices[0].finish_reason not in [
+                    "stop",
+                    "function_call",
+                    "tool_calls",
+                ]:
                     if response.choices[0].finish_reason == "length":
                         # This is not retryable, hence RuntimeError v.s. ValueError
                         raise RuntimeError("Finish reason was length (maximum context length)")
@@ -505,7 +541,11 @@ class Agent(BaseAgent):
             nonnull_content = False
             if response_message.content or response_message.reasoning_content or response_message.redacted_reasoning_content:
                 # The content if then internal monologue, not chat
-                self.interface.internal_monologue(response_message.content, msg_obj=messages[-1], chunk_index=chunk_index)
+                self.interface.internal_monologue(
+                    response_message.content,
+                    msg_obj=messages[-1],
+                    chunk_index=chunk_index,
+                )
                 chunk_index += 1
                 # Flag to avoid printing a duplicate if inner thoughts get popped from the function call
                 nonnull_content = True
@@ -531,9 +571,19 @@ class Agent(BaseAgent):
                 error_msg = f"No function named {function_name}"
                 function_response = "None"  # more like "never ran?"
                 messages = self._handle_function_error_response(
-                    error_msg, tool_call_id, function_name, function_args, function_response, messages, group_id=group_id
+                    error_msg,
+                    tool_call_id,
+                    function_name,
+                    function_args,
+                    function_response,
+                    messages,
+                    group_id=group_id,
                 )
-                return messages, False, True  # force a heartbeat to allow agent to handle error
+                return (
+                    messages,
+                    False,
+                    True,
+                )  # force a heartbeat to allow agent to handle error
 
             # Failure case 2: function name is OK, but function args are bad JSON
             try:
@@ -546,16 +596,30 @@ class Agent(BaseAgent):
                 error_msg = f"Error parsing JSON for function '{function_name}' arguments: {function_call.arguments}"
                 function_response = "None"  # more like "never ran?"
                 messages = self._handle_function_error_response(
-                    error_msg, tool_call_id, function_name, function_args, function_response, messages, group_id=group_id
+                    error_msg,
+                    tool_call_id,
+                    function_name,
+                    function_args,
+                    function_response,
+                    messages,
+                    group_id=group_id,
                 )
-                return messages, False, True  # force a heartbeat to allow agent to handle error
+                return (
+                    messages,
+                    False,
+                    True,
+                )  # force a heartbeat to allow agent to handle error
 
             # Check if inner thoughts is in the function call arguments (possible apparently if you are using Azure)
             if INNER_THOUGHTS_KWARG in function_args:
                 response_message.content = function_args.pop(INNER_THOUGHTS_KWARG)
             # The content if then internal monologue, not chat
             if response_message.content and not nonnull_content:
-                self.interface.internal_monologue(response_message.content, msg_obj=messages[-1], chunk_index=chunk_index)
+                self.interface.internal_monologue(
+                    response_message.content,
+                    msg_obj=messages[-1],
+                    chunk_index=chunk_index,
+                )
                 chunk_index += 1
 
             # (Still parsing function args)
@@ -582,12 +646,19 @@ class Agent(BaseAgent):
             # handle cases where we return a json message
             if "message" in function_args:
                 function_args["message"] = str(function_args.get("message", ""))
-            self.interface.function_message(f"Running {function_name}({function_args})", msg_obj=messages[-1], chunk_index=chunk_index)
+            self.interface.function_message(
+                f"Running {function_name}({function_args})",
+                msg_obj=messages[-1],
+                chunk_index=chunk_index,
+            )
             chunk_index = 0  # reset chunk index after assistant message
             try:
                 # handle tool execution (sandbox) and state updates
                 log_telemetry(
-                    self.logger, "_handle_ai_response execute tool start", function_name=function_name, function_args=function_args
+                    self.logger,
+                    "_handle_ai_response execute tool start",
+                    function_name=function_name,
+                    function_args=function_args,
                 )
                 log_event(
                     "tool_call_initiated",
@@ -609,12 +680,17 @@ class Agent(BaseAgent):
                     },
                 )
                 log_telemetry(
-                    self.logger, "_handle_ai_response execute tool finish", function_name=function_name, function_args=function_args
+                    self.logger,
+                    "_handle_ai_response execute tool finish",
+                    function_name=function_name,
+                    function_args=function_args,
                 )
 
                 if tool_execution_result and tool_execution_result.status == "error":
                     tool_return = ToolReturn(
-                        status=tool_execution_result.status, stdout=tool_execution_result.stdout, stderr=tool_execution_result.stderr
+                        status=tool_execution_result.status,
+                        stdout=tool_execution_result.stdout,
+                        stderr=tool_execution_result.stderr,
                     )
                     messages = self._handle_function_error_response(
                         function_response,
@@ -626,10 +702,18 @@ class Agent(BaseAgent):
                         [tool_return],
                         group_id=group_id,
                     )
-                    return messages, False, True  # force a heartbeat to allow agent to handle error
+                    return (
+                        messages,
+                        False,
+                        True,
+                    )  # force a heartbeat to allow agent to handle error
 
                 # handle trunction
-                if function_name in ["conversation_search", "conversation_search_date", "archival_memory_search"]:
+                if function_name in [
+                    "conversation_search",
+                    "conversation_search_date",
+                    "archival_memory_search",
+                ]:
                     # with certain functions we rely on the paging mechanism to handle overflow
                     truncate = False
                 else:
@@ -640,7 +724,9 @@ class Agent(BaseAgent):
                 # get the function response limit
                 return_char_limit = target_letta_tool.return_char_limit
                 function_response_string = validate_function_response(
-                    function_response, return_char_limit=return_char_limit, truncate=truncate
+                    function_response,
+                    return_char_limit=return_char_limit,
+                    truncate=truncate,
                 )
                 function_args.pop("self", None)
                 function_response = package_function_response(True, function_response_string, self.agent_state.timezone)
@@ -649,7 +735,11 @@ class Agent(BaseAgent):
                 function_args.pop("self", None)
                 # error_msg = f"Error calling function {function_name} with args {function_args}: {str(e)}"
                 # Less detailed - don't provide full args, idea is that it should be in recent context so no need (just adds noise)
-                error_msg = get_friendly_error_msg(function_name=function_name, exception_name=type(e).__name__, exception_message=str(e))
+                error_msg = get_friendly_error_msg(
+                    function_name=function_name,
+                    exception_name=type(e).__name__,
+                    exception_message=str(e),
+                )
                 error_msg_user = f"{error_msg}\n{traceback.format_exc()}"
                 self.logger.error(error_msg_user)
                 messages = self._handle_function_error_response(
@@ -663,7 +753,11 @@ class Agent(BaseAgent):
                     include_function_failed_message=True,
                     group_id=group_id,
                 )
-                return messages, False, True  # force a heartbeat to allow agent to handle error
+                return (
+                    messages,
+                    False,
+                    True,
+                )  # force a heartbeat to allow agent to handle error
 
             # Step 4: check if function response is an error
             if function_response_string.startswith(ERROR_MESSAGE_PREFIX):
@@ -684,7 +778,11 @@ class Agent(BaseAgent):
                     include_function_failed_message=True,
                     group_id=group_id,
                 )
-                return messages, False, True  # force a heartbeat to allow agent to handle error
+                return (
+                    messages,
+                    False,
+                    True,
+                )  # force a heartbeat to allow agent to handle error
 
             # If no failures happened along the way: ...
             # Step 5: send the info on the function call and function response to GPT
@@ -707,8 +805,16 @@ class Agent(BaseAgent):
                     group_id=group_id,
                 )
             )  # extend conversation with function response
-            self.interface.function_message(f"Ran {function_name}({function_args})", msg_obj=messages[-1], chunk_index=chunk_index)
-            self.interface.function_message(f"Success: {function_response_string}", msg_obj=messages[-1], chunk_index=chunk_index)
+            self.interface.function_message(
+                f"Ran {function_name}({function_args})",
+                msg_obj=messages[-1],
+                chunk_index=chunk_index,
+            )
+            self.interface.function_message(
+                f"Success: {function_response_string}",
+                msg_obj=messages[-1],
+                chunk_index=chunk_index,
+            )
             chunk_index += 1
             self.last_function_response = function_response
 
@@ -852,7 +958,11 @@ class Agent(BaseAgent):
             self.logger.info("Autoclearing message buffer")
             self.agent_state = self.agent_manager.trim_all_in_context_messages_except_system(self.agent_state.id, actor=self.user)
 
-        return LettaUsageStatistics(**total_usage.model_dump(), step_count=step_count, steps_messages=steps_messages)
+        return LettaUsageStatistics(
+            **total_usage.model_dump(),
+            step_count=step_count,
+            steps_messages=steps_messages,
+        )
 
     def inner_step(
         self,
@@ -1091,7 +1201,11 @@ class Agent(BaseAgent):
         cleaned_user_message_text, name = strip_name_field_from_user_message(user_message)
 
         # Turn into a dict
-        openai_message_dict = {"role": "user", "content": cleaned_user_message_text, "name": name}
+        openai_message_dict = {
+            "role": "user",
+            "content": cleaned_user_message_text,
+            "name": name,
+        }
 
         # Create the associated Message object (in the database)
         assert self.agent_state.created_by_id is not None, "User ID is not set"
@@ -1125,7 +1239,11 @@ class Agent(BaseAgent):
                 },
             )
 
-        cutoff = calculate_summarizer_cutoff(in_context_messages=in_context_messages, token_counts=token_counts, logger=logger)
+        cutoff = calculate_summarizer_cutoff(
+            in_context_messages=in_context_messages,
+            token_counts=token_counts,
+            logger=logger,
+        )
         message_sequence_to_summarize = in_context_messages[1:cutoff]  # do NOT get rid of the system message
         logger.info(f"Attempting to summarize {len(message_sequence_to_summarize)} messages of {len(in_context_messages)}")
 
@@ -1138,7 +1256,9 @@ class Agent(BaseAgent):
             )
 
         summary = summarize_messages(
-            agent_state=self.agent_state, message_sequence_to_summarize=message_sequence_to_summarize, actor=self.user
+            agent_state=self.agent_state,
+            message_sequence_to_summarize=message_sequence_to_summarize,
+            actor=self.user,
         )
         logger.info(f"Got summary: {summary}")
 
@@ -1148,7 +1268,11 @@ class Agent(BaseAgent):
         hidden_message_count = all_time_message_count - remaining_message_count
         summary_message_count = len(message_sequence_to_summarize)
         summary_message = package_summarize_message(
-            summary, summary_message_count, hidden_message_count, all_time_message_count, self.agent_state.timezone
+            summary,
+            summary_message_count,
+            hidden_message_count,
+            all_time_message_count,
+            self.agent_state.timezone,
         )
         logger.info(f"Packaged into message: {summary_message}")
 
@@ -1480,7 +1604,10 @@ class Agent(BaseAgent):
             else asyncio.sleep(0, result=0)
         )
         num_tokens_external_memory_summary_coroutine = (
-            anthropic_client.count_tokens(model=model, messages=[{"role": "user", "content": external_memory_summary}])
+            anthropic_client.count_tokens(
+                model=model,
+                messages=[{"role": "user", "content": external_memory_summary}],
+            )
             if external_memory_summary
             else asyncio.sleep(0, result=0)
         )
@@ -1634,7 +1761,10 @@ class Agent(BaseAgent):
                 # Get composio_api_key
                 composio_api_key = get_composio_api_key(actor=self.user, logger=self.logger)
                 function_response = execute_composio_action(
-                    action_name=action_name, args=function_args, api_key=composio_api_key, entity_id=entity_id
+                    action_name=action_name,
+                    args=function_args,
+                    api_key=composio_api_key,
+                    entity_id=entity_id,
                 )
             elif target_letta_tool.tool_type == ToolType.EXTERNAL_MCP:
                 # Get the server name from the tool tag
@@ -1678,9 +1808,12 @@ class Agent(BaseAgent):
                 agent_state_copy.tools = []
                 agent_state_copy.tool_rules = []
 
-                tool_execution_result = ToolExecutionSandbox(function_name, function_args, self.user, tool_object=target_letta_tool).run(
-                    agent_state=agent_state_copy
-                )
+                tool_execution_result = ToolExecutionSandbox(
+                    function_name,
+                    function_args,
+                    self.user,
+                    tool_object=target_letta_tool,
+                ).run(agent_state=agent_state_copy)
                 assert orig_memory_str == self.agent_state.memory.compile(), "Memory should not be modified in a sandbox tool"
                 if tool_execution_result.agent_state is not None:
                     self.update_memory_if_changed(tool_execution_result.agent_state.memory)
@@ -1689,7 +1822,9 @@ class Agent(BaseAgent):
             # Need to catch error here, or else trunction wont happen
             # TODO: modify to function execution error
             function_response = get_friendly_error_msg(
-                function_name=function_name, exception_name=type(e).__name__, exception_message=str(e)
+                function_name=function_name,
+                exception_name=type(e).__name__,
+                exception_message=str(e),
             )
             return ToolExecutionResult(
                 status="error",
@@ -1731,7 +1866,9 @@ def save_agent(agent: Agent):
     agent_manager.update_agent(agent_id=agent_state.id, agent_update=update_agent, actor=agent.user)
 
 
-def strip_name_field_from_user_message(user_message_text: str) -> Tuple[str, Optional[str]]:
+def strip_name_field_from_user_message(
+    user_message_text: str,
+) -> Tuple[str, Optional[str]]:
     """If 'name' exists in the JSON string, remove it and return the cleaned text + name value"""
     try:
         user_message_json = dict(json_loads(user_message_text))

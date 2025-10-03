@@ -40,7 +40,9 @@ def mock_agent_messages():
                 created_at=datetime.now(timezone.utc),
             ),
             PydanticMessage(
-                role=MessageRole.user, content=[{"type": "text", "text": "What's the weather like?"}], created_at=datetime.now(timezone.utc)
+                role=MessageRole.user,
+                content=[{"type": "text", "text": "What's the weather like?"}],
+                created_at=datetime.now(timezone.utc),
             ),
         ]
     }
@@ -55,7 +57,12 @@ def mock_agent_tools():
                 "description": "Fetch current weather data",
                 "parameters": {
                     "type": "object",
-                    "properties": {"location": {"type": "string", "description": "The location to get weather for"}},
+                    "properties": {
+                        "location": {
+                            "type": "string",
+                            "description": "The location to get weather for",
+                        }
+                    },
                     "required": ["location"],
                 },
             }
@@ -70,7 +77,11 @@ def mock_agent_llm_config(llm_config):
 
 @pytest.mark.asyncio
 async def test_send_llm_batch_request_async_success(
-    anthropic_client, mock_agent_messages, mock_agent_tools, mock_agent_llm_config, dummy_beta_message_batch
+    anthropic_client,
+    mock_agent_messages,
+    mock_agent_tools,
+    mock_agent_llm_config,
+    dummy_beta_message_batch,
 ):
     """Test a successful batch request using mocked Anthropic client responses."""
     # Patch the _get_anthropic_client_async method so that it returns a mock client.
@@ -99,5 +110,8 @@ async def test_send_llm_batch_request_async_mismatched_keys(anthropic_client, mo
     a ValueError is raised.
     """
     mismatched_tools = {"agent-2": []}  # Different agent ID than in the messages mapping.
-    with pytest.raises(ValueError, match="Agent mappings for messages and tools must use the same agent_ids."):
+    with pytest.raises(
+        ValueError,
+        match="Agent mappings for messages and tools must use the same agent_ids.",
+    ):
         await anthropic_client.send_llm_batch_request_async(mock_agent_messages, mismatched_tools, mock_agent_llm_config)

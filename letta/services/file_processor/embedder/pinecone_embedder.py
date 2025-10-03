@@ -56,11 +56,18 @@ class PineconeEmbedder(BaseEmbedder):
             logger.info(f"Successfully kicked off upserting {len(chunks)} records to Pinecone")
             log_event(
                 "embedder.upsert_started",
-                {"records_upserted": len(chunks), "namespace": source_id, "file_id": file_id},
+                {
+                    "records_upserted": len(chunks),
+                    "namespace": source_id,
+                    "file_id": file_id,
+                },
             )
         except Exception as e:
             logger.error(f"Failed to upsert records to Pinecone: {str(e)}")
-            log_event("embedder.upsert_failed", {"error": str(e), "error_type": type(e).__name__})
+            log_event(
+                "embedder.upsert_failed",
+                {"error": str(e), "error_type": type(e).__name__},
+            )
             raise
 
         # Create Passage objects (without embeddings since Pinecone handles them)
@@ -79,6 +86,11 @@ class PineconeEmbedder(BaseEmbedder):
         logger.info(f"Successfully created {len(passages)} passages")
         log_event(
             "embedder.generation_completed",
-            {"passages_created": len(passages), "total_chunks_processed": len(chunks), "file_id": file_id, "source_id": source_id},
+            {
+                "passages_created": len(passages),
+                "total_chunks_processed": len(chunks),
+                "file_id": file_id,
+                "source_id": source_id,
+            },
         )
         return passages

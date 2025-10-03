@@ -66,6 +66,11 @@ class TurbopufferEmbedder(BaseEmbedder):
             logger.error(f"Failed to generate embeddings with Turbopuffer: {str(e)}")
             log_event(
                 "turbopuffer_embedder.generation_failed",
-                {"error": str(e), "error_type": type(e).__name__, "file_id": file_id, "source_id": source_id},
+                {
+                    "error": str(e),
+                    "error_type": type(e).__name__,
+                    "file_id": file_id,
+                    "source_id": source_id,
+                },
             )
             raise

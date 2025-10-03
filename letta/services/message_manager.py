@@ -5,7 +5,11 @@ from typing import List, Optional, Sequence, Tuple
 
 from sqlalchemy import delete, exists, func, select, text
 
-from letta.constants import CONVERSATION_SEARCH_TOOL_NAME, DEFAULT_MESSAGE_TOOL, DEFAULT_MESSAGE_TOOL_KWARG
+from letta.constants import (
+    CONVERSATION_SEARCH_TOOL_NAME,
+    DEFAULT_MESSAGE_TOOL,
+    DEFAULT_MESSAGE_TOOL_KWARG,
+)
 from letta.log import get_logger
 from letta.orm.agent import Agent as AgentModel
 from letta.orm.errors import NoResultFound
@@ -13,8 +17,17 @@ from letta.orm.message import Message as MessageModel
 from letta.otel.tracing import trace_method
 from letta.schemas.enums import MessageRole
 from letta.schemas.letta_message import LettaMessageUpdateUnion
-from letta.schemas.letta_message_content import ImageSourceType, LettaImage, MessageContentType, TextContent
-from letta.schemas.message import Message as PydanticMessage, MessageSearchResult, MessageUpdate
+from letta.schemas.letta_message_content import (
+    ImageSourceType,
+    LettaImage,
+    MessageContentType,
+    TextContent,
+)
+from letta.schemas.message import (
+    Message as PydanticMessage,
+    MessageSearchResult,
+    MessageUpdate,
+)
 from letta.schemas.user import User as PydanticUser
 from letta.server.db import db_registry
 from letta.services.file_manager import FileManager
@@ -45,11 +58,18 @@ class MessageManager:
             JSON string with message content, or empty string for non-searchable roles
         """
         # only extract text from searchable roles
-        if message.role not in [MessageRole.assistant, MessageRole.user, MessageRole.tool]:
+        if message.role not in [
+            MessageRole.assistant,
+            MessageRole.user,
+            MessageRole.tool,
+        ]:
             return ""
 
         # skip tool messages related to send_message and conversation_search entirely
-        if message.role == MessageRole.tool and message.name in [DEFAULT_MESSAGE_TOOL, CONVERSATION_SEARCH_TOOL_NAME]:
+        if message.role == MessageRole.tool and message.name in [
+            DEFAULT_MESSAGE_TOOL,
+            CONVERSATION_SEARCH_TOOL_NAME,
+        ]:
             return ""
 
         if not message.content:
@@ -159,7 +179,10 @@ class MessageManager:
                         tool_result_text = next_msg.content[0].text if next_msg.content else ""
 
                         # get the tool call that matches this result (we know it exists from the condition above)
-                        matching_tool_call = next((tc for tc in current_msg.tool_calls if tc.id == next_msg.tool_call_id), None)
+                        matching_tool_call = next(
+                            (tc for tc in current_msg.tool_calls if tc.id == next_msg.tool_call_id),
+                            None,
+                        )
 
                         # format tool call with parameters
                         try:
@@ -192,7 +215,11 @@ class MessageManager:
                         except (json.JSONDecodeError, ValueError):
                             tool_result_summary = tool_result_text
 
-                        combined_data = {"thinking": assistant_text, "tool_call": tool_call_str, "tool_result": tool_result_summary}
+                        combined_data = {
+                            "thinking": assistant_text,
+                            "tool_call": tool_call_str,
+                            "tool_result": tool_result_summary,
+                        }
                         combined_text = json.dumps(combined_data)
                     else:
                         combined_text = assistant_text
@@ -263,7 +290,12 @@ class MessageManager:
             )
         # Sort results directly based on message_ids
         result_dict = {msg.id: msg.to_pydantic() for msg in results}
-        return list(filter(lambda x: x is not None, [result_dict.get(msg_id, None) for msg_id in message_ids]))
+        return list(
+            filter(
+                lambda x: x is not None,
+                [result_dict.get(msg_id, None) for msg_id in message_ids],
+            )
+        )
 
     @enforce_types
     @trace_method
@@ -442,7 +474,10 @@ class MessageManager:
     @enforce_types
     @trace_method
     def update_message_by_letta_message(
-        self, message_id: str, letta_message_update: LettaMessageUpdateUnion, actor: PydanticUser
+        self,
+        message_id: str,
+        letta_message_update: LettaMessageUpdateUnion,
+        actor: PydanticUser,
     ) -> PydanticMessage:
         """
         Updated the underlying messages table giving an update specified to the user-facing LettaMessage
@@ -481,7 +516,10 @@ class MessageManager:
     @enforce_types
     @trace_method
     def update_message_by_letta_message(
-        self, message_id: str, letta_message_update: LettaMessageUpdateUnion, actor: PydanticUser
+        self,
+        message_id: str,
+        letta_message_update: LettaMessageUpdateUnion,
+        actor: PydanticUser,
     ) -> PydanticMessage:
         """
         Updated the underlying messages table giving an update specified to the user-facing LettaMessage
@@ -593,7 +631,12 @@ class MessageManager:
             return pydantic_message
 
     async def _update_message_embedding_background(
-        self, message: PydanticMessage, text: str, actor: PydanticUser, project_id: Optional[str] = None, template_id: Optional[str] = None
+        self,
+        message: PydanticMessage,
+        text: str,
+        actor: PydanticUser,
+        project_id: Optional[str] = None,
+        template_id: Optional[str] = None,
     ) -> None:
         """Background task to update a message's embedding in Turbopuffer.
 
@@ -610,7 +653,11 @@ class MessageManager:
             tpuf_client = TurbopufferClient()
 
             # delete old message from turbopuffer
-            await tpuf_client.delete_messages(agent_id=message.agent_id, organization_id=actor.organization_id, message_ids=[message.id])
+            await tpuf_client.delete_messages(
+                agent_id=message.agent_id,
+                organization_id=actor.organization_id,
+                message_ids=[message.id],
+            )
 
             # re-insert with updated content - TurbopufferClient will generate embeddings internally
             await tpuf_client.insert_messages(
@@ -630,7 +677,11 @@ class MessageManager:
             # don't re-raise the exception in background mode - just log it
 
     def _update_message_by_id_impl(
-        self, message_id: str, message_update: MessageUpdate, actor: PydanticUser, message: MessageModel
+        self,
+        message_id: str,
+        message_update: MessageUpdate,
+        actor: PydanticUser,
+        message: MessageModel,
     ) -> MessageModel:
         """
         Modifies the existing message object to update the database in the sync/async functions.
@@ -685,13 +736,18 @@ class MessageManager:
                 await msg.hard_delete_async(session, actor=actor)
 
                 # delete from turbopuffer if enabled
-                from letta.helpers.tpuf_client import TurbopufferClient, should_use_tpuf_for_messages
+                from letta.helpers.tpuf_client import (
+                    TurbopufferClient,
+                    should_use_tpuf_for_messages,
+                )
 
                 if should_use_tpuf_for_messages() and agent_id:
                     try:
                         tpuf_client = TurbopufferClient()
                         await tpuf_client.delete_messages(
-                            agent_id=agent_id, organization_id=actor.organization_id, message_ids=[message_id]
+                            agent_id=agent_id,
+                            organization_id=actor.organization_id,
+                            message_ids=[message_id],
                         )
                         logger.info(f"Successfully deleted message {message_id} from Turbopuffer")
                     except Exception as e:
@@ -1002,7 +1058,11 @@ class MessageManager:
     @enforce_types
     @trace_method
     async def delete_all_messages_for_agent_async(
-        self, agent_id: str, actor: PydanticUser, exclude_ids: Optional[List[str]] = None, strict_mode: bool = False
+        self,
+        agent_id: str,
+        actor: PydanticUser,
+        exclude_ids: Optional[List[str]] = None,
+        strict_mode: bool = False,
     ) -> int:
         """
         Efficiently deletes all messages associated with a given agent_id,
@@ -1028,7 +1088,10 @@ class MessageManager:
             await session.commit()
 
             # 5) delete from turbopuffer if enabled
-            from letta.helpers.tpuf_client import TurbopufferClient, should_use_tpuf_for_messages
+            from letta.helpers.tpuf_client import (
+                TurbopufferClient,
+                should_use_tpuf_for_messages,
+            )
 
             if should_use_tpuf_for_messages():
                 try:
@@ -1062,7 +1125,10 @@ class MessageManager:
         async with db_registry.async_session() as session:
             # get agent_ids BEFORE deleting (for turbopuffer)
             agent_ids = []
-            from letta.helpers.tpuf_client import TurbopufferClient, should_use_tpuf_for_messages
+            from letta.helpers.tpuf_client import (
+                TurbopufferClient,
+                should_use_tpuf_for_messages,
+            )
 
             if should_use_tpuf_for_messages():
                 agent_query = (
@@ -1087,7 +1153,11 @@ class MessageManager:
                     tpuf_client = TurbopufferClient()
                     # delete from each affected agent's namespace
                     for agent_id in agent_ids:
-                        await tpuf_client.delete_messages(agent_id=agent_id, organization_id=actor.organization_id, message_ids=message_ids)
+                        await tpuf_client.delete_messages(
+                            agent_id=agent_id,
+                            organization_id=actor.organization_id,
+                            message_ids=message_ids,
+                        )
                     logger.info(f"Successfully deleted {len(message_ids)} messages from Turbopuffer")
                 except Exception as e:
                     logger.error(f"Failed to delete messages from Turbopuffer: {e}")
@@ -1130,7 +1200,10 @@ class MessageManager:
         Returns:
             List of tuples (message, metadata) where metadata contains relevance scores
         """
-        from letta.helpers.tpuf_client import TurbopufferClient, should_use_tpuf_for_messages
+        from letta.helpers.tpuf_client import (
+            TurbopufferClient,
+            should_use_tpuf_for_messages,
+        )
 
         # check if we should use turbopuffer
         if should_use_tpuf_for_messages():
@@ -1251,7 +1324,10 @@ class MessageManager:
         Raises:
             ValueError: If message embedding or Turbopuffer is not enabled
         """
-        from letta.helpers.tpuf_client import TurbopufferClient, should_use_tpuf_for_messages
+        from letta.helpers.tpuf_client import (
+            TurbopufferClient,
+            should_use_tpuf_for_messages,
+        )
 
         # check if turbopuffer is enabled
         # TODO: extend to non-Turbopuffer in the future.

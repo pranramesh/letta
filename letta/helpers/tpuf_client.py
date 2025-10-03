@@ -555,7 +555,13 @@ class TurbopufferClient:
                 query_embedding=query_embedding,
                 query_text=query_text,
                 top_k=top_k,
-                include_attributes=["text", "organization_id", "archive_id", "created_at", "tags"],
+                include_attributes=[
+                    "text",
+                    "organization_id",
+                    "archive_id",
+                    "created_at",
+                    "tags",
+                ],
                 filters=final_filter,
                 vector_weight=vector_weight,
                 fts_weight=fts_weight,
@@ -710,7 +716,13 @@ class TurbopufferClient:
                 query_embedding=query_embedding,
                 query_text=query_text,
                 top_k=top_k,
-                include_attributes=["text", "organization_id", "agent_id", "role", "created_at"],
+                include_attributes=[
+                    "text",
+                    "organization_id",
+                    "agent_id",
+                    "role",
+                    "created_at",
+                ],
                 filters=final_filter,
                 vector_weight=vector_weight,
                 fts_weight=fts_weight,
@@ -840,7 +852,13 @@ class TurbopufferClient:
                 query_embedding=query_embedding,
                 query_text=query_text,
                 top_k=top_k,
-                include_attributes=["text", "organization_id", "agent_id", "role", "created_at"],
+                include_attributes=[
+                    "text",
+                    "organization_id",
+                    "agent_id",
+                    "role",
+                    "created_at",
+                ],
                 filters=final_filter,
                 vector_weight=vector_weight,
                 fts_weight=fts_weight,
@@ -1037,7 +1055,9 @@ class TurbopufferClient:
 
         # sort by RRF score and return with metadata
         sorted_results = sorted(
-            [(all_items[iid], score, score_metadata[iid]) for iid, score in rrf_scores.items()], key=lambda x: x[1], reverse=True
+            [(all_items[iid], score, score_metadata[iid]) for iid, score in rrf_scores.items()],
+            key=lambda x: x[1],
+            reverse=True,
         )
 
         return sorted_results[:top_k]
@@ -1337,7 +1357,13 @@ class TurbopufferClient:
                 query_embedding=query_embedding,
                 query_text=query_text,
                 top_k=top_k,
-                include_attributes=["text", "organization_id", "source_id", "file_id", "created_at"],
+                include_attributes=[
+                    "text",
+                    "organization_id",
+                    "source_id",
+                    "file_id",
+                    "created_at",
+                ],
                 filters=final_filter,
                 vector_weight=vector_weight,
                 fts_weight=fts_weight,
@@ -1424,7 +1450,10 @@ class TurbopufferClient:
                 namespace = client.namespace(namespace_name)
                 # use delete_by_filter to only delete passages for this file
                 # need to filter by both source_id and file_id
-                filter_expr = ("And", [("source_id", "Eq", source_id), ("file_id", "Eq", file_id)])
+                filter_expr = (
+                    "And",
+                    [("source_id", "Eq", source_id), ("file_id", "Eq", file_id)],
+                )
                 result = await namespace.write(delete_by_filter=filter_expr)
                 logger.info(
                     f"Successfully deleted passages for file {file_id} from source {source_id} (deleted {result.rows_affected} rows)"

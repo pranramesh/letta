@@ -6,7 +6,10 @@ from colorama import Fore, Style, init
 
 from letta.constants import CLI_WARNING_PREFIX
 from letta.helpers.json_helpers import json_loads
-from letta.local_llm.constants import ASSISTANT_MESSAGE_CLI_SYMBOL, INNER_THOUGHTS_CLI_SYMBOL
+from letta.local_llm.constants import (
+    ASSISTANT_MESSAGE_CLI_SYMBOL,
+    INNER_THOUGHTS_CLI_SYMBOL,
+)
 from letta.schemas.message import Message
 from letta.utils import printd
 
@@ -30,7 +33,12 @@ class AgentInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def internal_monologue(self, msg: str, msg_obj: Optional[Message] = None, chunk_index: Optional[int] = None):
+    def internal_monologue(
+        self,
+        msg: str,
+        msg_obj: Optional[Message] = None,
+        chunk_index: Optional[int] = None,
+    ):
         """Letta generates some internal monologue"""
         raise NotImplementedError
 
@@ -40,7 +48,12 @@ class AgentInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def function_message(self, msg: str, msg_obj: Optional[Message] = None, chunk_index: Optional[int] = None):
+    def function_message(
+        self,
+        msg: str,
+        msg_obj: Optional[Message] = None,
+        chunk_index: Optional[int] = None,
+    ):
         """Letta calls a function"""
         raise NotImplementedError
 
@@ -161,7 +174,12 @@ class CLIInterface(AgentInterface):
             printd_user_message("🧑", msg_json)
 
     @staticmethod
-    def function_message(msg: str, msg_obj: Optional[Message] = None, debug: bool = DEBUG, chunk_index: Optional[int] = None):
+    def function_message(
+        msg: str,
+        msg_obj: Optional[Message] = None,
+        debug: bool = DEBUG,
+        chunk_index: Optional[int] = None,
+    ):
         def print_function_message(icon, msg, color=Fore.RED, printf=print):
             if STRIP_UI:
                 printf(f"⚡{icon} [function] {msg}")
@@ -190,8 +208,17 @@ class CLIInterface(AgentInterface):
                 if match:
                     function_name = match.group(1)
                     function_args = match.group(2)
-                    if function_name in ["archival_memory_insert", "archival_memory_search", "core_memory_replace", "core_memory_append"]:
-                        if function_name in ["archival_memory_insert", "core_memory_append", "core_memory_replace"]:
+                    if function_name in [
+                        "archival_memory_insert",
+                        "archival_memory_search",
+                        "core_memory_replace",
+                        "core_memory_append",
+                    ]:
+                        if function_name in [
+                            "archival_memory_insert",
+                            "core_memory_append",
+                            "core_memory_replace",
+                        ]:
                             print_function_message("🧠", f"updating memory with {function_name}")
                         elif function_name == "archival_memory_search":
                             print_function_message("🧠", f"searching memory with {function_name}")
@@ -219,7 +246,10 @@ class CLIInterface(AgentInterface):
                         except Exception as e:
                             printd(str(e))
                             printd(msg_dict)
-                    elif function_name in ["conversation_search", "conversation_search_date"]:
+                    elif function_name in [
+                        "conversation_search",
+                        "conversation_search_date",
+                    ]:
                         print_function_message("🧠", f"searching memory with {function_name}")
                         try:
                             msg_dict = eval(function_args)

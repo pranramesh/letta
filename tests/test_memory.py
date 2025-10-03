@@ -62,7 +62,10 @@ def test_compile_standard_blocks_metadata_and_values():
 
 
 def test_compile_line_numbered_blocks_sleeptime():
-    m = Memory(agent_type=AgentType.sleeptime_agent, blocks=[Block(label="notes", value="line1\nline2", limit=100)])
+    m = Memory(
+        agent_type=AgentType.sleeptime_agent,
+        blocks=[Block(label="notes", value="line1\nline2", limit=100)],
+    )
     out = m.compile()
     assert "<memory_blocks>" in out
     assert CORE_MEMORY_LINE_NUMBER_WARNING in out
@@ -70,7 +73,10 @@ def test_compile_line_numbered_blocks_sleeptime():
 
 
 def test_compile_line_numbered_blocks_memgpt_v2():
-    m = Memory(agent_type=AgentType.memgpt_v2_agent, blocks=[Block(label="notes", value="a\nb", limit=100)])
+    m = Memory(
+        agent_type=AgentType.memgpt_v2_agent,
+        blocks=[Block(label="notes", value="a\nb", limit=100)],
+    )
     out = m.compile()
     assert "Line 1: a" in out and "Line 2: b" in out
 
@@ -81,7 +87,10 @@ def test_compile_empty_returns_empty_string():
 
 
 def test_tool_usage_rules_inclusion_and_order():
-    m = Memory(agent_type=AgentType.memgpt_agent, blocks=[Block(label="a", value="b", limit=100)])
+    m = Memory(
+        agent_type=AgentType.memgpt_agent,
+        blocks=[Block(label="a", value="b", limit=100)],
+    )
     rules = Block(label="tool_usage_rules", value="RVAL", description="RDESCR", limit=100)
     out = m.compile(tool_usage_rules=rules)
     assert "<tool_usage_rules>" in out
@@ -91,8 +100,20 @@ def test_tool_usage_rules_inclusion_and_order():
 
 def test_directories_common_includes_files_and_metadata():
     src = make_source("src1", "project", "Sdesc", "Sinst")
-    fb = FileBlock(label="fileA", value="data", limit=100, file_id="f1", source_id="src1", is_open=True, read_only=True)
-    m = Memory(agent_type=AgentType.memgpt_agent, blocks=[Block(label="x", value="y", limit=10)], file_blocks=[fb])
+    fb = FileBlock(
+        label="fileA",
+        value="data",
+        limit=100,
+        file_id="f1",
+        source_id="src1",
+        is_open=True,
+        read_only=True,
+    )
+    m = Memory(
+        agent_type=AgentType.memgpt_agent,
+        blocks=[Block(label="x", value="y", limit=10)],
+        file_blocks=[fb],
+    )
     out = m.compile(sources=[src], max_files_open=3)
     assert "<directories>" in out and "</directories>" in out
     assert "<file_limits>" in out
@@ -115,9 +136,20 @@ def test_directories_common_omits_empty_value():
 
 def test_directories_react_nested_label_and_status_counts():
     src = make_source("src1", "project")
-    fb1 = FileBlock(label="fileA", value="content", limit=100, file_id="f1", source_id="src1", is_open=True)
+    fb1 = FileBlock(
+        label="fileA",
+        value="content",
+        limit=100,
+        file_id="f1",
+        source_id="src1",
+        is_open=True,
+    )
     fb2 = FileBlock(label="fileB", value="", limit=100, file_id="f2", source_id="src1", is_open=True)
-    m = Memory(agent_type=AgentType.react_agent, blocks=[Block(label="ignore", value="zz", limit=5)], file_blocks=[fb1, fb2])
+    m = Memory(
+        agent_type=AgentType.react_agent,
+        blocks=[Block(label="ignore", value="zz", limit=5)],
+        file_blocks=[fb1, fb2],
+    )
     out = m.compile(sources=[src], max_files_open=5)
     assert "<memory_blocks>" not in out
     assert "<directories>" in out
@@ -129,7 +161,14 @@ def test_directories_react_nested_label_and_status_counts():
 
 def test_directories_file_limits_absent_when_none():
     src = make_source("src1", "project")
-    fb = FileBlock(label="fileA", value="x", limit=100, file_id="f1", source_id="src1", is_open=True)
+    fb = FileBlock(
+        label="fileA",
+        value="x",
+        limit=100,
+        file_id="f1",
+        source_id="src1",
+        is_open=True,
+    )
     m = Memory(agent_type=AgentType.memgpt_agent, blocks=[], file_blocks=[fb])
     out = m.compile(sources=[src], max_files_open=None)
     assert "<directories>" in out
@@ -159,7 +198,10 @@ def test_file_blocks_duplicates_pruned_and_warning(caplog):
 
 @pytest.mark.asyncio
 async def test_compile_async_matches_sync():
-    m = Memory(agent_type=AgentType.memgpt_agent, blocks=[Block(label="a", value="b", limit=10)])
+    m = Memory(
+        agent_type=AgentType.memgpt_agent,
+        blocks=[Block(label="a", value="b", limit=10)],
+    )
     assert await m.compile_async() == m.compile()
 
 
@@ -171,7 +213,14 @@ def test_prompt_template_deprecated_noop():
 
 def test_sources_without_descriptions_or_instructions():
     src = make_source("src1", "project", None, None)
-    fb = FileBlock(label="fileA", value="data", limit=100, file_id="f1", source_id="src1", is_open=True)
+    fb = FileBlock(
+        label="fileA",
+        value="data",
+        limit=100,
+        file_id="f1",
+        source_id="src1",
+        is_open=True,
+    )
     m = Memory(agent_type=AgentType.memgpt_agent, blocks=[], file_blocks=[fb])
     out = m.compile(sources=[src])
     assert "<description>" not in out or "<description></description>" not in out
@@ -180,17 +229,50 @@ def test_sources_without_descriptions_or_instructions():
 
 def test_read_only_metadata_in_file_and_block():
     src = make_source("src1", "project")
-    fb = FileBlock(label="fileA", value="data", limit=100, file_id="f1", source_id="src1", is_open=True, read_only=True)
-    m = Memory(agent_type=AgentType.memgpt_agent, blocks=[Block(label="x", value="y", limit=10, read_only=True)], file_blocks=[fb])
+    fb = FileBlock(
+        label="fileA",
+        value="data",
+        limit=100,
+        file_id="f1",
+        source_id="src1",
+        is_open=True,
+        read_only=True,
+    )
+    m = Memory(
+        agent_type=AgentType.memgpt_agent,
+        blocks=[Block(label="x", value="y", limit=10, read_only=True)],
+        file_blocks=[fb],
+    )
     out = m.compile(sources=[src])
     assert out.count("- read_only=true") >= 2
 
 
 def test_current_files_open_counts_truthy_only():
     src = make_source("src1", "project")
-    fb1 = FileBlock(label="fileA", value="data", limit=100, file_id="f1", source_id="src1", is_open=True)
-    fb2 = FileBlock(label="fileB", value="", limit=100, file_id="f2", source_id="src1", is_open=False)
-    fb3 = FileBlock(label="fileC", value="", limit=100, file_id="f3", source_id="src1", is_open=False)
+    fb1 = FileBlock(
+        label="fileA",
+        value="data",
+        limit=100,
+        file_id="f1",
+        source_id="src1",
+        is_open=True,
+    )
+    fb2 = FileBlock(
+        label="fileB",
+        value="",
+        limit=100,
+        file_id="f2",
+        source_id="src1",
+        is_open=False,
+    )
+    fb3 = FileBlock(
+        label="fileC",
+        value="",
+        limit=100,
+        file_id="f3",
+        source_id="src1",
+        is_open=False,
+    )
     m = Memory(agent_type=AgentType.react_agent, blocks=[], file_blocks=[fb1, fb2, fb3])
     out = m.compile(sources=[src], max_files_open=10)
     assert "- current_files_open=1" in out

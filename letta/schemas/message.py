@@ -10,10 +10,17 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
-from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall as OpenAIToolCall, Function as OpenAIFunction
+from openai.types.chat.chat_completion_message_tool_call import (
+    ChatCompletionMessageToolCall as OpenAIToolCall,
+    Function as OpenAIFunction,
+)
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from letta.constants import DEFAULT_MESSAGE_TOOL, DEFAULT_MESSAGE_TOOL_KWARG, TOOL_CALL_ID_MAX_LEN
+from letta.constants import (
+    DEFAULT_MESSAGE_TOOL,
+    DEFAULT_MESSAGE_TOOL_KWARG,
+    TOOL_CALL_ID_MAX_LEN,
+)
 from letta.helpers.datetime_helpers import get_utc_time, is_utc_datetime
 from letta.helpers.json_helpers import json_dumps
 from letta.local_llm.constants import INNER_THOUGHTS_KWARG, INNER_THOUGHTS_KWARG_VERTEX
@@ -95,9 +102,18 @@ class MessageCreate(MessageCreateBase):
         json_schema_extra=get_letta_message_content_union_str_json_schema(),
     )
     name: Optional[str] = Field(default=None, description="The name of the participant.")
-    otid: Optional[str] = Field(default=None, description="The offline threading id associated with this message")
-    sender_id: Optional[str] = Field(default=None, description="The id of the sender of the message, can be an identity id or agent id")
-    batch_item_id: Optional[str] = Field(default=None, description="The id of the LLMBatchItem that this message is associated with")
+    otid: Optional[str] = Field(
+        default=None,
+        description="The offline threading id associated with this message",
+    )
+    sender_id: Optional[str] = Field(
+        default=None,
+        description="The id of the sender of the message, can be an identity id or agent id",
+    )
+    batch_item_id: Optional[str] = Field(
+        default=None,
+        description="The id of the LLMBatchItem that this message is associated with",
+    )
     group_id: Optional[str] = Field(default=None, description="The multi-agent group that the message was sent in")
 
     def model_dump(self, to_orm: bool = False, **kwargs) -> Dict[str, Any]:
@@ -111,7 +127,10 @@ class MessageCreate(MessageCreateBase):
 class ApprovalCreate(MessageCreateBase):
     """Input to approve or deny a tool call request"""
 
-    type: Literal[MessageCreateType.approval] = Field(default=MessageCreateType.approval, description="The message type to be created.")
+    type: Literal[MessageCreateType.approval] = Field(
+        default=MessageCreateType.approval,
+        description="The message type to be created.",
+    )
     approve: bool = Field(..., description="Whether the tool has been approved")
     approval_request_id: str = Field(..., description="The message ID of the approval request")
     reason: Optional[str] = Field(None, description="An optional explanation for the provided approval status")
@@ -187,26 +206,47 @@ class Message(BaseMessage):
         description="For role user/assistant: the (optional) name of the participant. For role tool/function: the name of the function called.",
     )
     tool_calls: Optional[List[OpenAIToolCall]] = Field(
-        default=None, description="The list of tool calls requested. Only applicable for role assistant."
+        default=None,
+        description="The list of tool calls requested. Only applicable for role assistant.",
     )
-    tool_call_id: Optional[str] = Field(default=None, description="The ID of the tool call. Only applicable for role tool.")
+    tool_call_id: Optional[str] = Field(
+        default=None,
+        description="The ID of the tool call. Only applicable for role tool.",
+    )
     # Extras
     step_id: Optional[str] = Field(default=None, description="The id of the step that this message was created in.")
-    otid: Optional[str] = Field(default=None, description="The offline threading id associated with this message")
-    tool_returns: Optional[List[ToolReturn]] = Field(default=None, description="Tool execution return information for prior tool calls")
+    otid: Optional[str] = Field(
+        default=None,
+        description="The offline threading id associated with this message",
+    )
+    tool_returns: Optional[List[ToolReturn]] = Field(
+        default=None,
+        description="Tool execution return information for prior tool calls",
+    )
     group_id: Optional[str] = Field(default=None, description="The multi-agent group that the message was sent in")
-    sender_id: Optional[str] = Field(default=None, description="The id of the sender of the message, can be an identity id or agent id")
-    batch_item_id: Optional[str] = Field(default=None, description="The id of the LLMBatchItem that this message is associated with")
+    sender_id: Optional[str] = Field(
+        default=None,
+        description="The id of the sender of the message, can be an identity id or agent id",
+    )
+    batch_item_id: Optional[str] = Field(
+        default=None,
+        description="The id of the LLMBatchItem that this message is associated with",
+    )
     is_err: Optional[bool] = Field(
-        default=None, description="Whether this message is part of an error step. Used only for debugging purposes."
+        default=None,
+        description="Whether this message is part of an error step. Used only for debugging purposes.",
     )
     approval_request_id: Optional[str] = Field(
-        default=None, description="The id of the approval request if this message is associated with a tool call request."
+        default=None,
+        description="The id of the approval request if this message is associated with a tool call request.",
     )
     approve: Optional[bool] = Field(default=None, description="Whether tool call is approved.")
     denial_reason: Optional[str] = Field(default=None, description="The reason the tool call request was denied.")
     # This overrides the optional base orm schema, created_at MUST exist on all messages objects
-    created_at: datetime = Field(default_factory=get_utc_time, description="The timestamp when the object was created.")
+    created_at: datetime = Field(
+        default_factory=get_utc_time,
+        description="The timestamp when the object was created.",
+    )
 
     @field_validator("role")
     @classmethod
@@ -616,8 +656,8 @@ class Message(BaseMessage):
                     role=MessageRole.tool,  # NOTE
                     content=content,
                     name=name,
-                    tool_calls=openai_message_dict["tool_calls"] if "tool_calls" in openai_message_dict else None,
-                    tool_call_id=openai_message_dict["tool_call_id"] if "tool_call_id" in openai_message_dict else None,
+                    tool_calls=(openai_message_dict["tool_calls"] if "tool_calls" in openai_message_dict else None),
+                    tool_call_id=(openai_message_dict["tool_call_id"] if "tool_call_id" in openai_message_dict else None),
                     created_at=created_at,
                     id=str(id),
                     tool_returns=tool_returns,
@@ -631,8 +671,8 @@ class Message(BaseMessage):
                     role=MessageRole.tool,  # NOTE
                     content=content,
                     name=name,
-                    tool_calls=openai_message_dict["tool_calls"] if "tool_calls" in openai_message_dict else None,
-                    tool_call_id=openai_message_dict["tool_call_id"] if "tool_call_id" in openai_message_dict else None,
+                    tool_calls=(openai_message_dict["tool_calls"] if "tool_calls" in openai_message_dict else None),
+                    tool_call_id=(openai_message_dict["tool_call_id"] if "tool_call_id" in openai_message_dict else None),
                     created_at=created_at,
                     tool_returns=tool_returns,
                     group_id=group_id,
@@ -679,7 +719,7 @@ class Message(BaseMessage):
                     # standard fields expected in an OpenAI ChatCompletion message object
                     role=MessageRole(openai_message_dict["role"]),
                     content=content,
-                    name=openai_message_dict["name"] if "name" in openai_message_dict else None,
+                    name=(openai_message_dict["name"] if "name" in openai_message_dict else None),
                     tool_calls=tool_calls,
                     tool_call_id=None,  # NOTE: None, since this field is only non-null for role=='tool'
                     created_at=created_at,
@@ -699,7 +739,11 @@ class Message(BaseMessage):
                 assert openai_message_dict["role"] == "assistant", openai_message_dict
 
                 tool_calls = [
-                    OpenAIToolCall(id=tool_call["id"], type=tool_call["type"], function=tool_call["function"])
+                    OpenAIToolCall(
+                        id=tool_call["id"],
+                        type=tool_call["type"],
+                        function=tool_call["function"],
+                    )
                     for tool_call in openai_message_dict["tool_calls"]
                 ]
             else:
@@ -713,9 +757,9 @@ class Message(BaseMessage):
                     # standard fields expected in an OpenAI ChatCompletion message object
                     role=MessageRole(openai_message_dict["role"]),
                     content=content,
-                    name=openai_message_dict["name"] if "name" in openai_message_dict else name,
+                    name=(openai_message_dict["name"] if "name" in openai_message_dict else name),
                     tool_calls=tool_calls,
-                    tool_call_id=openai_message_dict["tool_call_id"] if "tool_call_id" in openai_message_dict else None,
+                    tool_call_id=(openai_message_dict["tool_call_id"] if "tool_call_id" in openai_message_dict else None),
                     created_at=created_at,
                     id=str(id),
                     tool_returns=tool_returns,
@@ -728,9 +772,9 @@ class Message(BaseMessage):
                     # standard fields expected in an OpenAI ChatCompletion message object
                     role=MessageRole(openai_message_dict["role"]),
                     content=content,
-                    name=openai_message_dict["name"] if "name" in openai_message_dict else name,
+                    name=(openai_message_dict["name"] if "name" in openai_message_dict else name),
                     tool_calls=tool_calls,
-                    tool_call_id=openai_message_dict["tool_call_id"] if "tool_call_id" in openai_message_dict else None,
+                    tool_call_id=(openai_message_dict["tool_call_id"] if "tool_call_id" in openai_message_dict else None),
                     created_at=created_at,
                     tool_returns=tool_returns,
                     group_id=group_id,
@@ -738,7 +782,10 @@ class Message(BaseMessage):
 
     def to_openai_dict_search_results(self, max_tool_id_length: int = TOOL_CALL_ID_MAX_LEN) -> dict:
         result_json = self.to_openai_dict()
-        search_result_json = {"timestamp": self.created_at, "message": {"content": result_json["content"], "role": result_json["role"]}}
+        search_result_json = {
+            "timestamp": self.created_at,
+            "message": {"content": result_json["content"], "role": result_json["role"]},
+        }
         return search_result_json
 
     def to_openai_dict(
@@ -790,7 +837,7 @@ class Message(BaseMessage):
         elif self.role == "assistant" or self.role == "approval":
             assert self.tool_calls is not None or text_content is not None
             openai_message = {
-                "content": None if (put_inner_thoughts_in_kwargs and self.tool_calls is not None) else text_content,
+                "content": (None if (put_inner_thoughts_in_kwargs and self.tool_calls is not None) else text_content),
                 "role": "assistant",
             }
 
@@ -816,7 +863,7 @@ class Message(BaseMessage):
             openai_message = {
                 "content": text_content,
                 "role": self.role,
-                "tool_call_id": self.tool_call_id[:max_tool_id_length] if max_tool_id_length else self.tool_call_id,
+                "tool_call_id": (self.tool_call_id[:max_tool_id_length] if max_tool_id_length else self.tool_call_id),
             }
 
         else:
@@ -1201,7 +1248,10 @@ class Message(BaseMessage):
 
 class ToolReturn(BaseModel):
     status: Literal["success", "error"] = Field(..., description="The status of the tool call")
-    stdout: Optional[List[str]] = Field(default=None, description="Captured stdout (e.g. prints, logs) from the tool invocation")
+    stdout: Optional[List[str]] = Field(
+        default=None,
+        description="Captured stdout (e.g. prints, logs) from the tool invocation",
+    )
     stderr: Optional[List[str]] = Field(default=None, description="Captured stderr from the tool invocation")
     # func_return: Optional[Any] = Field(None, description="The function return object")
 

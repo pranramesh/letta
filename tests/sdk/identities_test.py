@@ -1,13 +1,33 @@
 from conftest import create_test_module
 
 IDENTITIES_CREATE_PARAMS = [
-    ("caren1", {"identifier_key": "123", "name": "caren", "identity_type": "user"}, {}, None),
-    ("caren2", {"identifier_key": "456", "name": "caren", "identity_type": "user"}, {}, None),
+    (
+        "caren1",
+        {"identifier_key": "123", "name": "caren", "identity_type": "user"},
+        {},
+        None,
+    ),
+    (
+        "caren2",
+        {"identifier_key": "456", "name": "caren", "identity_type": "user"},
+        {},
+        None,
+    ),
 ]
 
 IDENTITIES_MODIFY_PARAMS = [
-    ("caren1", {"properties": [{"key": "email", "value": "caren@letta.com", "type": "string"}]}, {}, None),
-    ("caren2", {"properties": [{"key": "email", "value": "caren@gmail.com", "type": "string"}]}, {}, None),
+    (
+        "caren1",
+        {"properties": [{"key": "email", "value": "caren@letta.com", "type": "string"}]},
+        {},
+        None,
+    ),
+    (
+        "caren2",
+        {"properties": [{"key": "email", "value": "caren@gmail.com", "type": "string"}]},
+        {},
+        None,
+    ),
 ]
 
 IDENTITIES_UPSERT_PARAMS = [

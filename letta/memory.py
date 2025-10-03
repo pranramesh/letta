@@ -29,7 +29,10 @@ def get_memory_functions(cls: Memory) -> Dict[str, Callable]:
             base_functions.append(func_name)
 
     for func_name in dir(cls):
-        if func_name.startswith("_") or func_name in ["load", "to_dict"]:  # skip base functions
+        if func_name.startswith("_") or func_name in [
+            "load",
+            "to_dict",
+        ]:  # skip base functions
             continue
         if func_name in base_functions:  # dont use BaseMemory functions
             continue
@@ -67,15 +70,33 @@ def summarize_messages(
         trunc_ratio = (summarizer_settings.memory_warning_threshold * context_window / summary_input_tkns) * 0.8  # For good measure...
         cutoff = int(len(message_sequence_to_summarize) * trunc_ratio)
         summary_input = str(
-            [summarize_messages(agent_state, message_sequence_to_summarize=message_sequence_to_summarize[:cutoff], actor=actor)]
+            [
+                summarize_messages(
+                    agent_state,
+                    message_sequence_to_summarize=message_sequence_to_summarize[:cutoff],
+                    actor=actor,
+                )
+            ]
             + message_sequence_to_summarize[cutoff:]
         )
 
     dummy_agent_id = agent_state.id
     message_sequence = [
-        Message(agent_id=dummy_agent_id, role=MessageRole.system, content=[TextContent(text=summary_prompt)]),
-        Message(agent_id=dummy_agent_id, role=MessageRole.assistant, content=[TextContent(text=MESSAGE_SUMMARY_REQUEST_ACK)]),
-        Message(agent_id=dummy_agent_id, role=MessageRole.user, content=[TextContent(text=summary_input)]),
+        Message(
+            agent_id=dummy_agent_id,
+            role=MessageRole.system,
+            content=[TextContent(text=summary_prompt)],
+        ),
+        Message(
+            agent_id=dummy_agent_id,
+            role=MessageRole.assistant,
+            content=[TextContent(text=MESSAGE_SUMMARY_REQUEST_ACK)],
+        ),
+        Message(
+            agent_id=dummy_agent_id,
+            role=MessageRole.user,
+            content=[TextContent(text=summary_input)],
+        ),
     ]
 
     # TODO: We need to eventually have a separate LLM config for the summarizer LLM

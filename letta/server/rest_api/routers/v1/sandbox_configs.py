@@ -17,9 +17,16 @@ from letta.schemas.sandbox_config import (
     SandboxConfigCreate,
     SandboxConfigUpdate,
 )
-from letta.server.rest_api.dependencies import HeaderParams, get_headers, get_letta_server
+from letta.server.rest_api.dependencies import (
+    HeaderParams,
+    get_headers,
+    get_letta_server,
+)
 from letta.server.server import SyncServer
-from letta.services.helpers.tool_execution_helper import create_venv_for_local_sandbox, install_pip_requirements_for_sandbox
+from letta.services.helpers.tool_execution_helper import (
+    create_venv_for_local_sandbox,
+    install_pip_requirements_for_sandbox,
+)
 
 router = APIRouter(prefix="/sandbox-config", tags=["sandbox-config"])
 
@@ -146,7 +153,12 @@ async def force_recreate_local_sandbox_venv(
 
     # Recreate the virtual environment
     try:
-        create_venv_for_local_sandbox(sandbox_dir_path=sandbox_dir, venv_path=str(venv_path), env=os.environ.copy(), force_recreate=True)
+        create_venv_for_local_sandbox(
+            sandbox_dir_path=sandbox_dir,
+            venv_path=str(venv_path),
+            env=os.environ.copy(),
+            force_recreate=True,
+        )
         logger.info(f"Successfully recreated virtual environment at: {venv_path}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to recreate venv: {e}")

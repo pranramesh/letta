@@ -34,8 +34,18 @@ def upgrade() -> None:
         sa.Column("block_id", sa.String(), nullable=False),
         sa.Column("block_label", sa.String(), nullable=False),
         sa.Column("id", sa.String(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
         sa.Column("is_deleted", sa.Boolean(), server_default=sa.text("FALSE"), nullable=False),
         sa.Column("_created_by_id", sa.String(), nullable=True),
         sa.Column("_last_updated_by_id", sa.String(), nullable=True),
@@ -43,7 +53,11 @@ def upgrade() -> None:
             ["agent_id"],
             ["agents.id"],
         ),
-        sa.ForeignKeyConstraint(["block_id", "block_label"], ["block.id", "block.label"], name="fk_block_id_label"),
+        sa.ForeignKeyConstraint(
+            ["block_id", "block_label"],
+            ["block.id", "block.label"],
+            name="fk_block_id_label",
+        ),
         sa.PrimaryKeyConstraint("agent_id", "block_id", "block_label", "id"),
         sa.UniqueConstraint("agent_id", "block_label", name="unique_label_per_agent"),
     )

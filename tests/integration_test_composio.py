@@ -77,7 +77,9 @@ async def test_composio_tool_execution_e2e(check_composio_key_set, composio_get_
         actor=default_user,
     )
     tool_execution_result = await tool_executor.execute_tool_async(
-        function_name=composio_get_emojis.name, function_args={}, tool=composio_get_emojis
+        function_name=composio_get_emojis.name,
+        function_args={},
+        tool=composio_get_emojis,
     )
 
     # Small check, it should return something at least

@@ -73,7 +73,12 @@ class ConditionalToolRuleSchema(BaseToolRuleSchema):
     require_output_mapping: bool
 
 
-ToolRuleSchema = Union[BaseToolRuleSchema, ChildToolRuleSchema, MaxCountPerStepToolRuleSchema, ConditionalToolRuleSchema]
+ToolRuleSchema = Union[
+    BaseToolRuleSchema,
+    ChildToolRuleSchema,
+    MaxCountPerStepToolRuleSchema,
+    ConditionalToolRuleSchema,
+]
 
 
 class ParameterProperties(BaseModel):

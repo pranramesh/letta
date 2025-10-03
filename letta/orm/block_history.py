@@ -16,7 +16,12 @@ class BlockHistory(OrganizationMixin, SqlalchemyBase):
 
     __table_args__ = (
         # PRIMARY lookup index for finding specific history entries & ordering
-        Index("ix_block_history_block_id_sequence", "block_id", "sequence_number", unique=True),
+        Index(
+            "ix_block_history_block_id_sequence",
+            "block_id",
+            "sequence_number",
+            unique=True,
+        ),
     )
 
     # agent generates its own id
@@ -44,5 +49,7 @@ class BlockHistory(OrganizationMixin, SqlalchemyBase):
     )
 
     sequence_number: Mapped[int] = mapped_column(
-        Integer, nullable=False, doc="Monotonically increasing sequence number for the history of a specific block_id, starting from 1."
+        Integer,
+        nullable=False,
+        doc="Monotonically increasing sequence number for the history of a specific block_id, starting from 1.",
     )

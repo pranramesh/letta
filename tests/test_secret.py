@@ -293,7 +293,11 @@ class TestSecretDict:
         settings.encryption_key = self.MOCK_KEY
 
         try:
-            plaintext_dict = {"api_key": "sk-1234567890", "api_secret": "secret-value", "nested": {"token": "bearer-token"}}
+            plaintext_dict = {
+                "api_key": "sk-1234567890",
+                "api_secret": "secret-value",
+                "nested": {"token": "bearer-token"},
+            }
 
             secret_dict = SecretDict.from_plaintext(plaintext_dict)
 
@@ -378,7 +382,10 @@ class TestSecretDict:
 
         try:
             complex_dict = {
-                "level1": {"level2": {"level3": ["item1", "item2"], "secret": "nested-secret"}, "array": [1, 2, {"nested": "value"}]},
+                "level1": {
+                    "level2": {"level3": ["item1", "item2"], "secret": "nested-secret"},
+                    "array": [1, 2, {"nested": "value"}],
+                },
                 "simple": "value",
                 "number": 42,
                 "boolean": True,
@@ -440,7 +447,11 @@ class TestSecretDict:
         settings.encryption_key = self.MOCK_KEY
 
         try:
-            plaintext_dict = {"key1": "value1", "key2": "value2", "nested": {"inner": "value"}}
+            plaintext_dict = {
+                "key1": "value1",
+                "key2": "value2",
+                "nested": {"inner": "value"},
+            }
             secret_dict = SecretDict.from_plaintext(plaintext_dict)
 
             # First call should decrypt and cache

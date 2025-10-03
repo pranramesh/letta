@@ -47,7 +47,9 @@ class MistralFileParser(FileParser):
             logger.info(f"Extracting text using Mistral OCR model: {self.model}")
             async with Mistral(api_key=settings.mistral_api_key) as mistral:
                 ocr_response = await mistral.ocr.process_async(
-                    model="mistral-ocr-latest", document={"type": "document_url", "document_url": document_url}, include_image_base64=False
+                    model="mistral-ocr-latest",
+                    document={"type": "document_url", "document_url": document_url},
+                    include_image_base64=False,
                 )
 
             return ocr_response

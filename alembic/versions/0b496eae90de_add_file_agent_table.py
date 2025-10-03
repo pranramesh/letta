@@ -33,9 +33,24 @@ def upgrade() -> None:
         sa.Column("agent_id", sa.String(), nullable=False),
         sa.Column("is_open", sa.Boolean(), nullable=False),
         sa.Column("visible_content", sa.Text(), nullable=True),
-        sa.Column("last_accessed_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
+        sa.Column(
+            "last_accessed_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
         sa.Column("is_deleted", sa.Boolean(), server_default=sa.text("FALSE"), nullable=False),
         sa.Column("_created_by_id", sa.String(), nullable=True),
         sa.Column("_last_updated_by_id", sa.String(), nullable=True),
@@ -48,7 +63,12 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id", "file_id", "agent_id"),
     )
-    op.create_index("ix_files_agents_file_id_agent_id", "files_agents", ["file_id", "agent_id"], unique=False)
+    op.create_index(
+        "ix_files_agents_file_id_agent_id",
+        "files_agents",
+        ["file_id", "agent_id"],
+        unique=False,
+    )
     # ### end Alembic commands ###
 
 

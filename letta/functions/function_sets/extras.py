@@ -4,7 +4,10 @@ from typing import Optional
 
 import requests
 
-from letta.constants import MESSAGE_CHATGPT_FUNCTION_MODEL, MESSAGE_CHATGPT_FUNCTION_SYSTEM_MESSAGE
+from letta.constants import (
+    MESSAGE_CHATGPT_FUNCTION_MODEL,
+    MESSAGE_CHATGPT_FUNCTION_SYSTEM_MESSAGE,
+)
 from letta.helpers.json_helpers import json_dumps, json_loads
 from letta.llm_api.llm_api_tools import create
 from letta.schemas.letta_message_content import TextContent
@@ -30,7 +33,12 @@ def message_chatgpt(self, message: str):
             role="system",
             content=[TextContent(text=MESSAGE_CHATGPT_FUNCTION_SYSTEM_MESSAGE)],
         ),
-        Message(user_id=dummy_user_id, agent_id=dummy_agent_id, role="user", content=[TextContent(text=str(message))]),
+        Message(
+            user_id=dummy_user_id,
+            agent_id=dummy_agent_id,
+            role="user",
+            content=[TextContent(text=str(message))],
+        ),
     ]
     # TODO: this will error without an LLMConfig
     response = create(
@@ -130,6 +138,10 @@ def http_request(self, method: str, url: str, payload_json: Optional[str] = None
             print(f"[HTTP] launching {method} request to {url}, payload=\n{json_dumps(payload, indent=2)}")
             response = requests.request(method, url, json=payload, headers=headers)
 
-        return {"status_code": response.status_code, "headers": dict(response.headers), "body": response.text}
+        return {
+            "status_code": response.status_code,
+            "headers": dict(response.headers),
+            "body": response.text,
+        }
     except Exception as e:
         return {"error": str(e)}

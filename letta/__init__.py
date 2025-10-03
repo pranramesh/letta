@@ -32,7 +32,13 @@ from letta.schemas.letta_message import LettaMessage
 from letta.schemas.letta_ping import LettaPing
 from letta.schemas.letta_stop_reason import LettaStopReason
 from letta.schemas.llm_config import LLMConfig
-from letta.schemas.memory import ArchivalMemorySummary, BasicBlockMemory, ChatMemory, Memory, RecallMemorySummary
+from letta.schemas.memory import (
+    ArchivalMemorySummary,
+    BasicBlockMemory,
+    ChatMemory,
+    Memory,
+    RecallMemorySummary,
+)
 from letta.schemas.message import Message
 from letta.schemas.organization import Organization
 from letta.schemas.passage import Passage

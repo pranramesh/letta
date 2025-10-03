@@ -63,7 +63,12 @@ class TestMCPServerEncryption:
             token = "super-secret-api-token-12345"
             server_url = "https://api.example.com/mcp"
 
-            mcp_server = PydanticMCPServer(server_name=server_name, server_type=MCPServerType.SSE, server_url=server_url, token=token)
+            mcp_server = PydanticMCPServer(
+                server_name=server_name,
+                server_type=MCPServerType.SSE,
+                server_url=server_url,
+                token=token,
+            )
 
             created_server = await server.mcp_manager.create_or_update_mcp_server(mcp_server, actor=default_user)
 
@@ -111,11 +116,18 @@ class TestMCPServerEncryption:
             mock_get_client.return_value = mock_client
 
             server_name = f"test_headers_server_{uuid4().hex[:8]}"
-            custom_headers = {"Authorization": "Bearer secret-token-xyz", "X-API-Key": "api-key-123456", "X-Custom-Header": "custom-value"}
+            custom_headers = {
+                "Authorization": "Bearer secret-token-xyz",
+                "X-API-Key": "api-key-123456",
+                "X-Custom-Header": "custom-value",
+            }
             server_url = "https://api.example.com/mcp"
 
             mcp_server = PydanticMCPServer(
-                server_name=server_name, server_type=MCPServerType.STREAMABLE_HTTP, server_url=server_url, custom_headers=custom_headers
+                server_name=server_name,
+                server_type=MCPServerType.STREAMABLE_HTTP,
+                server_url=server_url,
+                custom_headers=custom_headers,
             )
 
             created_server = await server.mcp_manager.create_or_update_mcp_server(mcp_server, actor=default_user)
@@ -208,7 +220,10 @@ class TestMCPServerEncryption:
         token = "plaintext-token-no-encryption"
 
         mcp_server = PydanticMCPServer(
-            server_name=server_name, server_type=MCPServerType.SSE, server_url="https://api.example.com", token=token
+            server_name=server_name,
+            server_type=MCPServerType.SSE,
+            server_url="https://api.example.com",
+            token=token,
         )
 
         created_server = await server.mcp_manager.create_or_update_mcp_server(mcp_server, actor=default_user)

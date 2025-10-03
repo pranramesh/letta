@@ -4,13 +4,28 @@ from letta_client.errors import UnprocessableEntityError
 from letta.constants import CORE_MEMORY_HUMAN_CHAR_LIMIT, CORE_MEMORY_PERSONA_CHAR_LIMIT
 
 BLOCKS_CREATE_PARAMS = [
-    ("human_block", {"label": "human", "value": "test"}, {"limit": CORE_MEMORY_HUMAN_CHAR_LIMIT}, None),
-    ("persona_block", {"label": "persona", "value": "test1"}, {"limit": CORE_MEMORY_PERSONA_CHAR_LIMIT}, None),
+    (
+        "human_block",
+        {"label": "human", "value": "test"},
+        {"limit": CORE_MEMORY_HUMAN_CHAR_LIMIT},
+        None,
+    ),
+    (
+        "persona_block",
+        {"label": "persona", "value": "test1"},
+        {"limit": CORE_MEMORY_PERSONA_CHAR_LIMIT},
+        None,
+    ),
 ]
 
 BLOCKS_MODIFY_PARAMS = [
     ("human_block", {"value": "test2"}, {}, None),
-    ("persona_block", {"value": "testing testing testing", "limit": 10}, {}, UnprocessableEntityError),
+    (
+        "persona_block",
+        {"value": "testing testing testing", "limit": 10},
+        {},
+        UnprocessableEntityError,
+    ),
 ]
 
 BLOCKS_LIST_PARAMS = [

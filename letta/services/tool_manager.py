@@ -44,7 +44,12 @@ class ToolManager:
     # TODO: Refactor this across the codebase to use CreateTool instead of passing in a Tool object
     @enforce_types
     @trace_method
-    def create_or_update_tool(self, pydantic_tool: PydanticTool, actor: PydanticUser, bypass_name_check: bool = False) -> PydanticTool:
+    def create_or_update_tool(
+        self,
+        pydantic_tool: PydanticTool,
+        actor: PydanticUser,
+        bypass_name_check: bool = False,
+    ) -> PydanticTool:
         """Create a new tool based on the ToolCreate schema."""
         tool_id = self.get_tool_id_by_name(tool_name=pydantic_tool.name, actor=actor)
         if tool_id:
@@ -59,7 +64,11 @@ class ToolManager:
                 if "tool_type" in update_data:
                     updated_tool_type = update_data.get("tool_type")
                 tool = self.update_tool_by_id(
-                    tool_id, ToolUpdate(**update_data), actor, updated_tool_type=updated_tool_type, bypass_name_check=bypass_name_check
+                    tool_id,
+                    ToolUpdate(**update_data),
+                    actor,
+                    updated_tool_type=updated_tool_type,
+                    bypass_name_check=bypass_name_check,
                 )
             else:
                 printd(
@@ -74,7 +83,10 @@ class ToolManager:
     @enforce_types
     @trace_method
     async def create_or_update_tool_async(
-        self, pydantic_tool: PydanticTool, actor: PydanticUser, bypass_name_check: bool = False
+        self,
+        pydantic_tool: PydanticTool,
+        actor: PydanticUser,
+        bypass_name_check: bool = False,
     ) -> PydanticTool:
         """Create a new tool based on the ToolCreate schema."""
         tool_id = await self.get_tool_id_by_name_async(tool_name=pydantic_tool.name, actor=actor)
@@ -91,7 +103,11 @@ class ToolManager:
                 if "tool_type" in update_data:
                     updated_tool_type = update_data.get("tool_type")
                 tool = await self.update_tool_by_id_async(
-                    tool_id, ToolUpdate(**update_data), actor, updated_tool_type=updated_tool_type, bypass_name_check=bypass_name_check
+                    tool_id,
+                    ToolUpdate(**update_data),
+                    actor,
+                    updated_tool_type=updated_tool_type,
+                    bypass_name_check=bypass_name_check,
                 )
             else:
                 printd(
@@ -105,31 +121,57 @@ class ToolManager:
 
     @enforce_types
     async def create_mcp_server(
-        self, server_config: Union[StdioServerConfig, SSEServerConfig], actor: PydanticUser
+        self,
+        server_config: Union[StdioServerConfig, SSEServerConfig],
+        actor: PydanticUser,
     ) -> List[Union[StdioServerConfig, SSEServerConfig]]:
         pass
 
     @enforce_types
     @trace_method
     def create_or_update_mcp_tool(
-        self, tool_create: ToolCreate, mcp_server_name: str, mcp_server_id: str, actor: PydanticUser
+        self,
+        tool_create: ToolCreate,
+        mcp_server_name: str,
+        mcp_server_id: str,
+        actor: PydanticUser,
     ) -> PydanticTool:
-        metadata = {MCP_TOOL_TAG_NAME_PREFIX: {"server_name": mcp_server_name, "server_id": mcp_server_id}}
+        metadata = {
+            MCP_TOOL_TAG_NAME_PREFIX: {
+                "server_name": mcp_server_name,
+                "server_id": mcp_server_id,
+            }
+        }
         return self.create_or_update_tool(
             PydanticTool(
-                tool_type=ToolType.EXTERNAL_MCP, name=tool_create.json_schema["name"], metadata_=metadata, **tool_create.model_dump()
+                tool_type=ToolType.EXTERNAL_MCP,
+                name=tool_create.json_schema["name"],
+                metadata_=metadata,
+                **tool_create.model_dump(),
             ),
             actor,
         )
 
     @enforce_types
     async def create_mcp_tool_async(
-        self, tool_create: ToolCreate, mcp_server_name: str, mcp_server_id: str, actor: PydanticUser
+        self,
+        tool_create: ToolCreate,
+        mcp_server_name: str,
+        mcp_server_id: str,
+        actor: PydanticUser,
     ) -> PydanticTool:
-        metadata = {MCP_TOOL_TAG_NAME_PREFIX: {"server_name": mcp_server_name, "server_id": mcp_server_id}}
+        metadata = {
+            MCP_TOOL_TAG_NAME_PREFIX: {
+                "server_name": mcp_server_name,
+                "server_id": mcp_server_id,
+            }
+        }
         return await self.create_or_update_tool_async(
             PydanticTool(
-                tool_type=ToolType.EXTERNAL_MCP, name=tool_create.json_schema["name"], metadata_=metadata, **tool_create.model_dump()
+                tool_type=ToolType.EXTERNAL_MCP,
+                name=tool_create.json_schema["name"],
+                metadata_=metadata,
+                **tool_create.model_dump(),
             ),
             actor,
         )
@@ -138,14 +180,24 @@ class ToolManager:
     @trace_method
     def create_or_update_composio_tool(self, tool_create: ToolCreate, actor: PydanticUser) -> PydanticTool:
         return self.create_or_update_tool(
-            PydanticTool(tool_type=ToolType.EXTERNAL_COMPOSIO, name=tool_create.json_schema["name"], **tool_create.model_dump()), actor
+            PydanticTool(
+                tool_type=ToolType.EXTERNAL_COMPOSIO,
+                name=tool_create.json_schema["name"],
+                **tool_create.model_dump(),
+            ),
+            actor,
         )
 
     @enforce_types
     @trace_method
     async def create_or_update_composio_tool_async(self, tool_create: ToolCreate, actor: PydanticUser) -> PydanticTool:
         return await self.create_or_update_tool_async(
-            PydanticTool(tool_type=ToolType.EXTERNAL_COMPOSIO, name=tool_create.json_schema["name"], **tool_create.model_dump()), actor
+            PydanticTool(
+                tool_type=ToolType.EXTERNAL_COMPOSIO,
+                name=tool_create.json_schema["name"],
+                **tool_create.model_dump(),
+            ),
+            actor,
         )
 
     @enforce_types
@@ -183,7 +235,10 @@ class ToolManager:
     @enforce_types
     @trace_method
     async def bulk_upsert_tools_async(
-        self, pydantic_tools: List[PydanticTool], actor: PydanticUser, override_existing_tools: bool = True
+        self,
+        pydantic_tools: List[PydanticTool],
+        actor: PydanticUser,
+        override_existing_tools: bool = True,
     ) -> List[PydanticTool]:
         """
         Bulk create or update multiple tools in a single database transaction.
@@ -301,7 +356,10 @@ class ToolManager:
     async def tool_exists_async(self, tool_id: str, actor: PydanticUser) -> bool:
         """Check if a tool exists and belongs to the user's organization (lightweight check)."""
         async with db_registry.async_session() as session:
-            query = select(func.count(ToolModel.id)).where(ToolModel.id == tool_id, ToolModel.organization_id == actor.organization_id)
+            query = select(func.count(ToolModel.id)).where(
+                ToolModel.id == tool_id,
+                ToolModel.organization_id == actor.organization_id,
+            )
             result = await session.execute(query)
             count = result.scalar()
             return count > 0
@@ -311,7 +369,10 @@ class ToolManager:
     async def tool_name_exists_async(self, tool_name: str, actor: PydanticUser) -> bool:
         """Check if a tool with the given name exists in the user's organization (lightweight check)."""
         async with db_registry.async_session() as session:
-            query = select(func.count(ToolModel.id)).where(ToolModel.name == tool_name, ToolModel.organization_id == actor.organization_id)
+            query = select(func.count(ToolModel.id)).where(
+                ToolModel.name == tool_name,
+                ToolModel.organization_id == actor.organization_id,
+            )
             result = await session.execute(query)
             count = result.scalar()
             return count > 0
@@ -432,14 +493,20 @@ class ToolManager:
                         query = query.where(
                             or_(
                                 ToolModel.created_at > after_tool.created_at,
-                                and_(ToolModel.created_at == after_tool.created_at, ToolModel.id > after_tool.id),
+                                and_(
+                                    ToolModel.created_at == after_tool.created_at,
+                                    ToolModel.id > after_tool.id,
+                                ),
                             )
                         )
                     else:
                         query = query.where(
                             or_(
                                 ToolModel.created_at < after_tool.created_at,
-                                and_(ToolModel.created_at == after_tool.created_at, ToolModel.id < after_tool.id),
+                                and_(
+                                    ToolModel.created_at == after_tool.created_at,
+                                    ToolModel.id < after_tool.id,
+                                ),
                             )
                         )
 
@@ -450,14 +517,20 @@ class ToolManager:
                         query = query.where(
                             or_(
                                 ToolModel.created_at < before_tool.created_at,
-                                and_(ToolModel.created_at == before_tool.created_at, ToolModel.id < before_tool.id),
+                                and_(
+                                    ToolModel.created_at == before_tool.created_at,
+                                    ToolModel.id < before_tool.id,
+                                ),
                             )
                         )
                     else:
                         query = query.where(
                             or_(
                                 ToolModel.created_at > before_tool.created_at,
-                                and_(ToolModel.created_at == before_tool.created_at, ToolModel.id > before_tool.id),
+                                and_(
+                                    ToolModel.created_at == before_tool.created_at,
+                                    ToolModel.id > before_tool.id,
+                                ),
                             )
                         )
 
@@ -637,7 +710,9 @@ class ToolManager:
                 # Check source type to use appropriate parser
                 source_type = update_data.get("source_type", current_tool.source_type)
                 if source_type == "typescript":
-                    from letta.functions.typescript_parser import derive_typescript_json_schema
+                    from letta.functions.typescript_parser import (
+                        derive_typescript_json_schema,
+                    )
 
                     derived_schema = derive_typescript_json_schema(source_code=update_data["source_code"])
                 else:
@@ -708,7 +783,9 @@ class ToolManager:
         # in this case, fallback to dangerous schema generation
         if new_schema is None:
             if source_type == "typescript":
-                from letta.functions.typescript_parser import derive_typescript_json_schema
+                from letta.functions.typescript_parser import (
+                    derive_typescript_json_schema,
+                )
 
                 new_schema = derive_typescript_json_schema(source_code=update_data["source_code"])
             else:
@@ -723,7 +800,9 @@ class ToolManager:
         # NOTE: EXTREMELEY HACKY, we need to stop making assumptions about the source_code
         if "source_code" in update_data and f"def {new_name}" not in update_data.get("source_code", ""):
             raise LettaToolNameSchemaMismatchError(
-                tool_name=new_name, json_schema_name=new_schema.get("name"), source_code=update_data.get("source_code")
+                tool_name=new_name,
+                json_schema_name=new_schema.get("name"),
+                source_code=update_data.get("source_code"),
             )
 
         # Now perform the update within the session
@@ -941,7 +1020,11 @@ class ToolManager:
 
     @trace_method
     async def _bulk_upsert_postgresql(
-        self, session, tool_data_list: List[PydanticTool], actor: PydanticUser, override_existing_tools: bool = True
+        self,
+        session,
+        tool_data_list: List[PydanticTool],
+        actor: PydanticUser,
+        override_existing_tools: bool = True,
     ) -> List[PydanticTool]:
         """hyper-optimized postgresql bulk upsert using on_conflict_do_update or on_conflict_do_nothing."""
         from sqlalchemy import func, select
@@ -988,13 +1071,19 @@ class ToolManager:
 
         # fetch results (includes both inserted and skipped tools)
         tool_names = [tool.name for tool in tool_data_list]
-        result_query = select(ToolModel).where(ToolModel.name.in_(tool_names), ToolModel.organization_id == actor.organization_id)
+        result_query = select(ToolModel).where(
+            ToolModel.name.in_(tool_names),
+            ToolModel.organization_id == actor.organization_id,
+        )
         result = await session.execute(result_query)
         return [tool.to_pydantic() for tool in result.scalars()]
 
     @trace_method
     async def _upsert_tools_individually(
-        self, tool_data_list: List[PydanticTool], actor: PydanticUser, override_existing_tools: bool = True
+        self,
+        tool_data_list: List[PydanticTool],
+        actor: PydanticUser,
+        override_existing_tools: bool = True,
     ) -> List[PydanticTool]:
         """fallback to individual upserts for sqlite (original approach)."""
         tools = []

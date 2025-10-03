@@ -28,7 +28,12 @@ class MCPOAuth(SqlalchemyBase, OrganizationMixin, UserMixin):
 
     # Core session information
     state: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, doc="OAuth state parameter")
-    server_id: Mapped[str] = mapped_column(String(255), ForeignKey("mcp_server.id", ondelete="CASCADE"), nullable=True, doc="MCP server ID")
+    server_id: Mapped[str] = mapped_column(
+        String(255),
+        ForeignKey("mcp_server.id", ondelete="CASCADE"),
+        nullable=True,
+        doc="MCP server ID",
+    )
     server_url: Mapped[str] = mapped_column(Text, nullable=False, doc="MCP server URL")
     server_name: Mapped[str] = mapped_column(Text, nullable=False, doc="MCP server display name")
 
@@ -58,9 +63,16 @@ class MCPOAuth(SqlalchemyBase, OrganizationMixin, UserMixin):
     status: Mapped[OAuthSessionStatus] = mapped_column(String(20), default=OAuthSessionStatus.PENDING, doc="Session status")
 
     # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(), doc="Session creation time")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(),
+        doc="Session creation time",
+    )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(), onupdate=lambda: datetime.now(), doc="Last update time"
+        DateTime(timezone=True),
+        default=lambda: datetime.now(),
+        onupdate=lambda: datetime.now(),
+        doc="Last update time",
     )
 
     # Relationships (if needed in the future)

@@ -18,7 +18,10 @@ from letta.settings import tool_settings
 class SandboxRunResult(BaseModel):
     func_return: Optional[Any] = Field(None, description="The function return object")
     agent_state: Optional[AgentState] = Field(None, description="The agent state")
-    stdout: Optional[List[str]] = Field(None, description="Captured stdout (e.g. prints, logs) from the function invocation")
+    stdout: Optional[List[str]] = Field(
+        None,
+        description="Captured stdout (e.g. prints, logs) from the function invocation",
+    )
     stderr: Optional[List[str]] = Field(None, description="Captured stderr from the function invocation")
     status: Literal["success", "error"] = Field(..., description="The status of the tool execution and return object")
     sandbox_config_fingerprint: str = Field(None, description="The fingerprint of the config for the sandbox")
@@ -26,7 +29,10 @@ class SandboxRunResult(BaseModel):
 
 class LocalSandboxConfig(BaseModel):
     sandbox_dir: Optional[str] = Field(None, description="Directory for the sandbox environment.")
-    use_venv: bool = Field(False, description="Whether or not to use the venv, or run directly in the same run loop.")
+    use_venv: bool = Field(
+        False,
+        description="Whether or not to use the venv, or run directly in the same run loop.",
+    )
     venv_name: str = Field(
         "venv",
         description="The name for the venv in the sandbox directory. We first search for an existing venv with this name, otherwise, we make it from the requirements.txt.",
@@ -98,7 +104,10 @@ class SandboxConfigBase(OrmMetadataBase):
 class SandboxConfig(SandboxConfigBase):
     id: str = SandboxConfigBase.generate_id_field()
     type: SandboxType = Field(None, description="The type of sandbox.")
-    organization_id: Optional[str] = Field(None, description="The unique identifier of the organization associated with the sandbox.")
+    organization_id: Optional[str] = Field(
+        None,
+        description="The unique identifier of the organization associated with the sandbox.",
+    )
     config: Dict = Field(default_factory=lambda: {}, description="The JSON sandbox settings data.")
 
     def get_e2b_config(self) -> E2BSandboxConfig:

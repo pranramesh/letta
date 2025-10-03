@@ -1,7 +1,9 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall as OpenAIToolCall
+from openai.types.chat.chat_completion_message_tool_call import (
+    ChatCompletionMessageToolCall as OpenAIToolCall,
+)
 from pydantic import BaseModel, Field
 
 from letta.helpers.datetime_helpers import get_utc_time
@@ -49,11 +51,21 @@ class MessageSchema(MessageCreate):
     model: Optional[str] = Field(None, description="The model used to make the function call")
     agent_id: Optional[str] = Field(None, description="The unique identifier of the agent")
     tool_calls: Optional[List[OpenAIToolCall]] = Field(
-        default=None, description="The list of tool calls requested. Only applicable for role assistant."
+        default=None,
+        description="The list of tool calls requested. Only applicable for role assistant.",
     )
-    tool_call_id: Optional[str] = Field(default=None, description="The ID of the tool call. Only applicable for role tool.")
-    tool_returns: Optional[List[ToolReturn]] = Field(default=None, description="Tool execution return information for prior tool calls")
-    created_at: datetime = Field(default_factory=get_utc_time, description="The timestamp when the object was created.")
+    tool_call_id: Optional[str] = Field(
+        default=None,
+        description="The ID of the tool call. Only applicable for role tool.",
+    )
+    tool_returns: Optional[List[ToolReturn]] = Field(
+        default=None,
+        description="Tool execution return information for prior tool calls",
+    )
+    created_at: datetime = Field(
+        default_factory=get_utc_time,
+        description="The timestamp when the object was created.",
+    )
 
     # TODO: Should we also duplicate the steps here?
     # TODO: What about tool_return?
@@ -86,7 +98,10 @@ class FileAgentSchema(FileAgentBase):
     """File-Agent relationship with human-readable ID for agent file"""
 
     __id_prefix__ = "file_agent"
-    id: str = Field(..., description="Human-readable identifier for this file-agent relationship in the file")
+    id: str = Field(
+        ...,
+        description="Human-readable identifier for this file-agent relationship in the file",
+    )
 
     @classmethod
     def from_file_agent(cls, file_agent: FileAgent) -> "FileAgentSchema":
@@ -112,15 +127,26 @@ class AgentSchema(CreateAgent):
     __id_prefix__ = "agent"
     id: str = Field(..., description="Human-readable identifier for this agent in the file")
     in_context_message_ids: List[str] = Field(
-        default_factory=list, description="List of message IDs that are currently in the agent's context"
+        default_factory=list,
+        description="List of message IDs that are currently in the agent's context",
     )
-    messages: List[MessageSchema] = Field(default_factory=list, description="List of messages in the agent's conversation history")
-    files_agents: List[FileAgentSchema] = Field(default_factory=list, description="List of file-agent relationships for this agent")
+    messages: List[MessageSchema] = Field(
+        default_factory=list,
+        description="List of messages in the agent's conversation history",
+    )
+    files_agents: List[FileAgentSchema] = Field(
+        default_factory=list,
+        description="List of file-agent relationships for this agent",
+    )
     group_ids: List[str] = Field(default_factory=list, description="List of groups that the agent manages")
 
     @classmethod
     async def from_agent_state(
-        cls, agent_state: AgentState, message_manager: MessageManager, files_agents: List[FileAgent], actor: User
+        cls,
+        agent_state: AgentState,
+        message_manager: MessageManager,
+        files_agents: List[FileAgent],
+        actor: User,
     ) -> "AgentSchema":
         """Convert AgentState to AgentSchema"""
 
@@ -128,8 +154,8 @@ class AgentSchema(CreateAgent):
             name=agent_state.name,
             memory_blocks=[],  # TODO: Convert from agent_state.memory if needed
             tools=[],
-            tool_ids=[tool.id for tool in agent_state.tools] if agent_state.tools else [],
-            source_ids=[source.id for source in agent_state.sources] if agent_state.sources else [],
+            tool_ids=([tool.id for tool in agent_state.tools] if agent_state.tools else []),
+            source_ids=([source.id for source in agent_state.sources] if agent_state.sources else []),
             block_ids=[block.id for block in agent_state.memory.blocks],
             tool_rules=agent_state.tool_rules,
             tags=agent_state.tags,
@@ -181,7 +207,7 @@ class AgentSchema(CreateAgent):
             in_context_message_ids=agent_state.message_ids or [],
             messages=message_schemas,  # Messages will be populated separately by the manager
             files_agents=[FileAgentSchema.from_file_agent(f) for f in files_agents],
-            group_ids=[agent_state.multi_agent_group.id] if agent_state.multi_agent_group else [],
+            group_ids=([agent_state.multi_agent_group.id] if agent_state.multi_agent_group else []),
             **create_agent.model_dump(),
         )
 
@@ -320,7 +346,7 @@ class MCPServerSchema(BaseModel):
             server_name=mcp_server.server_name,
             server_url=mcp_server.server_url,
             # exclude token, custom_headers, and the env field in stdio_config that may contain authentication credentials
-            stdio_config=cls.strip_env_from_stdio_config(mcp_server.stdio_config.model_dump()) if mcp_server.stdio_config else None,
+            stdio_config=(cls.strip_env_from_stdio_config(mcp_server.stdio_config.model_dump()) if mcp_server.stdio_config else None),
             metadata_=mcp_server.metadata_,
         )
 
@@ -340,6 +366,7 @@ class AgentFileSchema(BaseModel):
     tools: List[ToolSchema] = Field(..., description="List of tools in this agent file")
     mcp_servers: List[MCPServerSchema] = Field(..., description="List of MCP servers in this agent file")
     metadata: Dict[str, str] = Field(
-        default_factory=dict, description="Metadata for this agent file, including revision_id and other export information."
+        default_factory=dict,
+        description="Metadata for this agent file, including revision_id and other export information.",
     )
     created_at: Optional[datetime] = Field(default=None, description="The timestamp when the object was created.")

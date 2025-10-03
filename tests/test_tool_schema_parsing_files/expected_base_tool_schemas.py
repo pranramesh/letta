@@ -48,8 +48,14 @@ def get_store_memories_schema():
                     "items": {
                         "type": "object",
                         "properties": {
-                            "start_index": {"type": "integer", "description": "Zero-based index of the first evicted line in this chunk."},
-                            "end_index": {"type": "integer", "description": "Zero-based index of the last evicted line (inclusive)."},
+                            "start_index": {
+                                "type": "integer",
+                                "description": "Zero-based index of the first evicted line in this chunk.",
+                            },
+                            "end_index": {
+                                "type": "integer",
+                                "description": "Zero-based index of the last evicted line (inclusive).",
+                            },
                             "context": {
                                 "type": "string",
                                 "description": "1-3 sentence paraphrase capturing key facts/details, user preferences, or goals that this chunk reveals—written for future retrieval.",

@@ -147,7 +147,8 @@ class HiddenReasoningMessage(LettaMessage):
     """
 
     message_type: Literal[MessageType.hidden_reasoning_message] = Field(
-        default=MessageType.hidden_reasoning_message, description="The type of the message."
+        default=MessageType.hidden_reasoning_message,
+        description="The type of the message.",
     )
     state: Literal["redacted", "omitted"]
     hidden_reasoning: Optional[str] = None
@@ -218,9 +219,17 @@ class ToolCallMessage(LettaMessage):
         """
         if isinstance(v, dict):
             if "name" in v and "arguments" in v and "tool_call_id" in v:
-                return ToolCall(name=v["name"], arguments=v["arguments"], tool_call_id=v["tool_call_id"])
+                return ToolCall(
+                    name=v["name"],
+                    arguments=v["arguments"],
+                    tool_call_id=v["tool_call_id"],
+                )
             elif "name" in v or "arguments" in v or "tool_call_id" in v:
-                return ToolCallDelta(name=v.get("name"), arguments=v.get("arguments"), tool_call_id=v.get("tool_call_id"))
+                return ToolCallDelta(
+                    name=v.get("name"),
+                    arguments=v.get("arguments"),
+                    tool_call_id=v.get("tool_call_id"),
+                )
             else:
                 raise ValueError("tool_call must contain either 'name' or 'arguments'")
         return v
@@ -263,7 +272,8 @@ class ApprovalRequestMessage(LettaMessage):
     """
 
     message_type: Literal[MessageType.approval_request_message] = Field(
-        default=MessageType.approval_request_message, description="The type of the message."
+        default=MessageType.approval_request_message,
+        description="The type of the message.",
     )
     tool_call: Union[ToolCall, ToolCallDelta] = Field(..., description="The tool call that has been requested by the llm to run")
 
@@ -282,7 +292,8 @@ class ApprovalResponseMessage(LettaMessage):
     """
 
     message_type: Literal[MessageType.approval_response_message] = Field(
-        default=MessageType.approval_response_message, description="The type of the message."
+        default=MessageType.approval_response_message,
+        description="The type of the message.",
     )
     approve: bool = Field(..., description="Whether the tool has been approved")
     approval_request_id: str = Field(..., description="The message ID of the approval request")
@@ -365,7 +376,8 @@ def create_letta_message_union_schema():
 class UpdateSystemMessage(BaseModel):
     message_type: Literal["system_message"] = "system_message"
     content: str = Field(
-        ..., description="The message content sent by the system (can be a string or an array of multi-modal content parts)"
+        ...,
+        description="The message content sent by the system (can be a string or an array of multi-modal content parts)",
     )
 
 
@@ -393,7 +405,12 @@ class UpdateAssistantMessage(BaseModel):
 
 
 LettaMessageUpdateUnion = Annotated[
-    Union[UpdateSystemMessage, UpdateUserMessage, UpdateReasoningMessage, UpdateAssistantMessage],
+    Union[
+        UpdateSystemMessage,
+        UpdateUserMessage,
+        UpdateReasoningMessage,
+        UpdateAssistantMessage,
+    ],
     Field(discriminator="message_type"),
 ]
 
@@ -443,4 +460,9 @@ class LegacyInternalMonologue(LettaMessage):
     internal_monologue: str
 
 
-LegacyLettaMessage = Union[LegacyInternalMonologue, AssistantMessage, LegacyFunctionCallMessage, LegacyFunctionReturn]
+LegacyLettaMessage = Union[
+    LegacyInternalMonologue,
+    AssistantMessage,
+    LegacyFunctionCallMessage,
+    LegacyFunctionReturn,
+]

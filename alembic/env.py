@@ -18,7 +18,10 @@ if settings.database_engine is DatabaseChoice.POSTGRES:
     config.set_main_option("sqlalchemy.url", settings.letta_pg_uri)
     print("Using database: ", settings.letta_pg_uri)
 else:
-    config.set_main_option("sqlalchemy.url", "sqlite:///" + os.path.join(letta_config.recall_storage_path, "sqlite.db"))
+    config.set_main_option(
+        "sqlalchemy.url",
+        "sqlite:///" + os.path.join(letta_config.recall_storage_path, "sqlite.db"),
+    )
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

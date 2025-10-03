@@ -59,7 +59,10 @@ def {func_name}(**kwargs):
 
 
 async def execute_composio_action_async(
-    action_name: str, args: dict, api_key: Optional[str] = None, entity_id: Optional[str] = None
+    action_name: str,
+    args: dict,
+    api_key: Optional[str] = None,
+    entity_id: Optional[str] = None,
 ) -> tuple[str, str]:
     entity_id = entity_id or os.getenv(COMPOSIO_ENTITY_ENV_VAR_KEY, DEFAULT_ENTITY_ID)
     composio_toolset = AsyncComposioToolSet(api_key=api_key, entity_id=entity_id, lock=False)
@@ -85,7 +88,12 @@ async def execute_composio_action_async(
     return response.get("data")
 
 
-def execute_composio_action(action_name: str, args: dict, api_key: Optional[str] = None, entity_id: Optional[str] = None) -> Any:
+def execute_composio_action(
+    action_name: str,
+    args: dict,
+    api_key: Optional[str] = None,
+    entity_id: Optional[str] = None,
+) -> Any:
     return run_async_task(execute_composio_action_async(action_name, args, api_key, entity_id))
 
 

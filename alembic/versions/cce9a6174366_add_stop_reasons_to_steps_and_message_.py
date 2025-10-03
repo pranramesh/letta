@@ -25,7 +25,14 @@ def upgrade() -> None:
 
     # manually added to handle non-table creation enums
     stopreasontype = sa.Enum(
-        "end_turn", "error", "invalid_tool_call", "max_steps", "no_tool_call", "tool_rule", "cancelled", name="stopreasontype"
+        "end_turn",
+        "error",
+        "invalid_tool_call",
+        "max_steps",
+        "no_tool_call",
+        "tool_rule",
+        "cancelled",
+        name="stopreasontype",
     )
     stopreasontype.create(op.get_bind())
     op.add_column("steps", sa.Column("stop_reason", stopreasontype, nullable=True))

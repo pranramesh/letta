@@ -51,12 +51,16 @@ class EphemeralSummaryAgent(BaseAgent):
         # Check block existence
         try:
             block = await self.agent_manager.get_block_with_label_async(
-                agent_id=self.agent_id, block_label=self.target_block_label, actor=self.actor
+                agent_id=self.agent_id,
+                block_label=self.target_block_label,
+                actor=self.actor,
             )
         except NoResultFound:
             block = await self.block_manager.create_or_update_block_async(
                 block=Block(
-                    value="", label=self.target_block_label, description="Contains recursive summarizations of the conversation so far"
+                    value="",
+                    label=self.target_block_label,
+                    description="Contains recursive summarizations of the conversation so far",
                 ),
                 actor=self.actor,
             )

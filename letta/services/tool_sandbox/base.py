@@ -9,8 +9,13 @@ from letta.schemas.agent import AgentState
 from letta.schemas.sandbox_config import SandboxConfig
 from letta.schemas.tool import Tool
 from letta.schemas.tool_execution_result import ToolExecutionResult
-from letta.services.helpers.tool_execution_helper import add_imports_and_pydantic_schemas_for_args
-from letta.services.helpers.tool_parser_helper import convert_param_to_str_value, parse_function_arguments
+from letta.services.helpers.tool_execution_helper import (
+    add_imports_and_pydantic_schemas_for_args,
+)
+from letta.services.helpers.tool_parser_helper import (
+    convert_param_to_str_value,
+    parse_function_arguments,
+)
 from letta.services.sandbox_config_manager import SandboxConfigManager
 from letta.services.tool_manager import ToolManager
 from letta.types import JsonDict, JsonValue
@@ -307,7 +312,13 @@ class AsyncToolSandboxBase(ABC):
         """
         return False  # Default to False for local execution
 
-    async def _gather_env_vars(self, agent_state: AgentState | None, additional_env_vars: dict[str, str], sbx_id: str, is_local: bool):
+    async def _gather_env_vars(
+        self,
+        agent_state: AgentState | None,
+        additional_env_vars: dict[str, str],
+        sbx_id: str,
+        is_local: bool,
+    ):
         env = os.environ.copy() if is_local else {}
         if self.provided_sandbox_env_vars:
             env.update(self.provided_sandbox_env_vars)

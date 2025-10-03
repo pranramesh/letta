@@ -135,7 +135,14 @@ def test_cutoff_calculation_with_tool_call(mocker, server, agent_state, default_
         generate_message("system"),
         generate_message("user", text="First user message"),
         generate_message(
-            "assistant", tool_calls=[{"id": "tool_call_1", "type": "function", "function": {"name": "test_function", "arguments": "{}"}}]
+            "assistant",
+            tool_calls=[
+                {
+                    "id": "tool_call_1",
+                    "type": "function",
+                    "function": {"name": "test_function", "arguments": "{}"},
+                }
+            ],
         ),
         generate_message("tool", text="First tool response"),
         generate_message("assistant", text="First assistant response after tool"),
@@ -146,7 +153,11 @@ def test_cutoff_calculation_with_tool_call(mocker, server, agent_state, default_
     def mock_get_messages_by_ids(message_ids, actor):
         return [msg for msg in messages if msg.id in message_ids]
 
-    mocker.patch.object(server.agent_manager.message_manager, "get_messages_by_ids", side_effect=mock_get_messages_by_ids)
+    mocker.patch.object(
+        server.agent_manager.message_manager,
+        "get_messages_by_ids",
+        side_effect=mock_get_messages_by_ids,
+    )
 
     # Mock get_agent_by_id to return an agent with our message IDs
     mock_agent = mocker.Mock()

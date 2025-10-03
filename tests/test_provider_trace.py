@@ -97,7 +97,8 @@ def agent_state(client, roll_dice_tool, weather_tool):
 @pytest.mark.parametrize("message", ["Get the weather in San Francisco."])
 async def test_provider_trace_experimental_step(client, message, agent_state):
     response = client.agents.messages.create(
-        agent_id=agent_state.id, messages=[MessageCreate(role="user", content=[TextContent(text=message)])]
+        agent_id=agent_state.id,
+        messages=[MessageCreate(role="user", content=[TextContent(text=message)])],
     )
     tool_step = response.messages[0].step_id
     reply_step = response.messages[-1].step_id
@@ -113,7 +114,8 @@ async def test_provider_trace_experimental_step(client, message, agent_state):
 async def test_provider_trace_experimental_step_stream(client, message, agent_state):
     last_message_id = client.agents.messages.list(agent_id=agent_state.id, limit=1)[0]
     stream = client.agents.messages.create_stream(
-        agent_id=agent_state.id, messages=[MessageCreate(role="user", content=[TextContent(text=message)])]
+        agent_id=agent_state.id,
+        messages=[MessageCreate(role="user", content=[TextContent(text=message)])],
     )
 
     list(stream)

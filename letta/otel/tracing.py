@@ -114,7 +114,10 @@ async def _trace_error_handler(_request: Request, exc: Exception) -> JSONRespons
             },
         )
 
-    return JSONResponse(status_code=status_code, content={"detail": error_msg, "trace_id": get_trace_id() or ""})
+    return JSONResponse(
+        status_code=status_code,
+        content={"detail": error_msg, "trace_id": get_trace_id() or ""},
+    )
 
 
 def setup_tracing(
@@ -174,7 +177,9 @@ def setup_tracing(
 
         # Additionally set up our custom instrumentation
         try:
-            from letta.otel.sqlalchemy_instrumentation_integration import setup_letta_db_instrumentation
+            from letta.otel.sqlalchemy_instrumentation_integration import (
+                setup_letta_db_instrumentation,
+            )
 
             setup_letta_db_instrumentation(enable_joined_monitoring=True)
         except Exception as e:
@@ -261,7 +266,11 @@ def log_attributes(attributes: Dict[str, Any]) -> None:
         current_span.set_attributes(attributes)
 
 
-def log_event(name: str, attributes: Optional[Dict[str, Any]] = None, timestamp: Optional[int] = None) -> None:
+def log_event(
+    name: str,
+    attributes: Optional[Dict[str, Any]] = None,
+    timestamp: Optional[int] = None,
+) -> None:
     current_span = trace.get_current_span()
     if current_span:
         if timestamp is None:

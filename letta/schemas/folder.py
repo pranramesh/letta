@@ -37,7 +37,11 @@ class Folder(BaseFolder):
     id: str = BaseFolder.generate_id_field()
     embedding_config: EmbeddingConfig = Field(..., description="The embedding configuration used by the folder.")
     organization_id: Optional[str] = Field(None, description="The ID of the organization that created the folder.")
-    metadata: Optional[dict] = Field(None, validation_alias="metadata_", description="Metadata associated with the folder.")
+    metadata: Optional[dict] = Field(
+        None,
+        validation_alias="metadata_",
+        description="Metadata associated with the folder.",
+    )
 
     # metadata fields
     created_by_id: Optional[str] = Field(None, description="The id of the user that made this Tool.")

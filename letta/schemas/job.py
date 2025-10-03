@@ -14,7 +14,10 @@ from letta.schemas.letta_stop_reason import StopReasonType
 class JobBase(OrmMetadataBase):
     __id_prefix__ = "job"
     status: JobStatus = Field(default=JobStatus.created, description="The status of the job.")
-    created_at: datetime = Field(default_factory=get_utc_time, description="The unix timestamp of when the job was created.")
+    created_at: datetime = Field(
+        default_factory=get_utc_time,
+        description="The unix timestamp of when the job was created.",
+    )
 
     # completion related
     completed_at: Optional[datetime] = Field(None, description="The unix timestamp of when the job was completed.")
@@ -31,7 +34,10 @@ class JobBase(OrmMetadataBase):
     callback_url: Optional[str] = Field(None, description="If set, POST to this URL when the job completes.")
     callback_sent_at: Optional[datetime] = Field(None, description="Timestamp when the callback was last attempted.")
     callback_status_code: Optional[int] = Field(None, description="HTTP status code returned by the callback endpoint.")
-    callback_error: Optional[str] = Field(None, description="Optional error message from attempting to POST the callback endpoint.")
+    callback_error: Optional[str] = Field(
+        None,
+        description="Optional error message from attempting to POST the callback endpoint.",
+    )
 
     # Timing metrics (in nanoseconds for precision)
     ttft_ns: int | None = Field(None, description="Time to first token for a run in nanoseconds")
@@ -110,5 +116,6 @@ class LettaRequestConfig(BaseModel):
         description="The name of the message argument in the designated message tool.",
     )
     include_return_message_types: Optional[List[MessageType]] = Field(
-        default=None, description="Only return specified message types in the response. If `None` (default) returns all messages."
+        default=None,
+        description="Only return specified message types in the response. If `None` (default) returns all messages.",
     )

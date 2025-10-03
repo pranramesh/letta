@@ -37,20 +37,34 @@ def upgrade() -> None:
         sa.Column("source_id", sa.String(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index("agent_source_mapping_idx_user", "agent_source_mapping", ["user_id", "agent_id", "source_id"], unique=False)
+    op.create_index(
+        "agent_source_mapping_idx_user",
+        "agent_source_mapping",
+        ["user_id", "agent_id", "source_id"],
+        unique=False,
+    )
     op.create_table(
         "agents",
         sa.Column("id", sa.String(), nullable=False),
         sa.Column("user_id", sa.String(), nullable=False),
         sa.Column("name", sa.String(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
         sa.Column("description", sa.String(), nullable=True),
         sa.Column("message_ids", sa.JSON(), nullable=True),
         sa.Column("memory", sa.JSON(), nullable=True),
         sa.Column("system", sa.String(), nullable=True),
         sa.Column("agent_type", sa.String(), nullable=True),
         sa.Column("llm_config", letta.orm.custom_columns.LLMConfigColumn(), nullable=True),
-        sa.Column("embedding_config", letta.orm.custom_columns.EmbeddingConfigColumn(), nullable=True),
+        sa.Column(
+            "embedding_config",
+            letta.orm.custom_columns.EmbeddingConfigColumn(),
+            nullable=True,
+        ),
         sa.Column("metadata_", sa.JSON(), nullable=True),
         sa.Column("tools", sa.JSON(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
@@ -81,7 +95,12 @@ def upgrade() -> None:
         sa.Column("file_size", sa.Integer(), nullable=True),
         sa.Column("file_creation_date", sa.String(), nullable=True),
         sa.Column("file_last_modified_date", sa.String(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
@@ -89,7 +108,12 @@ def upgrade() -> None:
         sa.Column("id", sa.String(), nullable=False),
         sa.Column("user_id", sa.String(), nullable=True),
         sa.Column("status", sa.String(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
         sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("metadata_", sa.JSON(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
@@ -113,7 +137,12 @@ def upgrade() -> None:
         "organizations",
         sa.Column("id", sa.VARCHAR(), autoincrement=False, nullable=False),
         sa.Column("name", sa.VARCHAR(), autoincrement=False, nullable=False),
-        sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
+        sa.Column(
+            "created_at",
+            postgresql.TIMESTAMP(timezone=True),
+            autoincrement=False,
+            nullable=True,
+        ),
         sa.PrimaryKeyConstraint("id", name="organizations_pkey"),
     )
     op.create_table(
@@ -125,7 +154,11 @@ def upgrade() -> None:
         sa.Column("agent_id", sa.String(), nullable=True),
         sa.Column("source_id", sa.String(), nullable=True),
         sa.Column("embedding", pgvector.sqlalchemy.Vector(dim=4096), nullable=True),
-        sa.Column("embedding_config", letta.orm.custom_columns.EmbeddingConfigColumn(), nullable=True),
+        sa.Column(
+            "embedding_config",
+            letta.orm.custom_columns.EmbeddingConfigColumn(),
+            nullable=True,
+        ),
         sa.Column("metadata_", sa.JSON(), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint("id"),
@@ -136,8 +169,17 @@ def upgrade() -> None:
         sa.Column("id", sa.String(), nullable=False),
         sa.Column("user_id", sa.String(), nullable=False),
         sa.Column("name", sa.String(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
-        sa.Column("embedding_config", letta.orm.custom_columns.EmbeddingConfigColumn(), nullable=True),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
+        sa.Column(
+            "embedding_config",
+            letta.orm.custom_columns.EmbeddingConfigColumn(),
+            nullable=True,
+        ),
         sa.Column("description", sa.String(), nullable=True),
         sa.Column("metadata_", sa.JSON(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
@@ -159,7 +201,12 @@ def upgrade() -> None:
         sa.Column("id", sa.VARCHAR(), autoincrement=False, nullable=False),
         sa.Column("org_id", sa.VARCHAR(), autoincrement=False, nullable=True),
         sa.Column("name", sa.VARCHAR(), autoincrement=False, nullable=False),
-        sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
+        sa.Column(
+            "created_at",
+            postgresql.TIMESTAMP(timezone=True),
+            autoincrement=False,
+            nullable=True,
+        ),
         sa.Column("policies_accepted", sa.BOOLEAN(), autoincrement=False, nullable=False),
         sa.PrimaryKeyConstraint("id", name="users_pkey"),
     )
@@ -171,9 +218,19 @@ def upgrade() -> None:
         sa.Column("description", sa.VARCHAR(), autoincrement=False, nullable=True),
         sa.Column("source_type", sa.VARCHAR(), autoincrement=False, nullable=True),
         sa.Column("source_code", sa.VARCHAR(), autoincrement=False, nullable=True),
-        sa.Column("json_schema", postgresql.JSON(astext_type=sa.Text()), autoincrement=False, nullable=True),
+        sa.Column(
+            "json_schema",
+            postgresql.JSON(astext_type=sa.Text()),
+            autoincrement=False,
+            nullable=True,
+        ),
         sa.Column("module", sa.VARCHAR(), autoincrement=False, nullable=True),
-        sa.Column("tags", postgresql.JSON(astext_type=sa.Text()), autoincrement=False, nullable=True),
+        sa.Column(
+            "tags",
+            postgresql.JSON(astext_type=sa.Text()),
+            autoincrement=False,
+            nullable=True,
+        ),
         sa.PrimaryKeyConstraint("id", name="tools_pkey"),
     )
 

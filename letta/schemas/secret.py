@@ -207,7 +207,10 @@ class Secret(BaseModel):
 
         Returns both encrypted and plaintext values for dual-write during migration.
         """
-        return {"encrypted": self.get_encrypted(), "plaintext": self.get_plaintext() if not self._was_encrypted else None}
+        return {
+            "encrypted": self.get_encrypted(),
+            "plaintext": self.get_plaintext() if not self._was_encrypted else None,
+        }
 
     def __eq__(self, other: Any) -> bool:
         """
@@ -375,4 +378,7 @@ class SecretDict(BaseModel):
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for database storage."""
-        return {"encrypted": self.get_encrypted(), "plaintext": self.get_plaintext() if not self._was_encrypted else None}
+        return {
+            "encrypted": self.get_encrypted(),
+            "plaintext": self.get_plaintext() if not self._was_encrypted else None,
+        }

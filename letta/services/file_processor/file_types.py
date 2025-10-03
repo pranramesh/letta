@@ -42,19 +42,67 @@ class FileTypeRegistry:
     def _register_default_types(self) -> None:
         """Register all default supported file types."""
         # Document formats
-        self.register(".pdf", "application/pdf", False, "PDF document", ChunkingStrategy.LINE_BASED)
+        self.register(
+            ".pdf",
+            "application/pdf",
+            False,
+            "PDF document",
+            ChunkingStrategy.LINE_BASED,
+        )
         self.register(".txt", "text/plain", True, "Plain text file", ChunkingStrategy.LINE_BASED)
-        self.register(".md", "text/markdown", True, "Markdown document", ChunkingStrategy.DOCUMENTATION)
-        self.register(".markdown", "text/markdown", True, "Markdown document", ChunkingStrategy.DOCUMENTATION)
-        self.register(".json", "application/json", True, "JSON data file", ChunkingStrategy.STRUCTURED_DATA)
-        self.register(".jsonl", "application/jsonl", True, "JSON Lines file", ChunkingStrategy.STRUCTURED_DATA)
+        self.register(
+            ".md",
+            "text/markdown",
+            True,
+            "Markdown document",
+            ChunkingStrategy.DOCUMENTATION,
+        )
+        self.register(
+            ".markdown",
+            "text/markdown",
+            True,
+            "Markdown document",
+            ChunkingStrategy.DOCUMENTATION,
+        )
+        self.register(
+            ".json",
+            "application/json",
+            True,
+            "JSON data file",
+            ChunkingStrategy.STRUCTURED_DATA,
+        )
+        self.register(
+            ".jsonl",
+            "application/jsonl",
+            True,
+            "JSON Lines file",
+            ChunkingStrategy.STRUCTURED_DATA,
+        )
         self.register(".csv", "text/csv", True, "CSV data file", ChunkingStrategy.STRUCTURED_DATA)
 
         # Programming languages
         self.register(".py", "text/x-python", True, "Python source code", ChunkingStrategy.CODE)
-        self.register(".js", "text/javascript", True, "JavaScript source code", ChunkingStrategy.CODE)
-        self.register(".ts", "text/x-typescript", True, "TypeScript source code", ChunkingStrategy.CODE)
-        self.register(".java", "text/x-java-source", True, "Java source code", ChunkingStrategy.CODE)
+        self.register(
+            ".js",
+            "text/javascript",
+            True,
+            "JavaScript source code",
+            ChunkingStrategy.CODE,
+        )
+        self.register(
+            ".ts",
+            "text/x-typescript",
+            True,
+            "TypeScript source code",
+            ChunkingStrategy.CODE,
+        )
+        self.register(
+            ".java",
+            "text/x-java-source",
+            True,
+            "Java source code",
+            ChunkingStrategy.CODE,
+        )
         self.register(".cpp", "text/x-c++", True, "C++ source code", ChunkingStrategy.CODE)
         self.register(".cxx", "text/x-c++", True, "C++ source code", ChunkingStrategy.CODE)
         self.register(".c", "text/x-c", True, "C source code", ChunkingStrategy.CODE)
@@ -68,35 +116,113 @@ class FileTypeRegistry:
         self.register(".kt", "text/x-kotlin", True, "Kotlin source code", ChunkingStrategy.CODE)
         self.register(".scala", "text/x-scala", True, "Scala source code", ChunkingStrategy.CODE)
         self.register(".r", "text/x-r", True, "R source code", ChunkingStrategy.CODE)
-        self.register(".m", "text/x-objective-c", True, "Objective-C source code", ChunkingStrategy.CODE)
+        self.register(
+            ".m",
+            "text/x-objective-c",
+            True,
+            "Objective-C source code",
+            ChunkingStrategy.CODE,
+        )
 
         # Web technologies
         self.register(".html", "text/html", True, "HTML document", ChunkingStrategy.CODE)
         self.register(".htm", "text/html", True, "HTML document", ChunkingStrategy.CODE)
         self.register(".css", "text/css", True, "CSS stylesheet", ChunkingStrategy.STRUCTURED_DATA)
-        self.register(".scss", "text/x-scss", True, "SCSS stylesheet", ChunkingStrategy.STRUCTURED_DATA)
-        self.register(".sass", "text/x-sass", True, "Sass stylesheet", ChunkingStrategy.STRUCTURED_DATA)
-        self.register(".less", "text/x-less", True, "Less stylesheet", ChunkingStrategy.STRUCTURED_DATA)
+        self.register(
+            ".scss",
+            "text/x-scss",
+            True,
+            "SCSS stylesheet",
+            ChunkingStrategy.STRUCTURED_DATA,
+        )
+        self.register(
+            ".sass",
+            "text/x-sass",
+            True,
+            "Sass stylesheet",
+            ChunkingStrategy.STRUCTURED_DATA,
+        )
+        self.register(
+            ".less",
+            "text/x-less",
+            True,
+            "Less stylesheet",
+            ChunkingStrategy.STRUCTURED_DATA,
+        )
         self.register(".vue", "text/x-vue", True, "Vue.js component", ChunkingStrategy.CODE)
         self.register(".jsx", "text/x-jsx", True, "JSX source code", ChunkingStrategy.CODE)
         self.register(".tsx", "text/x-tsx", True, "TSX source code", ChunkingStrategy.CODE)
 
         # Configuration and data formats
-        self.register(".xml", "application/xml", True, "XML document", ChunkingStrategy.STRUCTURED_DATA)
-        self.register(".yaml", "text/x-yaml", True, "YAML configuration", ChunkingStrategy.STRUCTURED_DATA)
-        self.register(".yml", "text/x-yaml", True, "YAML configuration", ChunkingStrategy.STRUCTURED_DATA)
-        self.register(".toml", "application/toml", True, "TOML configuration", ChunkingStrategy.STRUCTURED_DATA)
-        self.register(".ini", "text/x-ini", True, "INI configuration", ChunkingStrategy.STRUCTURED_DATA)
-        self.register(".cfg", "text/x-conf", True, "Configuration file", ChunkingStrategy.STRUCTURED_DATA)
-        self.register(".conf", "text/x-conf", True, "Configuration file", ChunkingStrategy.STRUCTURED_DATA)
+        self.register(
+            ".xml",
+            "application/xml",
+            True,
+            "XML document",
+            ChunkingStrategy.STRUCTURED_DATA,
+        )
+        self.register(
+            ".yaml",
+            "text/x-yaml",
+            True,
+            "YAML configuration",
+            ChunkingStrategy.STRUCTURED_DATA,
+        )
+        self.register(
+            ".yml",
+            "text/x-yaml",
+            True,
+            "YAML configuration",
+            ChunkingStrategy.STRUCTURED_DATA,
+        )
+        self.register(
+            ".toml",
+            "application/toml",
+            True,
+            "TOML configuration",
+            ChunkingStrategy.STRUCTURED_DATA,
+        )
+        self.register(
+            ".ini",
+            "text/x-ini",
+            True,
+            "INI configuration",
+            ChunkingStrategy.STRUCTURED_DATA,
+        )
+        self.register(
+            ".cfg",
+            "text/x-conf",
+            True,
+            "Configuration file",
+            ChunkingStrategy.STRUCTURED_DATA,
+        )
+        self.register(
+            ".conf",
+            "text/x-conf",
+            True,
+            "Configuration file",
+            ChunkingStrategy.STRUCTURED_DATA,
+        )
 
         # Scripts and SQL
         self.register(".sh", "text/x-shellscript", True, "Shell script", ChunkingStrategy.CODE)
         self.register(".bash", "text/x-shellscript", True, "Bash script", ChunkingStrategy.CODE)
-        self.register(".ps1", "text/x-powershell", True, "PowerShell script", ChunkingStrategy.CODE)
+        self.register(
+            ".ps1",
+            "text/x-powershell",
+            True,
+            "PowerShell script",
+            ChunkingStrategy.CODE,
+        )
         self.register(".bat", "text/x-batch", True, "Batch script", ChunkingStrategy.CODE)
         self.register(".cmd", "text/x-batch", True, "Command script", ChunkingStrategy.CODE)
-        self.register(".dockerfile", "text/x-dockerfile", True, "Dockerfile", ChunkingStrategy.CODE)
+        self.register(
+            ".dockerfile",
+            "text/x-dockerfile",
+            True,
+            "Dockerfile",
+            ChunkingStrategy.CODE,
+        )
         self.register(".sql", "text/x-sql", True, "SQL script", ChunkingStrategy.CODE)
 
     def register(

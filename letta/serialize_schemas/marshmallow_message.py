@@ -37,4 +37,10 @@ class SerializedMessageSchema(BaseSchema):
 
     class Meta(BaseSchema.Meta):
         model = Message
-        exclude = BaseSchema.Meta.exclude + ("step", "job_message", "otid", "is_deleted", "organization")
+        exclude = BaseSchema.Meta.exclude + (
+            "step",
+            "job_message",
+            "otid",
+            "is_deleted",
+            "organization",
+        )

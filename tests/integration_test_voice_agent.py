@@ -9,18 +9,28 @@ from openai.types.chat import ChatCompletionChunk
 
 from letta.agents.voice_sleeptime_agent import VoiceSleeptimeAgent
 from letta.config import LettaConfig
-from letta.constants import DEFAULT_MAX_MESSAGE_BUFFER_LENGTH, DEFAULT_MIN_MESSAGE_BUFFER_LENGTH
+from letta.constants import (
+    DEFAULT_MAX_MESSAGE_BUFFER_LENGTH,
+    DEFAULT_MIN_MESSAGE_BUFFER_LENGTH,
+)
 from letta.orm.errors import NoResultFound
 from letta.schemas.agent import CreateAgent
 from letta.schemas.block import CreateBlock
 from letta.schemas.embedding_config import EmbeddingConfig
 from letta.schemas.enums import AgentType, MessageRole, MessageStreamStatus
 from letta.schemas.group import GroupUpdate, ManagerType, VoiceSleeptimeManagerUpdate
-from letta.schemas.letta_message import AssistantMessage, ReasoningMessage, ToolCallMessage
+from letta.schemas.letta_message import (
+    AssistantMessage,
+    ReasoningMessage,
+    ToolCallMessage,
+)
 from letta.schemas.letta_message_content import TextContent
 from letta.schemas.llm_config import LLMConfig
 from letta.schemas.message import Message, MessageCreate
-from letta.schemas.openai.chat_completion_request import ChatCompletionRequest, UserMessage as OpenAIUserMessage
+from letta.schemas.openai.chat_completion_request import (
+    ChatCompletionRequest,
+    UserMessage as OpenAIUserMessage,
+)
 from letta.schemas.usage import LettaUsageStatistics
 from letta.server.server import SyncServer
 from letta.services.agent_manager import AgentManager
@@ -97,7 +107,11 @@ def server_url():
 
     if not os.getenv("LETTA_SERVER_URL"):
         # Start server in subprocess to isolate async event loops
-        server_process = subprocess.Popen(["letta", "server", "--port", "8283"], env={**os.environ, "PYTHONUNBUFFERED": "1"}, text=True)
+        server_process = subprocess.Popen(
+            ["letta", "server", "--port", "8283"],
+            env={**os.environ, "PYTHONUNBUFFERED": "1"},
+            text=True,
+        )
 
         def cleanup():
             server_process.terminate()
@@ -227,7 +241,12 @@ def _assert_valid_chunk(chunk, idx, chunks):
 @pytest.mark.asyncio(loop_scope="module")
 @pytest.mark.parametrize("model", ["openai/gpt-4o-mini", "anthropic/claude-3-5-sonnet-20241022"])
 @pytest.mark.parametrize(
-    "message", ["How are you?", "Use the roll_dice tool to roll a die for me", "Use the run_code tool to calculate 2+2"]
+    "message",
+    [
+        "How are you?",
+        "Use the roll_dice tool to roll a die for me",
+        "Use the run_code tool to calculate 2+2",
+    ],
 )
 async def test_model_compatibility(model, message, server, server_url, actor, roll_dice_tool):
     request = _get_chat_request(message)
@@ -446,7 +465,11 @@ async def test_voice_sleeptime_agent(disable_e2b_api_key, voice_agent):
         llm_config=LLMConfig.default_config(model_name="gpt-4o-mini"),
         embedding_config=EmbeddingConfig.default_config(provider="openai"),
         project_id=voice_agent.project_id,
-        tool_ids=[finish_rethinking_memory_tool.id, store_memories_tool.id, rethink_user_memory_tool.id],
+        tool_ids=[
+            finish_rethinking_memory_tool.id,
+            store_memories_tool.id,
+            rethink_user_memory_tool.id,
+        ],
     )
     sleeptime_agent = agent_manager.create_agent(request, actor=actor)
 
@@ -576,7 +599,13 @@ async def test_valid_buffer_lengths_above_four(group_id, server, actor):
 @pytest.mark.asyncio(loop_scope="module")
 async def test_valid_buffer_lengths_only_max(group_id, server, actor):
     # both > 4 and max > min
-    updated = await _modify(group_id, server, actor, max_val=DEFAULT_MAX_MESSAGE_BUFFER_LENGTH + 1, min_val=None)
+    updated = await _modify(
+        group_id,
+        server,
+        actor,
+        max_val=DEFAULT_MAX_MESSAGE_BUFFER_LENGTH + 1,
+        min_val=None,
+    )
     assert updated.max_message_buffer_length == DEFAULT_MAX_MESSAGE_BUFFER_LENGTH + 1
     assert updated.min_message_buffer_length == DEFAULT_MIN_MESSAGE_BUFFER_LENGTH
 
@@ -584,7 +613,13 @@ async def test_valid_buffer_lengths_only_max(group_id, server, actor):
 @pytest.mark.asyncio(loop_scope="module")
 async def test_valid_buffer_lengths_only_min(group_id, server, actor):
     # both > 4 and max > min
-    updated = await _modify(group_id, server, actor, max_val=None, min_val=DEFAULT_MIN_MESSAGE_BUFFER_LENGTH + 1)
+    updated = await _modify(
+        group_id,
+        server,
+        actor,
+        max_val=None,
+        min_val=DEFAULT_MIN_MESSAGE_BUFFER_LENGTH + 1,
+    )
     assert updated.max_message_buffer_length == DEFAULT_MAX_MESSAGE_BUFFER_LENGTH
     assert updated.min_message_buffer_length == DEFAULT_MIN_MESSAGE_BUFFER_LENGTH + 1
 

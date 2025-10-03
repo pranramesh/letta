@@ -2,7 +2,11 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Header
 
-from letta.server.rest_api.dependencies import HeaderParams, get_headers, get_letta_server
+from letta.server.rest_api.dependencies import (
+    HeaderParams,
+    get_headers,
+    get_letta_server,
+)
 from letta.server.server import SyncServer
 
 router = APIRouter(prefix="/embeddings", tags=["embeddings"])

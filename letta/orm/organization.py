@@ -19,7 +19,11 @@ if TYPE_CHECKING:
     from letta.orm.passage import ArchivalPassage, SourcePassage
     from letta.orm.passage_tag import PassageTag
     from letta.orm.provider import Provider
-    from letta.orm.sandbox_config import AgentEnvironmentVariable, SandboxConfig, SandboxEnvironmentVariable
+    from letta.orm.sandbox_config import (
+        AgentEnvironmentVariable,
+        SandboxConfig,
+        SandboxEnvironmentVariable,
+    )
     from letta.orm.tool import Tool
     from letta.orm.user import User
 
@@ -42,10 +46,14 @@ class Organization(SqlalchemyBase):
         "SandboxConfig", back_populates="organization", cascade="all, delete-orphan"
     )
     sandbox_environment_variables: Mapped[List["SandboxEnvironmentVariable"]] = relationship(
-        "SandboxEnvironmentVariable", back_populates="organization", cascade="all, delete-orphan"
+        "SandboxEnvironmentVariable",
+        back_populates="organization",
+        cascade="all, delete-orphan",
     )
     agent_environment_variables: Mapped[List["AgentEnvironmentVariable"]] = relationship(
-        "AgentEnvironmentVariable", back_populates="organization", cascade="all, delete-orphan"
+        "AgentEnvironmentVariable",
+        back_populates="organization",
+        cascade="all, delete-orphan",
     )
 
     # relationships

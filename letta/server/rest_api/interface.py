@@ -25,12 +25,19 @@ from letta.schemas.letta_message import (
     ToolCallMessage,
     ToolReturnMessage,
 )
-from letta.schemas.letta_message_content import ReasoningContent, RedactedReasoningContent, TextContent
+from letta.schemas.letta_message_content import (
+    ReasoningContent,
+    RedactedReasoningContent,
+    TextContent,
+)
 from letta.schemas.message import Message
 from letta.schemas.openai.chat_completion_response import ChatCompletionChunkResponse
 from letta.server.rest_api.json_parser import OptimisticJSONParser
 from letta.streaming_interface import AgentChunkStreamingInterface
-from letta.streaming_utils import FunctionArgumentsStreamHandler, JSONInnerThoughtsExtractor
+from letta.streaming_utils import (
+    FunctionArgumentsStreamHandler,
+    JSONInnerThoughtsExtractor,
+)
 from letta.utils import parse_json
 
 
@@ -168,7 +175,12 @@ class QueuingInterface(AgentInterface):
             print(vars(msg_obj))
             print(msg_obj.created_at.isoformat())
 
-    def internal_monologue(self, msg: str, msg_obj: Optional[Message] = None, chunk_index: Optional[int] = None) -> None:
+    def internal_monologue(
+        self,
+        msg: str,
+        msg_obj: Optional[Message] = None,
+        chunk_index: Optional[int] = None,
+    ) -> None:
         """Handle the agent's internal monologue"""
         assert msg_obj is not None, "QueuingInterface requires msg_obj references for metadata"
         if self.debug:
@@ -213,7 +225,11 @@ class QueuingInterface(AgentInterface):
         self._queue_push(message_api=new_message, message_obj=msg_obj)
 
     def function_message(
-        self, msg: str, msg_obj: Optional[Message] = None, include_ran_messages: bool = False, chunk_index: Optional[int] = None
+        self,
+        msg: str,
+        msg_obj: Optional[Message] = None,
+        include_ran_messages: bool = False,
+        chunk_index: Optional[int] = None,
     ) -> None:
         """Handle the agent calling a function"""
         # TODO handle 'function' messages that indicate the start of a function call
@@ -360,7 +376,9 @@ class StreamingServerInterface(AgentChunkStreamingInterface):
         self.function_args_buffer = None
         self.function_id_buffer = None
 
-    async def _create_generator(self) -> AsyncGenerator[Union[LettaMessage, LegacyLettaMessage, MessageStreamStatus], None]:
+    async def _create_generator(
+        self,
+    ) -> AsyncGenerator[Union[LettaMessage, LegacyLettaMessage, MessageStreamStatus], None]:
         """An asynchronous generator that yields chunks as they become available."""
         while self._active:
             try:
@@ -529,7 +547,7 @@ class StreamingServerInterface(AgentChunkStreamingInterface):
                 date=message_date,
                 reasoning=message_delta.reasoning_content,
                 signature=message_delta.reasoning_content_signature,
-                source="reasoner_model" if message_delta.reasoning_content else "non_reasoner_model",
+                source=("reasoner_model" if message_delta.reasoning_content else "non_reasoner_model"),
                 name=name,
                 otid=Message.generate_otid_from_id(message_id, message_index),
             )
@@ -817,7 +835,9 @@ class StreamingServerInterface(AgentChunkStreamingInterface):
                                 payload = (self.function_args_buffer or "") + (updates_main_json or "")
                                 self.function_args_buffer = None
                                 cleaned = self.streaming_chat_completion_json_reader.process_json_chunk(payload)
-                                from letta.streaming_utils import sanitize_streamed_message_content
+                                from letta.streaming_utils import (
+                                    sanitize_streamed_message_content,
+                                )
 
                                 cleaned = sanitize_streamed_message_content(cleaned or "")
                                 if not cleaned:
@@ -1124,7 +1144,12 @@ class StreamingServerInterface(AgentChunkStreamingInterface):
         """Letta receives a user message"""
         return
 
-    def internal_monologue(self, msg: str, msg_obj: Optional[Message] = None, chunk_index: Optional[int] = None):
+    def internal_monologue(
+        self,
+        msg: str,
+        msg_obj: Optional[Message] = None,
+        chunk_index: Optional[int] = None,
+    ):
         """Letta generates some internal monologue"""
         if not self.streaming_mode:
             # create a fake "chunk" of a stream
@@ -1140,7 +1165,7 @@ class StreamingServerInterface(AgentChunkStreamingInterface):
                     date=msg_obj.created_at,
                     reasoning=msg,
                     name=msg_obj.name,
-                    otid=Message.generate_otid_from_id(msg_obj.id, chunk_index) if chunk_index is not None else None,
+                    otid=(Message.generate_otid_from_id(msg_obj.id, chunk_index) if chunk_index is not None else None),
                 )
 
                 self._push_to_buffer(processed_chunk)
@@ -1152,7 +1177,7 @@ class StreamingServerInterface(AgentChunkStreamingInterface):
                             date=msg_obj.created_at,
                             reasoning=content.text,
                             name=msg_obj.name,
-                            otid=Message.generate_otid_from_id(msg_obj.id, chunk_index) if chunk_index is not None else None,
+                            otid=(Message.generate_otid_from_id(msg_obj.id, chunk_index) if chunk_index is not None else None),
                         )
                     elif isinstance(content, ReasoningContent):
                         processed_chunk = ReasoningMessage(
@@ -1162,7 +1187,7 @@ class StreamingServerInterface(AgentChunkStreamingInterface):
                             reasoning=content.reasoning,
                             signature=content.signature,
                             name=msg_obj.name,
-                            otid=Message.generate_otid_from_id(msg_obj.id, chunk_index) if chunk_index is not None else None,
+                            otid=(Message.generate_otid_from_id(msg_obj.id, chunk_index) if chunk_index is not None else None),
                         )
                     elif isinstance(content, RedactedReasoningContent):
                         processed_chunk = HiddenReasoningMessage(
@@ -1171,7 +1196,7 @@ class StreamingServerInterface(AgentChunkStreamingInterface):
                             state="redacted",
                             hidden_reasoning=content.data,
                             name=msg_obj.name,
-                            otid=Message.generate_otid_from_id(msg_obj.id, chunk_index) if chunk_index is not None else None,
+                            otid=(Message.generate_otid_from_id(msg_obj.id, chunk_index) if chunk_index is not None else None),
                         )
 
                     self._push_to_buffer(processed_chunk)
@@ -1184,7 +1209,12 @@ class StreamingServerInterface(AgentChunkStreamingInterface):
         # NOTE: this is a no-op, we handle this special case in function_message instead
         return
 
-    def function_message(self, msg: str, msg_obj: Optional[Message] = None, chunk_index: Optional[int] = None):
+    def function_message(
+        self,
+        msg: str,
+        msg_obj: Optional[Message] = None,
+        chunk_index: Optional[int] = None,
+    ):
         """Letta calls a function"""
 
         # TODO handle 'function' messages that indicate the start of a function call
@@ -1233,7 +1263,7 @@ class StreamingServerInterface(AgentChunkStreamingInterface):
                                 date=msg_obj.created_at,
                                 content=func_args["message"],
                                 name=msg_obj.name,
-                                otid=Message.generate_otid_from_id(msg_obj.id, chunk_index) if chunk_index is not None else None,
+                                otid=(Message.generate_otid_from_id(msg_obj.id, chunk_index) if chunk_index is not None else None),
                             )
                             self._push_to_buffer(processed_chunk)
                         except Exception as e:
@@ -1257,7 +1287,7 @@ class StreamingServerInterface(AgentChunkStreamingInterface):
                             date=msg_obj.created_at,
                             content=str(func_args[self.assistant_message_tool_kwarg]),
                             name=msg_obj.name,
-                            otid=Message.generate_otid_from_id(msg_obj.id, chunk_index) if chunk_index is not None else None,
+                            otid=(Message.generate_otid_from_id(msg_obj.id, chunk_index) if chunk_index is not None else None),
                         )
                         # Store the ID of the tool call so allow skipping the corresponding response
                         self.prev_assistant_message_id = function_call.id
@@ -1271,7 +1301,7 @@ class StreamingServerInterface(AgentChunkStreamingInterface):
                                 tool_call_id=function_call.id,
                             ),
                             name=msg_obj.name,
-                            otid=Message.generate_otid_from_id(msg_obj.id, chunk_index) if chunk_index is not None else None,
+                            otid=(Message.generate_otid_from_id(msg_obj.id, chunk_index) if chunk_index is not None else None),
                         )
 
                     # processed_chunk = {
@@ -1307,12 +1337,12 @@ class StreamingServerInterface(AgentChunkStreamingInterface):
                     id=msg_obj.id,
                     date=msg_obj.created_at,
                     tool_return=msg,
-                    status=msg_obj.tool_returns[0].status if msg_obj.tool_returns else "success",
+                    status=(msg_obj.tool_returns[0].status if msg_obj.tool_returns else "success"),
                     tool_call_id=msg_obj.tool_call_id,
-                    stdout=msg_obj.tool_returns[0].stdout if msg_obj.tool_returns else [],
-                    stderr=msg_obj.tool_returns[0].stderr if msg_obj.tool_returns else [],
+                    stdout=(msg_obj.tool_returns[0].stdout if msg_obj.tool_returns else []),
+                    stderr=(msg_obj.tool_returns[0].stderr if msg_obj.tool_returns else []),
                     name=msg_obj.name,
-                    otid=Message.generate_otid_from_id(msg_obj.id, chunk_index) if chunk_index is not None else None,
+                    otid=(Message.generate_otid_from_id(msg_obj.id, chunk_index) if chunk_index is not None else None),
                 )
 
         elif msg.startswith("Error: "):
@@ -1323,12 +1353,12 @@ class StreamingServerInterface(AgentChunkStreamingInterface):
                 id=msg_obj.id,
                 date=msg_obj.created_at,
                 tool_return=msg,
-                status=msg_obj.tool_returns[0].status if msg_obj.tool_returns else "error",
+                status=(msg_obj.tool_returns[0].status if msg_obj.tool_returns else "error"),
                 tool_call_id=msg_obj.tool_call_id,
                 stdout=msg_obj.tool_returns[0].stdout if msg_obj.tool_returns else [],
                 stderr=msg_obj.tool_returns[0].stderr if msg_obj.tool_returns else [],
                 name=msg_obj.name,
-                otid=Message.generate_otid_from_id(msg_obj.id, chunk_index) if chunk_index is not None else None,
+                otid=(Message.generate_otid_from_id(msg_obj.id, chunk_index) if chunk_index is not None else None),
             )
 
         else:

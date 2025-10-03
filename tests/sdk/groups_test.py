@@ -1,10 +1,22 @@
 from conftest import create_test_module
 
 GROUPS_CREATE_PARAMS = [
-    ("round_robin_group", {"agent_ids": [], "description": ""}, {"manager_type": "round_robin"}, None),
+    (
+        "round_robin_group",
+        {"agent_ids": [], "description": ""},
+        {"manager_type": "round_robin"},
+        None,
+    ),
     (
         "supervisor_group",
-        {"agent_ids": [], "description": "", "manager_config": {"manager_type": "supervisor", "manager_agent_id": "caren_agent.id"}},
+        {
+            "agent_ids": [],
+            "description": "",
+            "manager_config": {
+                "manager_type": "supervisor",
+                "manager_agent_id": "caren_agent.id",
+            },
+        },
         {"manager_type": "supervisor"},
         None,
     ),

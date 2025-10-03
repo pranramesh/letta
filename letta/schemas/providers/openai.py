@@ -12,7 +12,18 @@ from letta.schemas.providers.base import Provider
 logger = get_logger(__name__)
 
 ALLOWED_PREFIXES = {"gpt-4", "gpt-5", "o1", "o3", "o4"}
-DISALLOWED_KEYWORDS = {"transcribe", "search", "realtime", "tts", "audio", "computer", "o1-mini", "o1-preview", "o1-pro", "chat"}
+DISALLOWED_KEYWORDS = {
+    "transcribe",
+    "search",
+    "realtime",
+    "tts",
+    "audio",
+    "computer",
+    "o1-mini",
+    "o1-preview",
+    "o1-pro",
+    "chat",
+}
 DEFAULT_EMBEDDING_BATCH_SIZE = 1024
 
 
@@ -23,7 +34,9 @@ class OpenAIProvider(Provider):
     base_url: str = Field("https://api.openai.com/v1", description="Base URL for the OpenAI API.")
 
     async def check_api_key(self):
-        from letta.llm_api.openai import openai_check_valid_api_key  # TODO: DO NOT USE THIS - old code path
+        from letta.llm_api.openai import (
+            openai_check_valid_api_key,
+        )  # TODO: DO NOT USE THIS - old code path
 
         openai_check_valid_api_key(self.base_url, self.api_key)
 
@@ -125,7 +138,11 @@ class OpenAIProvider(Provider):
 
     def _do_model_checks_for_name_and_context_size(self, model: dict, length_key: str = "context_length") -> tuple[str, int] | None:
         if "id" not in model:
-            logger.warning("Model missing 'id' field for provider: %s and model: %s", self.provider_type, model)
+            logger.warning(
+                "Model missing 'id' field for provider: %s and model: %s",
+                self.provider_type,
+                model,
+            )
             return None
 
         model_name = model["id"]

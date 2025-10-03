@@ -77,7 +77,11 @@ class DatabasePoolMonitor:
                 logger.info(f"Failed to record first_connect event metric: {e}")
 
         @event.listens_for(pool, "checkout")
-        def on_checkout(dbapi_connection: DBAPIConnection, connection_record: ConnectionPoolEntry, connection_proxy: PoolProxiedConnection):
+        def on_checkout(
+            dbapi_connection: DBAPIConnection,
+            connection_record: ConnectionPoolEntry,
+            connection_proxy: PoolProxiedConnection,
+        ):
             """Called when a connection is checked out from the pool."""
             connection_id = id(connection_record)
             checkout_start_ns = get_utc_timestamp_ns()
@@ -156,7 +160,11 @@ class DatabasePoolMonitor:
                 logger.info(f"Failed to record checkin event metric: {e}")
 
         @event.listens_for(pool, "invalidate")
-        def on_invalidate(dbapi_connection: DBAPIConnection, connection_record: ConnectionPoolEntry, exception):
+        def on_invalidate(
+            dbapi_connection: DBAPIConnection,
+            connection_record: ConnectionPoolEntry,
+            exception,
+        ):
             """Called when a connection is invalidated."""
             connection_id = id(connection_record)
 
@@ -169,7 +177,7 @@ class DatabasePoolMonitor:
                 attrs = {
                     "engine_name": engine_name,
                     "event": "invalidate",
-                    "exception_type": type(exception).__name__ if exception else "unknown",
+                    "exception_type": (type(exception).__name__ if exception else "unknown"),
                     **get_ctx_attributes(),
                 }
                 MetricRegistry().db_pool_connection_events_counter.add(1, attributes=attrs)
@@ -178,7 +186,11 @@ class DatabasePoolMonitor:
                 logger.info(f"Failed to record invalidate event metric: {e}")
 
         @event.listens_for(pool, "soft_invalidate")
-        def on_soft_invalidate(dbapi_connection: DBAPIConnection, connection_record: ConnectionPoolEntry, exception):
+        def on_soft_invalidate(
+            dbapi_connection: DBAPIConnection,
+            connection_record: ConnectionPoolEntry,
+            exception,
+        ):
             """Called when a connection is soft invalidated."""
             try:
                 from letta.otel.metric_registry import MetricRegistry
@@ -186,7 +198,7 @@ class DatabasePoolMonitor:
                 attrs = {
                     "engine_name": engine_name,
                     "event": "soft_invalidate",
-                    "exception_type": type(exception).__name__ if exception else "unknown",
+                    "exception_type": (type(exception).__name__ if exception else "unknown"),
                     **get_ctx_attributes(),
                 }
                 MetricRegistry().db_pool_connection_events_counter.add(1, attributes=attrs)
@@ -252,7 +264,11 @@ class DatabasePoolMonitor:
                 logger.info(f"Failed to record detach event metric: {e}")
 
         @event.listens_for(pool, "reset")
-        def on_reset(dbapi_connection: DBAPIConnection, connection_record: ConnectionPoolEntry, reset_state):
+        def on_reset(
+            dbapi_connection: DBAPIConnection,
+            connection_record: ConnectionPoolEntry,
+            reset_state,
+        ):
             """Called when a connection is reset."""
             try:
                 from letta.otel.metric_registry import MetricRegistry

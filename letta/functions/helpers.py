@@ -86,7 +86,9 @@ def _assert_all_classes_are_imported(tool: Union["LangChainBaseTool"], additiona
         raise RuntimeError(err_msg)
 
 
-def _find_required_class_names_for_import(obj: Union["LangChainBaseTool", BaseModel]) -> list[str]:
+def _find_required_class_names_for_import(
+    obj: Union["LangChainBaseTool", BaseModel],
+) -> list[str]:
     """
     Finds all the class names for required imports when instantiating the `obj`.
     NOTE: This does not return the full import path, only the class name.
@@ -436,7 +438,10 @@ def fire_and_forget_send_to_agent(
 
 
 async def _send_message_to_agents_matching_tags_async(
-    sender_agent: "Agent", server: "SyncServer", messages: List[MessageCreate], matching_agents: List["AgentState"]
+    sender_agent: "Agent",
+    server: "SyncServer",
+    messages: List[MessageCreate],
+    matching_agents: List["AgentState"],
 ) -> List[str]:
     async def _send_single(agent_state):
         return await _async_send_message_with_retries(
@@ -473,7 +478,13 @@ async def _send_message_to_all_agents_in_group_async(sender_agent: "Agent", mess
     worker_agents = [server.agent_manager.get_agent_by_id(agent_id=agent_id, actor=sender_agent.user) for agent_id in worker_agents_ids]
 
     # Create a system message
-    messages = [MessageCreate(role=MessageRole.system, content=augmented_message, name=sender_agent.agent_state.name)]
+    messages = [
+        MessageCreate(
+            role=MessageRole.system,
+            content=augmented_message,
+            name=sender_agent.agent_state.name,
+        )
+    ]
 
     # Possibly limit concurrency to avoid meltdown:
     sem = asyncio.Semaphore(settings.multi_agent_concurrent_sends)
@@ -520,13 +531,20 @@ def generate_model_from_args_json_schema(schema: Dict[str, Any]) -> Type[BaseMod
     return _create_model_from_schema(schema.get("title", "DynamicModel"), schema, nested_models)
 
 
-def _create_model_from_schema(name: str, model_schema: Dict[str, Any], nested_models: Dict[str, Type[BaseModel]] = None) -> Type[BaseModel]:
+def _create_model_from_schema(
+    name: str,
+    model_schema: Dict[str, Any],
+    nested_models: Dict[str, Type[BaseModel]] = None,
+) -> Type[BaseModel]:
     fields = {}
     for field_name, field_schema in model_schema["properties"].items():
         field_type = _get_field_type(field_schema, nested_models)
         required = field_name in model_schema.get("required", [])
         description = field_schema.get("description", "")  # Get description or empty string
-        fields[field_name] = (field_type, Field(..., description=description) if required else Field(None, description=description))
+        fields[field_name] = (
+            field_type,
+            (Field(..., description=description) if required else Field(None, description=description)),
+        )
 
     return create_model(name, **fields)
 

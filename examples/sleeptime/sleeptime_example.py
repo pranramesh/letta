@@ -13,20 +13,18 @@ agent = client.agents.create(
 )
 print(f"Created agent id {agent.id}")
 
-# get the group 
+# get the group
 group_id = agent.multi_agent_group.id
 current_frequence = agent.multi_agent_group.sleeptime_agent_frequency
 print(f"Group id: {group_id}, frequency: {current_frequence}")
 
 group = client.groups.modify(
     group_id=group_id,
-    manager_config=SleeptimeManagerUpdate(
-        sleeptime_agent_frequency=1
-    ),
+    manager_config=SleeptimeManagerUpdate(sleeptime_agent_frequency=1),
 )
 print(f"Updated group id {group_id} with frequency {group.sleeptime_agent_frequency}")
 print(f"Group members", group.agent_ids)
-sleeptime_ids = [] 
+sleeptime_ids = []
 for agent_id in group.agent_ids:
     if client.agents.retrieve(agent_id=agent_id).agent_type == "sleeptime_agent":
         sleeptime_ids.append(agent_id)
@@ -35,7 +33,9 @@ sleeptime_agent_id = sleeptime_ids[0]
 
 # check the frequency
 agent = client.agents.retrieve(agent_id=agent.id)
-print(f"Updated agent id {agent.id} with frequency {agent.multi_agent_group.sleeptime_agent_frequency}")
+print(
+    f"Updated agent id {agent.id} with frequency {agent.multi_agent_group.sleeptime_agent_frequency}"
+)
 
 
 response = client.agents.messages.create(
@@ -56,4 +56,3 @@ for message in response.messages:
 print("---------------- SLEEPTIME AGENT ----------------")
 for message in client.agents.messages.list(agent_id=sleeptime_agent_id):
     print(message)
-

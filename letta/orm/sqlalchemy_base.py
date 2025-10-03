@@ -13,7 +13,12 @@ from sqlalchemy.orm.interfaces import ORMOption
 
 from letta.log import get_logger
 from letta.orm.base import Base, CommonSqlalchemyMetaMixins
-from letta.orm.errors import DatabaseTimeoutError, ForeignKeyConstraintViolationError, NoResultFound, UniqueConstraintViolationError
+from letta.orm.errors import (
+    DatabaseTimeoutError,
+    ForeignKeyConstraintViolationError,
+    NoResultFound,
+    UniqueConstraintViolationError,
+)
 from letta.settings import DatabaseChoice
 
 if TYPE_CHECKING:
@@ -33,7 +38,10 @@ def handle_db_timeout(func):
                 return func(*args, **kwargs)
             except TimeoutError as e:
                 logger.error(f"Timeout while executing {func.__name__} with args {args} and kwargs {kwargs}: {e}")
-                raise DatabaseTimeoutError(message=f"Timeout occurred in {func.__name__}.", original_exception=e)
+                raise DatabaseTimeoutError(
+                    message=f"Timeout occurred in {func.__name__}.",
+                    original_exception=e,
+                )
 
         return wrapper
     else:
@@ -44,7 +52,10 @@ def handle_db_timeout(func):
                 return await func(*args, **kwargs)
             except TimeoutError as e:
                 logger.error(f"Timeout while executing {func.__name__} with args {args} and kwargs {kwargs}: {e}")
-                raise DatabaseTimeoutError(message=f"Timeout occurred in {func.__name__}.", original_exception=e)
+                raise DatabaseTimeoutError(
+                    message=f"Timeout occurred in {func.__name__}.",
+                    original_exception=e,
+                )
 
         return async_wrapper
 
@@ -354,10 +365,22 @@ class SqlalchemyBase(CommonSqlalchemyMetaMixins, Base):
             if before_obj and after_obj:
                 # Window-based query - get records between before and after
                 conditions.append(
-                    or_(cls.created_at < before_obj.created_at, and_(cls.created_at == before_obj.created_at, cls.id < before_obj.id))
+                    or_(
+                        cls.created_at < before_obj.created_at,
+                        and_(
+                            cls.created_at == before_obj.created_at,
+                            cls.id < before_obj.id,
+                        ),
+                    )
                 )
                 conditions.append(
-                    or_(cls.created_at > after_obj.created_at, and_(cls.created_at == after_obj.created_at, cls.id > after_obj.id))
+                    or_(
+                        cls.created_at > after_obj.created_at,
+                        and_(
+                            cls.created_at == after_obj.created_at,
+                            cls.id > after_obj.id,
+                        ),
+                    )
                 )
             else:
                 # Pure pagination query
@@ -365,14 +388,20 @@ class SqlalchemyBase(CommonSqlalchemyMetaMixins, Base):
                     conditions.append(
                         or_(
                             cls.created_at < before_obj.created_at,
-                            and_(cls.created_at == before_obj.created_at, cls.id < before_obj.id),
+                            and_(
+                                cls.created_at == before_obj.created_at,
+                                cls.id < before_obj.id,
+                            ),
                         )
                     )
                 if after_obj:
                     conditions.append(
                         or_(
                             cls.created_at > after_obj.created_at,
-                            and_(cls.created_at == after_obj.created_at, cls.id > after_obj.id),
+                            and_(
+                                cls.created_at == after_obj.created_at,
+                                cls.id > after_obj.id,
+                            ),
                         )
                     )
 
@@ -472,7 +501,15 @@ class SqlalchemyBase(CommonSqlalchemyMetaMixins, Base):
         """
         # this is ok because read_multiple will check if the
         identifiers = [] if identifier is None else [identifier]
-        found = cls.read_multiple(db_session, identifiers, actor, access, access_type, check_is_deleted, **kwargs)
+        found = cls.read_multiple(
+            db_session,
+            identifiers,
+            actor,
+            access,
+            access_type,
+            check_is_deleted,
+            **kwargs,
+        )
         if len(found) == 0:
             # for backwards compatibility.
             conditions = []
@@ -638,7 +675,12 @@ class SqlalchemyBase(CommonSqlalchemyMetaMixins, Base):
         return []
 
     @handle_db_timeout
-    def create(self, db_session: "Session", actor: Optional["User"] = None, no_commit: bool = False) -> "SqlalchemyBase":
+    def create(
+        self,
+        db_session: "Session",
+        actor: Optional["User"] = None,
+        no_commit: bool = False,
+    ) -> "SqlalchemyBase":
         logger.debug(f"Creating {self.__class__.__name__} with ID: {self.id} with actor={actor}")
 
         if actor:
@@ -682,7 +724,12 @@ class SqlalchemyBase(CommonSqlalchemyMetaMixins, Base):
 
     @classmethod
     @handle_db_timeout
-    def batch_create(cls, items: List["SqlalchemyBase"], db_session: "Session", actor: Optional["User"] = None) -> List["SqlalchemyBase"]:
+    def batch_create(
+        cls,
+        items: List["SqlalchemyBase"],
+        db_session: "Session",
+        actor: Optional["User"] = None,
+    ) -> List["SqlalchemyBase"]:
         """
         Create multiple records in a single transaction for better performance.
         Args:
@@ -854,7 +901,12 @@ class SqlalchemyBase(CommonSqlalchemyMetaMixins, Base):
             raise ValueError(f"Failed to hard delete {cls.__name__} with identifiers {identifiers}: {e}")
 
     @handle_db_timeout
-    def update(self, db_session: Session, actor: Optional["User"] = None, no_commit: bool = False) -> "SqlalchemyBase":
+    def update(
+        self,
+        db_session: Session,
+        actor: Optional["User"] = None,
+        no_commit: bool = False,
+    ) -> "SqlalchemyBase":
         logger.debug(...)
         if actor:
             self._set_created_and_updated_by_fields(actor.id)
@@ -871,7 +923,11 @@ class SqlalchemyBase(CommonSqlalchemyMetaMixins, Base):
 
     @handle_db_timeout
     async def update_async(
-        self, db_session: "AsyncSession", actor: Optional["User"] = None, no_commit: bool = False, no_refresh: bool = False
+        self,
+        db_session: "AsyncSession",
+        actor: Optional["User"] = None,
+        no_commit: bool = False,
+        no_refresh: bool = False,
     ) -> "SqlalchemyBase":
         """Async version of update function"""
         logger.debug(f"Updating {self.__class__.__name__} with ID: {self.id} with actor={actor}")

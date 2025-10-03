@@ -5,7 +5,11 @@ from letta.data_sources.redis_client import get_redis_client
 
 @pytest.mark.asyncio
 async def test_redis_client():
-    test_values = {"LETTA_TEST_0": [1, 2, 3], "LETTA_TEST_1": ["apple", "pear", "banana"], "LETTA_TEST_2": ["{}", 3.2, "cat"]}
+    test_values = {
+        "LETTA_TEST_0": [1, 2, 3],
+        "LETTA_TEST_1": ["apple", "pear", "banana"],
+        "LETTA_TEST_2": ["{}", 3.2, "cat"],
+    }
     redis_client = await get_redis_client()
 
     # Clear out keys

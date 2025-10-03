@@ -23,13 +23,21 @@ import pytest
 from letta.schemas.enums import ToolSourceType
 from letta.schemas.organization import Organization
 from letta.schemas.pip_requirement import PipRequirement
-from letta.schemas.sandbox_config import ModalSandboxConfig, SandboxConfig, SandboxConfigCreate, SandboxType
+from letta.schemas.sandbox_config import (
+    ModalSandboxConfig,
+    SandboxConfig,
+    SandboxConfigCreate,
+    SandboxType,
+)
 from letta.schemas.tool import Tool
 from letta.schemas.user import User
 from letta.services.organization_manager import OrganizationManager
 from letta.services.sandbox_config_manager import SandboxConfigManager
 from letta.services.tool_sandbox.modal_sandbox_v2 import AsyncToolSandboxModalV2
-from letta.services.tool_sandbox.modal_version_manager import ModalVersionManager, get_version_manager
+from letta.services.tool_sandbox.modal_version_manager import (
+    ModalVersionManager,
+    get_version_manager,
+)
 from letta.services.user_manager import UserManager
 
 # ============================================================================
@@ -50,7 +58,12 @@ def test_organization():
 def test_user(test_organization):
     """Create a test user in the database."""
     user_manager = UserManager()
-    user = user_manager.create_user(User(name=f"test-user-{uuid.uuid4().hex[:8]}", organization_id=test_organization.id))
+    user = user_manager.create_user(
+        User(
+            name=f"test-user-{uuid.uuid4().hex[:8]}",
+            organization_id=test_organization.id,
+        )
+    )
     yield user
     # Cleanup would go here if needed
 
@@ -101,7 +114,10 @@ def calculate(operation: str, a: float, b: float) -> float:
         json_schema={
             "parameters": {
                 "properties": {
-                    "operation": {"type": "string", "description": "The operation to perform"},
+                    "operation": {
+                        "type": "string",
+                        "description": "The operation to perform",
+                    },
                     "a": {"type": "number", "description": "The first number"},
                     "b": {"type": "number", "description": "The second number"},
                 }
@@ -150,8 +166,15 @@ async def fetch_data(url: str, delay: float = 0.1) -> Dict:
         json_schema={
             "parameters": {
                 "properties": {
-                    "url": {"type": "string", "description": "The URL to fetch data from"},
-                    "delay": {"type": "number", "default": 0.1, "description": "The delay in seconds"},
+                    "url": {
+                        "type": "string",
+                        "description": "The URL to fetch data from",
+                    },
+                    "delay": {
+                        "type": "number",
+                        "default": 0.1,
+                        "description": "The delay in seconds",
+                    },
                 }
             }
         },
@@ -208,7 +231,10 @@ def process_json(data: str) -> Dict:
         json_schema={
             "parameters": {
                 "properties": {
-                    "data": {"type": "string", "description": "The JSON string to process"},
+                    "data": {
+                        "type": "string",
+                        "description": "The JSON string to process",
+                    },
                 }
             }
         },
@@ -257,7 +283,8 @@ def mock_sandbox_config():
 
 
 @pytest.mark.skipif(
-    True or not os.getenv("MODAL_TOKEN_ID") or not os.getenv("MODAL_TOKEN_SECRET"), reason="Modal credentials not configured"
+    True or not os.getenv("MODAL_TOKEN_ID") or not os.getenv("MODAL_TOKEN_SECRET"),
+    reason="Modal credentials not configured",
 )
 class TestModalV2BasicExecution:
     """Basic execution tests with Modal."""
@@ -704,7 +731,11 @@ def calculate(operation: str, a: float, b: float) -> float:
                     version_manager = sandbox._deployment_manager.version_manager
                     if version_manager:
                         with patch.object(version_manager, "get_deployment", return_value=None):
-                            with patch.object(version_manager, "register_deployment", return_value=None):
+                            with patch.object(
+                                version_manager,
+                                "register_deployment",
+                                return_value=None,
+                            ):
                                 # First execution - should deploy
                                 result1 = await sandbox.run()
                                 assert result1.status == "success"
@@ -769,7 +800,10 @@ def calculate(operation: str, a: float, b: float) -> float:
 # ============================================================================
 
 
-@pytest.mark.skipif(not os.getenv("MODAL_TOKEN_ID") or not os.getenv("MODAL_TOKEN_SECRET"), reason="Modal credentials not configured")
+@pytest.mark.skipif(
+    not os.getenv("MODAL_TOKEN_ID") or not os.getenv("MODAL_TOKEN_SECRET"),
+    reason="Modal credentials not configured",
+)
 class TestModalV2DeploymentStats:
     """Tests for deployment statistics tracking."""
 

@@ -134,12 +134,20 @@ def format_json(json_str):
     try:
         parsed = json.loads(json_str)
         formatted = json.dumps(parsed, indent=2, ensure_ascii=False)
-        formatted = formatted.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        formatted = (
+            formatted.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        )
         formatted = formatted.replace("\n", "<br>").replace("  ", "&nbsp;&nbsp;")
         formatted = re.sub(r'(".*?"):', r'<span class="json-key">\1</span>:', formatted)
-        formatted = re.sub(r': (".*?")', r': <span class="json-string">\1</span>', formatted)
-        formatted = re.sub(r": (\d+)", r': <span class="json-number">\1</span>', formatted)
-        formatted = re.sub(r": (true|false)", r': <span class="json-boolean">\1</span>', formatted)
+        formatted = re.sub(
+            r': (".*?")', r': <span class="json-string">\1</span>', formatted
+        )
+        formatted = re.sub(
+            r": (\d+)", r': <span class="json-number">\1</span>', formatted
+        )
+        formatted = re.sub(
+            r": (true|false)", r': <span class="json-boolean">\1</span>', formatted
+        )
         return formatted
     except json.JSONDecodeError:
         return html.escape(json_str)

@@ -91,7 +91,11 @@ class AnthropicToolChoiceAuto(BaseModel):
 
 
 ToolChoice = Union[
-    Literal["none", "auto", "required", "any"], ToolFunctionChoice, AnthropicToolChoiceTool, AnthropicToolChoiceAny, AnthropicToolChoiceAuto
+    Literal["none", "auto", "required", "any"],
+    ToolFunctionChoice,
+    AnthropicToolChoiceTool,
+    AnthropicToolChoiceAny,
+    AnthropicToolChoiceAuto,
 ]
 
 

@@ -36,8 +36,18 @@ def unfriendly_func():
 
 # Define test parameters for tools
 TOOLS_CREATE_PARAMS = [
-    ("friendly_func", {"source_code": FRIENDLY_FUNC_SOURCE_CODE}, {"name": "friendly_func"}, None),
-    ("unfriendly_func", {"source_code": UNFRIENDLY_FUNC_SOURCE_CODE}, {"name": "unfriendly_func"}, None),
+    (
+        "friendly_func",
+        {"source_code": FRIENDLY_FUNC_SOURCE_CODE},
+        {"name": "friendly_func"},
+        None,
+    ),
+    (
+        "unfriendly_func",
+        {"source_code": UNFRIENDLY_FUNC_SOURCE_CODE},
+        {"name": "unfriendly_func"},
+        None,
+    ),
 ]
 
 TOOLS_UPSERT_PARAMS = [

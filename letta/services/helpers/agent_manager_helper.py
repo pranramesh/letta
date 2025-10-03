@@ -3,7 +3,18 @@ from datetime import datetime
 from typing import List, Literal, Optional, Set
 
 import numpy as np
-from sqlalchemy import Select, and_, asc, desc, func, literal, nulls_last, or_, select, union_all
+from sqlalchemy import (
+    Select,
+    and_,
+    asc,
+    desc,
+    func,
+    literal,
+    nulls_last,
+    or_,
+    select,
+    union_all,
+)
 from sqlalchemy.orm import noload
 from sqlalchemy.sql.expression import exists
 
@@ -41,13 +52,23 @@ from letta.schemas.message import Message, MessageCreate
 from letta.schemas.tool_rule import ToolRule
 from letta.schemas.user import User
 from letta.settings import DatabaseChoice, settings
-from letta.system import get_initial_boot_messages, get_login_event, package_function_response
+from letta.system import (
+    get_initial_boot_messages,
+    get_login_event,
+    package_function_response,
+)
 
 
 # Static methods
 @trace_method
 def _process_relationship(
-    session, agent: "AgentModel", relationship_name: str, model_class, item_ids: List[str], allow_partial=False, replace=True
+    session,
+    agent: "AgentModel",
+    relationship_name: str,
+    model_class,
+    item_ids: List[str],
+    allow_partial=False,
+    replace=True,
 ):
     """
     Generalized function to handle relationships like tools, sources, and blocks using item IDs.
@@ -90,7 +111,13 @@ def _process_relationship(
 
 @trace_method
 async def _process_relationship_async(
-    session, agent: "AgentModel", relationship_name: str, model_class, item_ids: List[str], allow_partial=False, replace=True
+    session,
+    agent: "AgentModel",
+    relationship_name: str,
+    model_class,
+    item_ids: List[str],
+    allow_partial=False,
+    replace=True,
 ):
     """
     Generalized function to handle relationships like tools, sources, and blocks using item IDs.
@@ -155,7 +182,11 @@ def _process_tags(agent: "AgentModel", tags: List[str], replace=True):
         agent.tags.extend([tag for tag in new_tags if tag.tag not in existing_tags])
 
 
-def derive_system_message(agent_type: AgentType, enable_sleeptime: Optional[bool] = None, system: Optional[str] = None) -> str:
+def derive_system_message(
+    agent_type: AgentType,
+    enable_sleeptime: Optional[bool] = None,
+    system: Optional[str] = None,
+) -> str:
     """
     Derive the appropriate system message based on agent type and configuration.
 
@@ -284,7 +315,9 @@ def compile_system_message(
         )
 
         memory_with_sources = in_context_memory.compile(
-            tool_usage_rules=tool_constraint_block, sources=sources, max_files_open=max_files_open
+            tool_usage_rules=tool_constraint_block,
+            sources=sources,
+            max_files_open=max_files_open,
         )
         full_memory_string = memory_with_sources + "\n\n" + memory_metadata_string
 
@@ -458,7 +491,11 @@ async def initialize_message_sequence_async(
 
 
 def package_initial_message_sequence(
-    agent_id: str, initial_message_sequence: List[MessageCreate], model: str, timezone: str, actor: User
+    agent_id: str,
+    initial_message_sequence: List[MessageCreate],
+    model: str,
+    timezone: str,
+    actor: User,
 ) -> List[Message]:
     # create the agent object
     init_messages = []
@@ -515,7 +552,10 @@ def package_initial_message_sequence(
                         OpenAIToolCall(
                             id=tool_call_id,
                             type="function",
-                            function=OpenAIFunction(name=DEFAULT_MESSAGE_TOOL, arguments=json.dumps({"message": message_create.content})),
+                            function=OpenAIFunction(
+                                name=DEFAULT_MESSAGE_TOOL,
+                                arguments=json.dumps({"message": message_create.content}),
+                            ),
                         )
                     ],
                 )
@@ -586,14 +626,31 @@ def _cursor_filter(sort_col, id_col, ref_sort_col, ref_id, forward: bool, nulls_
         if forward:
             # Moving forward (e.g. previous) from non-NULL: only greater non-NULL values
             # (NULLs are at the end, so we don't include them when moving forward from non-NULL)
-            return and_(sort_col.isnot(None), or_(sort_col > ref_sort_col, and_(sort_col == ref_sort_col, id_col > ref_id)))
+            return and_(
+                sort_col.isnot(None),
+                or_(
+                    sort_col > ref_sort_col,
+                    and_(sort_col == ref_sort_col, id_col > ref_id),
+                ),
+            )
         else:
             # Moving backward (e.g. next) from non-NULL: smaller non-NULL values or NULLs
-            return or_(sort_col.is_(None), or_(sort_col < ref_sort_col, and_(sort_col == ref_sort_col, id_col < ref_id)))
+            return or_(
+                sort_col.is_(None),
+                or_(
+                    sort_col < ref_sort_col,
+                    and_(sort_col == ref_sort_col, id_col < ref_id),
+                ),
+            )
 
 
 def _apply_pagination(
-    query, before: Optional[str], after: Optional[str], session, ascending: bool = True, sort_by: str = "created_at"
+    query,
+    before: Optional[str],
+    after: Optional[str],
+    session,
+    ascending: bool = True,
+    sort_by: str = "created_at",
 ) -> any:
     # Determine the sort column
     if sort_by == "last_run_completion":
@@ -608,7 +665,14 @@ def _apply_pagination(
         if result:
             after_sort_value, after_id = result
             query = query.where(
-                _cursor_filter(sort_column, AgentModel.id, after_sort_value, after_id, forward=ascending, nulls_last=sort_nulls_last)
+                _cursor_filter(
+                    sort_column,
+                    AgentModel.id,
+                    after_sort_value,
+                    after_id,
+                    forward=ascending,
+                    nulls_last=sort_nulls_last,
+                )
             )
 
     if before:
@@ -616,17 +680,32 @@ def _apply_pagination(
         if result:
             before_sort_value, before_id = result
             query = query.where(
-                _cursor_filter(sort_column, AgentModel.id, before_sort_value, before_id, forward=not ascending, nulls_last=sort_nulls_last)
+                _cursor_filter(
+                    sort_column,
+                    AgentModel.id,
+                    before_sort_value,
+                    before_id,
+                    forward=not ascending,
+                    nulls_last=sort_nulls_last,
+                )
             )
 
     # Apply ordering
     order_fn = asc if ascending else desc
-    query = query.order_by(nulls_last(order_fn(sort_column)) if sort_nulls_last else order_fn(sort_column), order_fn(AgentModel.id))
+    query = query.order_by(
+        nulls_last(order_fn(sort_column)) if sort_nulls_last else order_fn(sort_column),
+        order_fn(AgentModel.id),
+    )
     return query
 
 
 async def _apply_pagination_async(
-    query, before: Optional[str], after: Optional[str], session, ascending: bool = True, sort_by: str = "created_at"
+    query,
+    before: Optional[str],
+    after: Optional[str],
+    session,
+    ascending: bool = True,
+    sort_by: str = "created_at",
 ) -> any:
     # Determine the sort column
     if sort_by == "last_run_completion":
@@ -644,7 +723,14 @@ async def _apply_pagination_async(
             if settings.database_engine is DatabaseChoice.SQLITE and isinstance(after_sort_value, datetime):
                 after_sort_value = after_sort_value.strftime("%Y-%m-%d %H:%M:%S")
             query = query.where(
-                _cursor_filter(sort_column, AgentModel.id, after_sort_value, after_id, forward=ascending, nulls_last=sort_nulls_last)
+                _cursor_filter(
+                    sort_column,
+                    AgentModel.id,
+                    after_sort_value,
+                    after_id,
+                    forward=ascending,
+                    nulls_last=sort_nulls_last,
+                )
             )
 
     if before:
@@ -655,12 +741,22 @@ async def _apply_pagination_async(
             if settings.database_engine is DatabaseChoice.SQLITE and isinstance(before_sort_value, datetime):
                 before_sort_value = before_sort_value.strftime("%Y-%m-%d %H:%M:%S")
             query = query.where(
-                _cursor_filter(sort_column, AgentModel.id, before_sort_value, before_id, forward=not ascending, nulls_last=sort_nulls_last)
+                _cursor_filter(
+                    sort_column,
+                    AgentModel.id,
+                    before_sort_value,
+                    before_id,
+                    forward=not ascending,
+                    nulls_last=sort_nulls_last,
+                )
             )
 
     # Apply ordering
     order_fn = asc if ascending else desc
-    query = query.order_by(nulls_last(order_fn(sort_column)) if sort_nulls_last else order_fn(sort_column), order_fn(AgentModel.id))
+    query = query.order_by(
+        nulls_last(order_fn(sort_column)) if sort_nulls_last else order_fn(sort_column),
+        order_fn(AgentModel.id),
+    )
     return query
 
 
@@ -771,7 +867,13 @@ def _apply_relationship_filters(query, include_relationships: Optional[List[str]
     if "identity_ids" not in include_relationships:
         query = query.options(noload(AgentModel.identities))
 
-    relationships = ["tool_exec_environment_variables", "tools", "sources", "tags", "multi_agent_group"]
+    relationships = [
+        "tool_exec_environment_variables",
+        "tools",
+        "sources",
+        "tags",
+        "multi_agent_group",
+    ]
 
     for rel in relationships:
         if rel not in include_relationships:
@@ -812,7 +914,11 @@ async def build_passage_query(
         )
         embeddings = await embedding_client.request_embeddings([query_text], embedding_config)
         embedded_text = np.array(embeddings[0])
-        embedded_text = np.pad(embedded_text, (0, MAX_EMBEDDING_DIM - embedded_text.shape[0]), mode="constant").tolist()
+        embedded_text = np.pad(
+            embedded_text,
+            (0, MAX_EMBEDDING_DIM - embedded_text.shape[0]),
+            mode="constant",
+        ).tolist()
 
     # Start with base query for source passages
     source_passages = None
@@ -925,7 +1031,7 @@ async def build_passage_query(
             query_embedding_binary = adapt_array(embedded_text)
             main_query = main_query.order_by(
                 func.cosine_distance(combined_query.c.embedding, query_embedding_binary).asc(),
-                combined_query.c.created_at.asc() if ascending else combined_query.c.created_at.desc(),
+                (combined_query.c.created_at.asc() if ascending else combined_query.c.created_at.desc()),
                 combined_query.c.id.asc(),
             )
     else:
@@ -1028,7 +1134,11 @@ async def build_source_passage_query(
         )
         embeddings = await embedding_client.request_embeddings([query_text], embedding_config)
         embedded_text = np.array(embeddings[0])
-        embedded_text = np.pad(embedded_text, (0, MAX_EMBEDDING_DIM - embedded_text.shape[0]), mode="constant").tolist()
+        embedded_text = np.pad(
+            embedded_text,
+            (0, MAX_EMBEDDING_DIM - embedded_text.shape[0]),
+            mode="constant",
+        ).tolist()
 
     # Base query for source passages
     query = select(SourcePassage).where(SourcePassage.organization_id == actor.organization_id)
@@ -1060,7 +1170,7 @@ async def build_source_passage_query(
             query_embedding_binary = adapt_array(embedded_text)
             query = query.order_by(
                 func.cosine_distance(SourcePassage.embedding, query_embedding_binary).asc(),
-                SourcePassage.created_at.asc() if ascending else SourcePassage.created_at.desc(),
+                (SourcePassage.created_at.asc() if ascending else SourcePassage.created_at.desc()),
                 SourcePassage.id.asc(),
             )
     else:
@@ -1132,13 +1242,20 @@ async def build_agent_passage_query(
         )
         embeddings = await embedding_client.request_embeddings([query_text], embedding_config)
         embedded_text = np.array(embeddings[0])
-        embedded_text = np.pad(embedded_text, (0, MAX_EMBEDDING_DIM - embedded_text.shape[0]), mode="constant").tolist()
+        embedded_text = np.pad(
+            embedded_text,
+            (0, MAX_EMBEDDING_DIM - embedded_text.shape[0]),
+            mode="constant",
+        ).tolist()
 
     # Base query for agent passages - join through archives_agents
     query = (
         select(ArchivalPassage)
         .join(ArchivesAgents, ArchivalPassage.archive_id == ArchivesAgents.archive_id)
-        .where(ArchivesAgents.agent_id == agent_id, ArchivalPassage.organization_id == actor.organization_id)
+        .where(
+            ArchivesAgents.agent_id == agent_id,
+            ArchivalPassage.organization_id == actor.organization_id,
+        )
     )
 
     # Apply filters
@@ -1159,7 +1276,7 @@ async def build_agent_passage_query(
             query_embedding_binary = adapt_array(embedded_text)
             query = query.order_by(
                 func.cosine_distance(ArchivalPassage.embedding, query_embedding_binary).asc(),
-                ArchivalPassage.created_at.asc() if ascending else ArchivalPassage.created_at.desc(),
+                (ArchivalPassage.created_at.asc() if ascending else ArchivalPassage.created_at.desc()),
                 ArchivalPassage.id.asc(),
             )
     else:
@@ -1233,7 +1350,13 @@ async def validate_agent_exists_async(session, agent_id: str, actor: User) -> No
         NoResultFound: If agent doesn't exist or user doesn't have access
     """
     agent_exists_query = select(
-        exists().where(and_(AgentModel.id == agent_id, AgentModel.organization_id == actor.organization_id, AgentModel.is_deleted == False))
+        exists().where(
+            and_(
+                AgentModel.id == agent_id,
+                AgentModel.organization_id == actor.organization_id,
+                AgentModel.is_deleted == False,
+            )
+        )
     )
     result = await session.execute(agent_exists_query)
 
